@@ -1,6 +1,23 @@
+import datetime as dt
 from typing import Union
 
-__all__ = ("num_to_str",)
+__all__ = (
+    "date_to_str",
+    "num_to_str",
+)
+
+
+def date_to_str(d: dt.date, /) -> str:
+    """Cast date to string in ISO format: YYYY-MM-DD.
+
+    Examples
+    --------
+    >>> import onekit
+    >>> import datetime as dt
+    >>> onekit.date_to_str(dt.date(2022, 1, 1))
+    '2022-01-01'
+    """
+    return d.isoformat()
 
 
 def num_to_str(n: Union[int, float], /) -> str:
