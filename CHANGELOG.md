@@ -12,10 +12,6 @@
 
 * feat(pytlz): add num_to_str (#1)
 
-* feat(pytlz): add num_to_str
-
-* docs: show pytlz module ([`cc130e6`](https://github.com/estripling/onekit/commit/cc130e6850d9a8a325067a0935ccceada27b0e40))
-
 
 ## v0.1.0 (2023-11-09)
 
