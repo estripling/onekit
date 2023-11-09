@@ -93,12 +93,12 @@ jobs:
     - name: 🛠️ build distributions with Poetry
       run: poetry build
 
-    - name: 🚀 publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      if: steps.release.outputs.released == 'true'
-
     - name: 🚀 publish to GitHub releases
       uses: python-semantic-release/upload-to-gh-release@main
       if: steps.release.outputs.released == 'true'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🚀 publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: steps.release.outputs.released == 'true'
