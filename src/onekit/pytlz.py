@@ -4,7 +4,7 @@ __all__ = ("num_to_str",)
 
 
 def num_to_str(n: Union[int, float], /) -> str:
-    """Format a number to string with underscores as thousands separator.
+    """Cast number to string with underscores as thousands separator.
 
     Examples
     --------
