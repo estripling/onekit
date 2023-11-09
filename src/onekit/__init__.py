@@ -2,9 +2,9 @@ from importlib import metadata
 
 __version__ = metadata.version("onekit")
 
-from .core import *
+from .pytlz import *
 
 del (
     metadata,
-    core,
+    pytlz,
 )
