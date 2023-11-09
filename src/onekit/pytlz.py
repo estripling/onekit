@@ -1,7 +1,9 @@
+from typing import Union
+
 __all__ = ("num_to_str",)
 
 
-def num_to_str(n: int or float, /) -> str:
+def num_to_str(n: Union[int, float], /) -> str:
     """Format a number to string with underscores as thousands separator.
 
     Examples
