@@ -1,6 +1,20 @@
+import datetime as dt
+
 import pytest
 
 import onekit
+
+
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 1, 1), "2022-01-01"),
+        (dt.date(2022, 1, 31), "2022-01-31"),
+    ],
+)
+def test_to_str(d, expected):
+    actual = onekit.date_to_str(d)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
