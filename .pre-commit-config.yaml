@@ -1,0 +1,96 @@
+repos:
+  - repo: local
+    hooks:
+      - id: autoflake
+        name: autoflake
+        entry: autoflake
+        description: remove unused imports and unused variables
+        language: python
+        types: [python]
+        args: [
+          --in-place,
+          --ignore-init-module-imports,
+          --remove-all-unused-imports,
+          --recursive,
+        ]
+
+      - id: isort
+        name: isort
+        entry: isort
+        description: sort imports
+        language: python
+        types: [python]
+        args: [
+          --filter-files,
+          --remove-redundant-aliases,
+        ]
+
+      - id: black
+        name: black
+        entry: black
+        description: format Python code
+        language: python
+        types: [python]
+
+      - id: black-jupyter
+        name: black-jupyter
+        entry: black
+        description: format Python code in notebooks
+        language: python
+        types: [jupyter]
+
+      - id: flake8
+        name: flake8
+        entry: flake8
+        description: tool for style guide enforcement
+        language: python
+        types: [python]
+
+      - id: check-case-conflict
+        name: check-case-conflict
+        entry: check-case-conflict
+        description: check for files with names that would conflict on a case-insensitive filesystem
+        language: python
+        types: [text]
+
+      - id: check-json
+        name: check-json
+        entry: check-json
+        description: verify JSON syntax
+        language: python
+        types: [json]
+
+      - id: check-toml
+        name: check-toml
+        entry: check-toml
+        description: verify TOML syntax
+        language: python
+        types: [toml]
+
+      - id: check-yaml
+        name: check-yaml
+        entry: check-yaml
+        description: verify YAML syntax
+        language: python
+        types: [yaml]
+
+      - id: end-of-file-fixer
+        name: end-of-file-fixer
+        entry: end-of-file-fixer
+        description: makes sure files end in a newline and only a newline
+        language: python
+        types: [text]
+
+      - id: requirements-txt-fixer
+        name: requirements-txt-fixer
+        entry: requirements-txt-fixer
+        description: sorts entries in requirements.txt
+        language: python
+        files: requirements.*\.txt$
+
+      - id: trailing-whitespace-fixer
+        name: trailing-whitespace-fixer
+        entry: trailing-whitespace-fixer
+        description: trim trailing whitespace
+        language: python
+        types: [text]

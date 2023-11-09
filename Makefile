@@ -1,0 +1,113 @@
+SHELL := /bin/zsh
+PYTHON := python3.8
+POETRY := poetry
+
+
+.PHONY: help \
+	check \
+	run-precommit \
+	run-tests \
+	clear-cache \
+	create-docs \
+	remove-docs \
+	remove-local-branches \
+	build-package \
+	publish-package \
+	install-dependencies \
+	install-dependencies-precommit \
+	install-dependencies-testing \
+	install-dependencies-docs
+
+
+help:
+	@echo 'commands:'
+	@echo ' - check                             ;; run pre-commit, tests, and clear cache'
+	@echo ' - run-precommit                     ;; run pre-commit'
+	@echo ' - run-tests                         ;; run pytest with coverage report'
+	@echo ' - clear-cache                       ;; clear cache files and directories'
+	@echo ' - create-docs                       ;; create local documentation files'
+	@echo ' - remove-docs                       ;; remove local documentation files'
+	@echo ' - remove-local-branches             ;; remove local git branches, except main'
+	@echo ' - build-package                     ;; auxiliary command to build sdist and wheel distributions with poetry'
+	@echo ' - publish-package                   ;; auxiliary command to publish package to PyPI with poetry'
+	@echo ' - install-dependencies              ;; auxiliary command to install all dependencies with poetry if there is no poetry.lock'
+	@echo ' - install-dependencies-precommit    ;; auxiliary command to install dependencies with poetry for pre-commit'
+	@echo ' - install-dependencies-testing      ;; auxiliary command to install dependencies with poetry for testing'
+	@echo ' - install-dependencies-docs         ;; auxiliary command to install dependencies with poetry for documentation'
+	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
+
+
+check: run-precommit run-tests clear-cache
+
+
+run-precommit:
+	pre-commit run --all-files
+	@echo
+
+
+run-tests:
+	$(PYTHON) -m pytest --doctest-modules src/ --cov-report term-missing --cov=src/ tests/
+	@echo
+
+
+clear-cache:
+	$(PYTHON) scripts/clear_cache.py
+	@echo
+
+
+create-docs:
+	cd docs; make html; cd ..;
+
+
+remove-docs:
+	@rm -rf docs/_build/
+
+
+remove-local-branches:
+	git -P branch | grep -v "main" | grep -v \* | xargs git branch -D
+
+
+build-package:
+	$(POETRY) build
+
+
+publish-package:
+	$(POETRY) publish
+
+
+install-dependencies: install-dependencies-precommit \
+	install-dependencies-testing \
+	install-dependencies-docs \
+	install-dependencies-packaging
+
+
+install-dependencies-precommit:
+	$(POETRY) add --group precommit \
+	autoflake \
+	"black[jupyter]" \
+	isort \
+	flake8 \
+	pre-commit \
+	pre-commit-hooks
+
+
+install-dependencies-testing:
+	$(POETRY) add --group testing \
+	pytest \
+	pytest-cov
+
+
+install-dependencies-docs:
+	$(POETRY) add --group docs \
+	furo \
+	jupyterlab \
+	myst-parser \
+	nbsphinx \
+	sphinx-autoapi \
+	sphinx-copybutton \
+	time-machine
+
+
+install-dependencies-packaging:
+	$(POETRY) add --group packaging \
+	python-semantic-release

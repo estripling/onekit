@@ -1,0 +1,68 @@
+[tool.poetry]
+name = "onekit"
+version = "0.0.0"
+description = "One package for utility functions."
+authors = ["onekit developers"]
+license = "BSD 3-Clause"
+readme = "README.md"
+repository = "https://github.com/estripling/onekit"
+documentation = "https://onekit.readthedocs.io/en/stable/"
+keywords = ["onekit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+
+[tool.poetry.group.precommit.dependencies]
+autoflake = "^2.2.1"
+black = {extras = ["jupyter"], version = "^23.11.0"}
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+pre-commit = "^3.5.0"
+pre-commit-hooks = "^4.5.0"
+
+[tool.poetry.group.testing.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+
+[tool.poetry.group.docs.dependencies]
+furo = "^2023.9.10"
+jupyterlab = "^4.0.8"
+myst-parser = "^2.0.0"
+nbsphinx = "^0.9.3"
+sphinx-autoapi = "^3.0.0"
+sphinx-copybutton = "^0.5.2"
+time-machine = "^2.13.0"
+
+[tool.poetry.group.packaging.dependencies]
+python-semantic-release = "^8.3.0"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.isort]
+py_version = "auto"
+profile = "black"
+atomic = true
+skip_gitignore = true
+line_length = 88
+force_grid_wrap = 2
+multi_line_output = 3
+
+[tool.semantic_release]
+branch = "main"
+version_variables = ["pyproject.toml:version"]
+changelog_file = "CHANGELOG.md"
+build_command = "poetry build"
+dist_path = "dist/"
+upload_to_release = true
+upload_to_pypi = true
+remove_dist = false
+patch_without_tag = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

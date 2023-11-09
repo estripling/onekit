@@ -1,0 +1,104 @@
+name: release
+
+on:
+  # manually trigger from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: 🔍 test
+
+    # Only run this job when on "main"
+    if: github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+    environment: test
+    concurrency: test
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+    - name: 📥 check out repository
+      uses: actions/checkout@v4
+
+    - name: 🐍 set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: 💻 install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: '1.7.0'
+
+    - name: 💻 install onekit
+      run: poetry install
+
+    - name: 🔍 run pre-commit
+      run: poetry run pre-commit run --all-files
+
+    - name: 🔍 run pytest
+      run: poetry run pytest --doctest-modules src/ --cov=src/ --cov-report=xml tests/
+
+    - name: 📈 track coverage with Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        files: ./coverage.xml
+
+  release:
+    name: 🚀 release
+
+    needs: test
+
+    # Only run this job when on "main"
+    if: github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+    environment: release
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+    - name: 📥 check out repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.head_ref || github.ref_name }}
+
+    - name: 🐍 set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: 💻 install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: '1.7.0'
+
+    - name: 💻 install onekit
+      run: poetry install
+
+    - name: 🐍 Python Semantic Release (PSR)
+      uses: python-semantic-release/python-semantic-release@v8.3.0
+      id: release
+      if: github.ref_name == 'main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🛠️ build distributions with Poetry
+      run: poetry build
+
+    - name: 🚀 publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: steps.release.outputs.released == 'true'
+
+    - name: 🚀 publish to GitHub releases
+      uses: python-semantic-release/upload-to-gh-release@main
+      if: steps.release.outputs.released == 'true'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
