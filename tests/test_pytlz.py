@@ -12,7 +12,7 @@ from onekit import pytlz
         (dt.date(2022, 1, 31), "2022-01-31"),
     ],
 )
-def test_to_str(d, expected):
+def test_date_to_str(d, expected):
     actual = pytlz.date_to_str(d)
     assert actual == expected
 
