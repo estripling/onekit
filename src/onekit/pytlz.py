@@ -1,3 +1,5 @@
+"""Python utility functions."""
+
 import datetime as dt
 from typing import Union
 

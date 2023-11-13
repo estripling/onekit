@@ -17,7 +17,7 @@ One package for utility functions:
 
 - [Documentation](https://onekit.readthedocs.io/en/stable/index.html)
 - [Examples](https://onekit.readthedocs.io/en/stable/example.html)
-- [API Reference](https://onekit.readthedocs.io/en/stable/autoapi/onekit/index.html)
+- [API Reference](https://onekit.readthedocs.io/en/stable/autoapi/index.html)
 
 ## Installation
 
