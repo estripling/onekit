@@ -12,8 +12,46 @@ from onekit import pytlz
         (dt.date(2022, 1, 31), "2022-01-31"),
     ],
 )
-def test_to_str(d, expected):
+def test_date_to_str(d, expected):
     actual = pytlz.date_to_str(d)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "items, expected",
+    [
+        ([1, 2, 3], [1, 2, 3]),
+        ((1, 2, 3), [1, 2, 3]),
+        (range(1, 7), [1, 2, 3, 4, 5, 6]),
+        ([[1, 2], [3, 4], [5, 6]], [1, 2, 3, 4, 5, 6]),
+        ([[], [1, 2], [3, 4, 5], [6]], [1, 2, 3, 4, 5, 6]),
+        ([[1, 2], 3, (4, 5), (6,)], [1, 2, 3, 4, 5, 6]),
+        ([[[1, 2]], [3], 4, [[[5]]], [[[[6]]]]], [1, 2, 3, 4, 5, 6]),
+        ([1, [2, 3, 4], [[5, 6]]], [1, 2, 3, 4, 5, 6]),
+        ([1, [2, 3, 4, 5], 6, []], [1, 2, 3, 4, 5, 6]),
+        ([[1, 2], [3, 4, 5], 6], [1, 2, 3, 4, 5, 6]),
+        (([[1, 2], [3, 4, 5], 6],), [1, 2, 3, 4, 5, 6]),
+        ([iter([1, (2, 3)]), 4, [], iter([[[5]], 6])], [1, 2, 3, 4, 5, 6]),
+        (
+            [["one", 2], 3, [4, "five"], ["six"]],
+            ["one", 2, 3, 4, "five", "six"],
+        ),
+        (map(lambda x: 2 * x, range(1, 7)), [2, 4, 6, 8, 10, 12]),
+        ((2 * x for x in range(1, 7)), [2, 4, 6, 8, 10, 12]),
+        (tuple(2 * x for x in range(1, 7)), [2, 4, 6, 8, 10, 12]),
+        (list(2 * x for x in range(1, 7)), [2, 4, 6, 8, 10, 12]),
+        (([-1], 0, range(1, 7)), [-1, 0, 1, 2, 3, 4, 5, 6]),
+        (([-1], 0, map(lambda x: 2 * x, range(1, 4))), [-1, 0, 2, 4, 6]),
+        (([-1], 0, (2 * x for x in range(1, 4))), [-1, 0, 2, 4, 6]),
+        (([-1], 0, tuple(2 * x for x in range(1, 4))), [-1, 0, 2, 4, 6]),
+        (([-1], 0, list(2 * x for x in range(1, 4))), [-1, 0, 2, 4, 6]),
+        (filter(lambda x: x % 2 == 0, range(1, 7)), [2, 4, 6]),
+        ((-1, filter(lambda x: x % 2 == 0, range(1, 7))), [-1, 2, 4, 6]),
+        (([-1], filter(lambda x: x % 2 == 0, range(1, 7))), [-1, 2, 4, 6]),
+    ],
+)
+def test_flatten(items, expected):
+    actual = list(pytlz.flatten(items))
     assert actual == expected
 
 
