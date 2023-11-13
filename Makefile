@@ -35,6 +35,7 @@ help:
 	@echo ' - install-dependencies-testing      ;; auxiliary command to install dependencies with poetry for testing'
 	@echo ' - install-dependencies-docs         ;; auxiliary command to install dependencies with poetry for documentation'
 	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
+	@echo ' - install-dependencies-sparktlz     ;; auxiliary command to install dependencies with poetry for spark toolz'
 
 
 check: run-precommit run-tests clear-cache
@@ -78,7 +79,8 @@ publish-package:
 install-dependencies: install-dependencies-precommit \
 	install-dependencies-testing \
 	install-dependencies-docs \
-	install-dependencies-packaging
+	install-dependencies-packaging \
+	install-dependencies-sparktlz
 
 
 install-dependencies-precommit:
@@ -111,3 +113,8 @@ install-dependencies-docs:
 install-dependencies-packaging:
 	$(POETRY) add --group packaging \
 	python-semantic-release
+
+
+install-dependencies-sparktlz:
+	$(POETRY) add --group sparktlz \
+	pyspark==3.1.1

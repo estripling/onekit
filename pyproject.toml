@@ -39,6 +39,9 @@ time-machine = "^2.13.0"
 [tool.poetry.group.packaging.dependencies]
 python-semantic-release = "^8.3.0"
 
+[tool.poetry.group.sparktlz.dependencies]
+pyspark = "3.1.1"
+
 [tool.black]
 line-length = 88
 target-version = ["py38"]
