@@ -1,4 +1,4 @@
-"""Python utility functions."""
+"""Python toolz."""
 
 import datetime as dt
 from typing import (

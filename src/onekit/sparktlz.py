@@ -1,4 +1,4 @@
-"""PySpark utility functions."""
+"""PySpark toolz."""
 
 import functools
 
