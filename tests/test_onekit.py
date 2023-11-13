@@ -1,7 +1,7 @@
 from importlib import metadata
 
-import onekit as ok
+import onekit
 
 
 def test_version():
-    assert ok.__version__ == metadata.version("onekit")
+    assert onekit.__version__ == metadata.version("onekit")
