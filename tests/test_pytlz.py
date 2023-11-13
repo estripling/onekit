@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-import onekit as ok
+from onekit import pytlz
 
 
 @pytest.mark.parametrize(
@@ -13,7 +13,7 @@ import onekit as ok
     ],
 )
 def test_to_str(d, expected):
-    actual = ok.date_to_str(d)
+    actual = pytlz.date_to_str(d)
     assert actual == expected
 
 
@@ -29,5 +29,5 @@ def test_to_str(d, expected):
     ],
 )
 def test_num_to_str(n, expected):
-    actual = ok.num_to_str(n)
+    actual = pytlz.num_to_str(n)
     assert actual == expected
