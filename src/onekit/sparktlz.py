@@ -14,8 +14,8 @@ def union(*dataframes: SparkDataFrame) -> SparkDataFrame:
 
     Examples
     --------
-    >>> from onekit import sparktlz  # doctest: +SKIP
     >>> from pyspark.sql import SparkSession  # doctest: +SKIP
+    >>> from onekit import sparktlz  # doctest: +SKIP
     >>> spark = SparkSession.builder.getOrCreate()  # doctest: +SKIP
     >>> df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])  # doctest: +SKIP
     >>> df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])  # doctest: +SKIP
