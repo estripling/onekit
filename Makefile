@@ -35,6 +35,7 @@ help:
 	@echo ' - install-dependencies-testing      ;; auxiliary command to install dependencies with poetry for testing'
 	@echo ' - install-dependencies-docs         ;; auxiliary command to install dependencies with poetry for documentation'
 	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
+	@echo ' - install-dependencies-pdtlz        ;; auxiliary command to install dependencies with poetry for pandas toolz'
 	@echo ' - install-dependencies-sparktlz     ;; auxiliary command to install dependencies with poetry for spark toolz'
 
 
@@ -80,6 +81,7 @@ install-dependencies: install-dependencies-precommit \
 	install-dependencies-testing \
 	install-dependencies-docs \
 	install-dependencies-packaging \
+	install-dependencies-pdtlz \
 	install-dependencies-sparktlz
 
 
@@ -113,6 +115,11 @@ install-dependencies-docs:
 install-dependencies-packaging:
 	$(POETRY) add --group packaging \
 	python-semantic-release
+
+
+install-dependencies-pdtlz:
+	$(POETRY) add --group pdtlz \
+	"pandas>=0.23.2"
 
 
 install-dependencies-sparktlz:
