@@ -2,6 +2,49 @@
 
 
 
+## v0.4.0 (2023-11-13)
+
+### Build
+
+* build: add pandas (#9) ([`a5185ba`](https://github.com/estripling/onekit/commit/a5185baf15be09815fed92c34a70191ebdc86a91))
+
+### Documentation
+
+* docs: add example (#10)
+
+* docs(example.ipynb): add pytlz.flatten and sparktlz.union
+
+* style(sparktlz.union): rearrange docsting imports
+
+* docs(README.md): add example ([`9af41f3`](https://github.com/estripling/onekit/commit/9af41f347198d43d42def455cf6e2076992fe603))
+
+* docs: import pytlz directly (#6)
+
+* refactor: import pytlz directly
+
+* docs: no import onekit as ok
+
+* docs(README.md): rename example usage to examples
+
+* docs: add module description ([`e777ec4`](https://github.com/estripling/onekit/commit/e777ec440be757da0cd7a896563580f8d343667a))
+
+### Feature
+
+* feat(sparktlz): add union (#8) ([`7680762`](https://github.com/estripling/onekit/commit/76807626f3c64755171654d43749eb9c875c9d8c))
+
+* feat(pytlz): add flatten (#7)
+
+* tests(date_to_str): correct test name
+
+* feat(pytlz): add flatten ([`7629260`](https://github.com/estripling/onekit/commit/7629260f14a0ce7af3afa78e624753f03efd55e1))
+
+* feat: add sparktlz (#5)
+
+* build: add pyspark
+
+* tests: set up Spark session ([`443dc33`](https://github.com/estripling/onekit/commit/443dc338543f301da19d4a656e65bb7632949363))
+
+
 ## v0.3.0 (2023-11-09)
 
 ### Feature
