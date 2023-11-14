@@ -15,6 +15,7 @@ import toolz
 
 __all__ = (
     "all_predicate_true",
+    "any_predicate_true",
     "date_to_str",
     "flatten",
     "isdivisibleby",
@@ -43,6 +44,29 @@ def all_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bo
     False
     """
     return all(predicate(x) for predicate in predicates)
+
+
+@toolz.curry
+def any_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
+    """Check if any predicate is true.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> is_divisible_by_3_and_5 = pytlz.any_predicate_true(
+    ...     [
+    ...         pytlz.isdivisibleby(3),
+    ...         pytlz.isdivisibleby(5),
+    ...     ]
+    ... )
+    >>> is_divisible_by_3_and_5(60)
+    True
+    >>> is_divisible_by_3_and_5(9)
+    True
+    >>> is_divisible_by_3_and_5(13)
+    False
+    """
+    return any(predicate(x) for predicate in predicates)
 
 
 def date_to_str(d: dt.date, /) -> str:
