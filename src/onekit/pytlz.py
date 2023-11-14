@@ -215,7 +215,7 @@ def isodd(x: Union[int, float], /) -> bool:
     return toolz.complement(iseven)(x)
 
 
-def num_to_str(n: Union[int, float], /) -> str:
+def num_to_str(x: Union[int, float], /) -> str:
     """Cast number to string with underscores as thousands separator.
 
     Examples
@@ -227,7 +227,7 @@ def num_to_str(n: Union[int, float], /) -> str:
     >>> pytlz.num_to_str(100000.0)
     '100_000.0'
     """
-    return f"{n:_}"
+    return f"{x:_}"
 
 
 @toolz.curry
