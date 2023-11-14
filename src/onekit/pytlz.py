@@ -54,6 +54,8 @@ def all_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bo
     ...         pytlz.isdivisibleby(5),
     ...     ]
     ... )
+    >>> type(is_divisible_by_3_and_5)
+    <class 'toolz.functoolz.curry'>
     >>> is_divisible_by_3_and_5(60)
     True
     >>> is_divisible_by_3_and_5(9)
