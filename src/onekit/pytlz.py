@@ -8,6 +8,7 @@ from typing import (
     Iterator,
     List,
     Sequence,
+    Tuple,
     Union,
 )
 
@@ -17,12 +18,16 @@ __all__ = (
     "all_predicate_true",
     "any_predicate_true",
     "date_to_str",
+    "extend_range",
     "flatten",
     "isdivisibleby",
     "iseven",
     "isodd",
     "num_to_str",
 )
+
+
+Pair = Tuple[float, float]
 
 
 @toolz.curry
@@ -80,6 +85,31 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+@toolz.curry
+def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
+    """Extend value range ``xmax - xmin`` by factor.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.extend_range(0.0, 1.0)
+    (-0.05, 1.05)
+
+    >>> pytlz.extend_range(0.0, 1.0, factor=0.1)
+    (-0.1, 1.1)
+    """
+    if not isinstance(factor, float) or factor < 0:
+        raise ValueError(f"{factor=} - must be a non-negative float")
+
+    xmin, xmax = sorted([xmin, xmax])
+    value_range = xmax - xmin
+
+    new_xmin = xmin - factor * value_range
+    new_xmax = xmax + factor * value_range
+
+    return new_xmin, new_xmax
 
 
 def flatten(*items: Sequence[Any]) -> Generator:

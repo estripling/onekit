@@ -43,6 +43,30 @@ def test_date_to_str(d, expected):
 
 
 @pytest.mark.parametrize(
+    "xmin, xmax, factor, expected",
+    [
+        (0, 1, -0.1, None),
+        (0, 1, 0.0, (0, 1)),
+        (0, 1, 0.05, (-0.05, 1.05)),
+        (0, 1, 0.1, (-0.1, 1.1)),
+        (-1, 10, 0.1, (-2.1, 11.1)),
+        (0, 10, 0.1, (-1.0, 11.0)),
+        (1, 0, -0.1, None),
+        (1, 0, 0.0, (0, 1)),
+        (1, 0, 0.05, (-0.05, 1.05)),
+    ],
+)
+def test_extend_range(xmin, xmax, factor, expected):
+    extend_range = pytlz.extend_range(factor=factor)
+    if factor < 0:
+        with pytest.raises(ValueError):
+            extend_range(xmin, xmax)
+    else:
+        actual = extend_range(xmin, xmax)
+        assert actual == expected
+
+
+@pytest.mark.parametrize(
     "items, expected",
     [
         ([1, 2, 3], [1, 2, 3]),
