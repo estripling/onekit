@@ -1,10 +1,10 @@
-from pyspark.sql import DataFrame as SparkDataFrame
+from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
 from onekit import sparktlz
 
 
-def assert_dataframe_equal(lft_df: SparkDataFrame, rgt_df: SparkDataFrame) -> None:
+def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:
     """Assert that the left and right data frames are equal."""
     lft_schema = lft_df.schema.simpleString()
     rgt_schema = rgt_df.schema.simpleString()
