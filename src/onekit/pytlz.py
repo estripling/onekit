@@ -398,6 +398,12 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
 
     >>> pytlz.signif(14393237.76, n=3)
     14400000.0
+
+    >>> signif3 = pytlz.signif(n=3)
+    >>> type(signif3)
+    <class 'toolz.functoolz.curry'>
+    >>> signif3(14393237.76)
+    14400000.0
     """
     if not isinstance(n, int) or n < 1:
         raise ValueError(f"{n=} - must be a positive integer")
