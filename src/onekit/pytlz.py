@@ -39,29 +39,35 @@ __all__ = (
 
 
 Pair = Tuple[float, float]
+Predicate = Callable[[Any], bool]
 
 
-@toolz.curry
-def all_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
-    """Check if all predicates are true.
+def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
+    """Check every predicate :math:`P\\colon X \\rightarrow \\{False, True\\}` is true.
 
     Examples
     --------
     >>> from onekit import pytlz
+    >>> pytlz.all_predicate_true(lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
+    True
+
     >>> is_divisible_by_3_and_5 = pytlz.all_predicate_true(
-    ...     [
-    ...         pytlz.isdivisibleby(3),
-    ...         pytlz.isdivisibleby(5),
-    ...     ]
+    ...     pytlz.isdivisibleby(3),
+    ...     pytlz.isdivisibleby(5),
     ... )
     >>> type(is_divisible_by_3_and_5)
-    <class 'toolz.functoolz.curry'>
+    <class 'function'>
     >>> is_divisible_by_3_and_5(60)
     True
     >>> is_divisible_by_3_and_5(9)
     False
     """
-    return all(predicate(x) for predicate in predicates)
+
+    def inner(x: Any, /) -> bool:
+        """Evaluate all specified predicates :math:`P_i` for value :math:`x \\in X`."""
+        return all(predicate(x) for predicate in flatten(predicates))
+
+    return inner
 
 
 @toolz.curry
