@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pytest
 from pyspark.sql import SparkSession
@@ -23,3 +24,8 @@ def spark() -> SparkSession:
     spark.sparkContext.setLogLevel("ERROR")
     yield spark
     spark.stop()
+
+
+@pytest.fixture(scope="module")
+def n10() -> Tuple[int]:
+    return 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
