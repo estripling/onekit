@@ -3,8 +3,10 @@
 import datetime as dt
 from typing import (
     Any,
+    Callable,
     Generator,
     Iterator,
+    List,
     Sequence,
     Union,
 )
@@ -12,6 +14,7 @@ from typing import (
 import toolz
 
 __all__ = (
+    "all_predicate_true",
     "date_to_str",
     "flatten",
     "isdivisibleby",
@@ -19,6 +22,27 @@ __all__ = (
     "isodd",
     "num_to_str",
 )
+
+
+@toolz.curry
+def all_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
+    """Check if all predicates are true.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> is_divisible_by_3_and_5 = pytlz.all_predicate_true(
+    ...     [
+    ...         pytlz.isdivisibleby(3),
+    ...         pytlz.isdivisibleby(5),
+    ...     ]
+    ... )
+    >>> is_divisible_by_3_and_5(60)
+    True
+    >>> is_divisible_by_3_and_5(9)
+    False
+    """
+    return all(predicate(x) for predicate in predicates)
 
 
 def date_to_str(d: dt.date, /) -> str:

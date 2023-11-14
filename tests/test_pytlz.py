@@ -6,6 +6,19 @@ from onekit import pytlz
 
 
 @pytest.mark.parametrize(
+    "x, expected",
+    [
+        (60, True),
+        (9, False),
+    ],
+)
+def test_all_predicate_true(x, expected):
+    is_div_3_5 = pytlz.all_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])
+    actual = is_div_3_5(x)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
     "d, expected",
     [
         (dt.date(2022, 1, 1), "2022-01-01"),
