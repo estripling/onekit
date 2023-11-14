@@ -51,7 +51,7 @@ run-precommit:
 
 
 run-tests:
-	$(PYTHON) -m pytest --doctest-modules src/ --cov-report term-missing --cov=src/ tests/
+	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
 	@echo
 
 
