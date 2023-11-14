@@ -53,7 +53,7 @@ run-precommit:
 
 
 run-tests:
-	$(PYTHON) -m pytest -m "not slow" --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
+	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
 	@echo
 
 
@@ -104,7 +104,8 @@ install-dependencies-precommit:
 install-dependencies-testing:
 	$(POETRY) add --group testing \
 	pytest \
-	pytest-cov
+	pytest-cov \
+	pytest-skip-slow
 
 
 install-dependencies-docs:

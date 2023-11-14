@@ -2323,6 +2323,23 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtualenv"]
 
 [[package]]
+name = "pytest-skip-slow"
+version = "0.0.5"
+description = "A pytest plugin to skip `@pytest.mark.slow` tests by default."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest-skip-slow-0.0.5.tar.gz", hash = "sha256:655ea5c748c72947e0d302334e7fa8ef99929257a2a2bc928f630ddb5a161d88"},
+    {file = "pytest_skip_slow-0.0.5-py3-none-any.whl", hash = "sha256:e2f6401d6ed0db3be1402622a7b24f7df14f61ebd26feda808a0d45433d4d474"},
+]
+
+[package.dependencies]
+pytest = ">=6.2.0"
+
+[package.extras]
+test = ["tox"]
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -3528,4 +3545,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4.0"
-content-hash = "815957aa8dc15f22bf6d70c3a4e20244c903872d044f52effea0765d6b3bcfa7"
+content-hash = "892a1aca13de774f8a5df7e2727ede20f0bdcef9066e64003038ceb0be734865"
