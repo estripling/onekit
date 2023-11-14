@@ -26,6 +26,7 @@ __all__ = (
     "iseven",
     "isodd",
     "num_to_str",
+    "source_code",
 )
 
 
@@ -220,3 +221,20 @@ def num_to_str(n: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{n:_}"
+
+
+def source_code(x: object, /) -> str:
+    """Get source code of an object.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> def greet():
+    ...     return "Hello, World!"
+    ...
+    >>> print(pytlz.source_code(greet))
+    def greet():
+        return "Hello, World!"
+    <BLANKLINE>
+    """
+    return inspect.getsource(x)

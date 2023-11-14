@@ -149,3 +149,12 @@ def test_isodd(x):
 def test_num_to_str(n, expected):
     actual = pytlz.num_to_str(n)
     assert actual == expected
+
+
+def test_source_code():
+    def greet():
+        return "Hello, World!"
+
+    actual = pytlz.source_code(greet)
+    expected = '    def greet():\n        return "Hello, World!"\n'
+    assert actual == expected
