@@ -16,12 +16,25 @@ class TestSparkToolz:
 
         actual = sparktlz.union(df1, df2, df3)
         expected = df1.unionByName(df2).unionByName(df3)
-        assert_dataframe_equal(actual, expected)
+        self.assert_dataframe_equal(actual, expected)
 
     def test_spark_session(self, spark: SparkSession):
         assert isinstance(spark, SparkSession)
         assert spark.sparkContext.appName == "spark-session-for-testing"
         assert spark.version == "3.1.1"
+
+    @staticmethod
+    def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:
+        """Assert that the left and right data frames are equal."""
+        lft_schema = lft_df.schema.simpleString()
+        rgt_schema = rgt_df.schema.simpleString()
+        assert lft_schema == rgt_schema, "schema mismatch"
+
+        assert lft_df.count() == rgt_df.count(), "row count mismatch"
+
+        lft_rows = lft_df.subtract(rgt_df)
+        rgt_rows = rgt_df.subtract(lft_df)
+        assert (lft_rows.count() == 0) and (rgt_rows.count() == 0), "row mismatch"
 
     @pytest.fixture(scope="class")
     def spark(self) -> SparkSession:
@@ -42,16 +55,3 @@ class TestSparkToolz:
         spark.sparkContext.setLogLevel("ERROR")
         yield spark
         spark.stop()
-
-
-def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:
-    """Assert that the left and right data frames are equal."""
-    lft_schema = lft_df.schema.simpleString()
-    rgt_schema = rgt_df.schema.simpleString()
-    assert lft_schema == rgt_schema, "schema mismatch"
-
-    assert lft_df.count() == rgt_df.count(), "row count mismatch"
-
-    lft_rows = lft_df.subtract(rgt_df)
-    rgt_rows = rgt_df.subtract(lft_df)
-    assert (lft_rows.count() == 0) and (rgt_rows.count() == 0), "row mismatch"
