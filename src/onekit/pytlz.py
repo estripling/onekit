@@ -16,6 +16,7 @@ __all__ = (
     "flatten",
     "isdivisibleby",
     "iseven",
+    "isodd",
     "num_to_str",
 )
 
@@ -91,6 +92,24 @@ def iseven(x: Union[int, float], /) -> bool:
     True
     """
     return isdivisibleby(2)(x)
+
+
+def isodd(x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is odd.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.isodd(0)
+    False
+
+    >>> pytlz.isodd(1)
+    True
+
+    >>> pytlz.isodd(2)
+    False
+    """
+    return toolz.complement(iseven)(x)
 
 
 def num_to_str(n: Union[int, float], /) -> str:

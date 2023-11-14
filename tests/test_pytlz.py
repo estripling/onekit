@@ -69,6 +69,14 @@ def test_iseven(x):
     assert actual == expected
 
 
+@pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
+def test_isodd(x):
+    actual = pytlz.isodd(x)
+    is_even_number = x % 2 == 0
+    expected = not is_even_number
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "n, expected",
     [
