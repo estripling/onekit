@@ -2,6 +2,109 @@
 
 
 
+## v0.5.0 (2023-11-14)
+
+### Build
+
+* build(pyproject.toml): update classifiers (#14) ([`6bdc390`](https://github.com/estripling/onekit/commit/6bdc3906c552caa12336aafa7f8a4f4020022e40))
+
+### Ci
+
+* ci(release.yml): use release token (#12) ([`f2ca10a`](https://github.com/estripling/onekit/commit/f2ca10a65ca2e3828685148a2a96f3934afe51cd))
+
+### Documentation
+
+* docs: update developer guide (#17) ([`3d141b5`](https://github.com/estripling/onekit/commit/3d141b528a2823c555e6b8c364707f3291e5856f))
+
+* docs(README.md): remove example (#13) ([`9f510ac`](https://github.com/estripling/onekit/commit/9f510ace488f6a77b1b482432afc09204e82e2d2))
+
+### Feature
+
+* feat: add bumbag core functions (#18)
+
+* build: add toolz
+
+* test: add toolz
+
+* feat(pytlz): add isdivisibleby
+
+* feat(pytlz): add iseven
+
+* feat(pytlz): add isodd
+
+* feat(pytlz): add all_predicate_true
+
+* feat(pytlz): add any_predicate_true
+
+* test: use leaner syntax
+
+* test: mark Spark tests as slow
+
+* test: use test class for toolz
+
+* build: add pytest-skip-slow
+
+* test(TestSparkToolz): refactor assert_dataframe_equal
+
+* feat(pytlz): add extend_range
+
+* feat(pytlz): add func_name
+
+* feat(pytlz): add source_code
+
+* feat(pytlz): add signif
+
+* feat(pytlz): add reduce_sets
+
+* refactor(num_to_str): consistent type hinting
+
+* feat(pytlz): add contrast_sets
+
+* docs(all_predicate_true): add type call to show it is curried
+
+* docs(any_predicate_true): add type call to show it is curried
+
+* docs(extend_range): add type call to show it is curried
+
+* docs(isdivisibleby): add type call to show it is curried
+
+* docs(signif): add type call to show it is curried ([`50badd8`](https://github.com/estripling/onekit/commit/50badd8d105adc8c9d7acc94f70ef0fcffaa8af1))
+
+### Refactor
+
+* refactor: predicate functions (#19)
+
+* refactor(all_predicate_true): use inner function
+
+* refactor(any_predicate_true): use inner function
+
+* docs(isdivisibleby): update docstring for consistency ([`2a9f699`](https://github.com/estripling/onekit/commit/2a9f699d6c78b8f91a2a762f74ae7935a75c8ce2))
+
+### Style
+
+* style: update docs (#11)
+
+* docs: update module docstring
+
+* refactor(Makefile): add missing phony
+
+* docs(pytlz.flatten): update type hinting
+
+* docs(sparktlz.union): update type hinting
+
+* refactor: rename SparkDataFrame -&gt; SparkDF ([`2527c1c`](https://github.com/estripling/onekit/commit/2527c1c6bc5bdfdc87b2bbc913bf2585e782daaf))
+
+### Test
+
+* test: ignore Spark doctest (#16) ([`e682a09`](https://github.com/estripling/onekit/commit/e682a09f86a595b1549356322dc725e99092ff84))
+
+### Unknown
+
+* revert: &#34;ci(release.yml): use release token (#12)&#34; (#15)
+
+This reverts commit f2ca10a65ca2e3828685148a2a96f3934afe51cd. ([`0054460`](https://github.com/estripling/onekit/commit/0054460595c40699e8bda73576c04ac8281dca3d))
+
+
 ## v0.4.0 (2023-11-13)
 
 ### Build
