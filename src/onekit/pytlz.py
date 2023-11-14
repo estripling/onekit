@@ -9,9 +9,12 @@ from typing import (
     Union,
 )
 
+import toolz
+
 __all__ = (
     "date_to_str",
     "flatten",
+    "isdivisibleby",
     "num_to_str",
 )
 
@@ -53,6 +56,22 @@ def flatten(*items: Sequence[Any]) -> Generator:
                 yield item
 
     return _flatten(items)
+
+
+@toolz.curry
+def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is evenly divisible by :math:`n`.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> is_div_5 = pytlz.isdivisibleby(5)
+    >>> is_div_5(10)
+    True
+    >>> is_div_5(11.0)
+    False
+    """
+    return x % n == 0
 
 
 def num_to_str(n: Union[int, float], /) -> str:
