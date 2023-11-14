@@ -304,12 +304,12 @@ def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
     >>> pytlz.isdivisibleby(7, 49)
     True
 
-    >>> is_div_5 = pytlz.isdivisibleby(5)
-    >>> type(is_div_5)
+    >>> is_divisible_by_5 = pytlz.isdivisibleby(5)
+    >>> type(is_divisible_by_5)
     <class 'toolz.functoolz.curry'>
-    >>> is_div_5(10)
+    >>> is_divisible_by_5(10)
     True
-    >>> is_div_5(11.0)
+    >>> is_divisible_by_5(11.0)
     False
     """
     return x % n == 0
