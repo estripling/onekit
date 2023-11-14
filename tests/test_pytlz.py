@@ -24,13 +24,16 @@ def test_all_predicate_true(x, expected):
 @pytest.mark.parametrize(
     "x, expected",
     [
+        (3, True),
+        (5, True),
         (60, True),
         (9, True),
+        (12, True),
         (13, False),
     ],
 )
 def test_any_predicate_true(x, expected):
-    actual = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0], x)
+    actual = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])(x)
     assert actual == expected
 
 

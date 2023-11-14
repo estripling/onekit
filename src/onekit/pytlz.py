@@ -8,7 +8,6 @@ from typing import (
     Callable,
     Generator,
     Iterator,
-    List,
     Sequence,
     Tuple,
     Union,
@@ -70,29 +69,34 @@ def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
     return inner
 
 
-@toolz.curry
-def any_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
-    """Check if any predicate is true.
+def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
+    """Check any predicate :math:`P\\colon X \\rightarrow \\{False, True\\}` is true.
 
     Examples
     --------
     >>> from onekit import pytlz
-    >>> is_divisible_by_3_and_5 = pytlz.any_predicate_true(
-    ...     [
-    ...         pytlz.isdivisibleby(3),
-    ...         pytlz.isdivisibleby(5),
-    ...     ]
+    >>> pytlz.any_predicate_true(lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
+    True
+
+    >>> is_divisible_by_3_or_5 = pytlz.any_predicate_true(
+    ...     pytlz.isdivisibleby(3),
+    ...     pytlz.isdivisibleby(5),
     ... )
-    >>> type(is_divisible_by_3_and_5)
-    <class 'toolz.functoolz.curry'>
-    >>> is_divisible_by_3_and_5(60)
+    >>> type(is_divisible_by_3_or_5)
+    <class 'function'>
+    >>> is_divisible_by_3_or_5(60)
     True
-    >>> is_divisible_by_3_and_5(9)
+    >>> is_divisible_by_3_or_5(9)
     True
-    >>> is_divisible_by_3_and_5(13)
+    >>> is_divisible_by_3_or_5(13)
     False
     """
-    return any(predicate(x) for predicate in predicates)
+
+    def inner(x: Any, /) -> bool:
+        """Evaluate all specified predicates :math:`P_i` for value :math:`x \\in X`."""
+        return any(predicate(x) for predicate in flatten(predicates))
+
+    return inner
 
 
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
