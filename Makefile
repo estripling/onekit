@@ -16,7 +16,10 @@ POETRY := poetry
 	install-dependencies \
 	install-dependencies-precommit \
 	install-dependencies-testing \
-	install-dependencies-docs
+	install-dependencies-docs \
+	install-dependencies-packaging \
+	install-dependencies-pdtlz \
+	install-dependencies-sparktlz
 
 
 help:
