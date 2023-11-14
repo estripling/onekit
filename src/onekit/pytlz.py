@@ -2,6 +2,7 @@
 
 import datetime as dt
 import inspect
+import math
 from typing import (
     Any,
     Callable,
@@ -26,6 +27,7 @@ __all__ = (
     "iseven",
     "isodd",
     "num_to_str",
+    "signif",
     "source_code",
 )
 
@@ -221,6 +223,32 @@ def num_to_str(n: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{n:_}"
+
+
+@toolz.curry
+def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
+    """Round :math:`x` to its :math:`n` significant digits.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.signif(987654321)
+    988000000
+
+    >>> pytlz.signif(14393237.76, n=2)
+    14000000.0
+
+    >>> pytlz.signif(14393237.76, n=3)
+    14400000.0
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError(f"{n=} - must be a positive integer")
+
+    if not math.isfinite(x) or math.isclose(x, 0.0):
+        return x
+
+    n -= math.ceil(math.log10(abs(x)))
+    return round(x, n)
 
 
 def source_code(x: object, /) -> str:
