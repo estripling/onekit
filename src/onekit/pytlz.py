@@ -15,6 +15,10 @@ from typing import (
 )
 
 import toolz
+from toolz.curried import (
+    map,
+    reduce,
+)
 
 __all__ = (
     "all_predicate_true",
@@ -27,6 +31,7 @@ __all__ = (
     "iseven",
     "isodd",
     "num_to_str",
+    "reduce_sets",
     "signif",
     "source_code",
 )
@@ -223,6 +228,33 @@ def num_to_str(n: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{n:_}"
+
+
+@toolz.curry
+def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set:
+    """Apply function of two set arguments to reduce a sequence of sets.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> x = {0, 1, 2, 3}
+    >>> y = {2, 4, 6}
+    >>> z = {2, 6, 8}
+    >>> sets = [x, y, z]
+    >>> pytlz.reduce_sets(set.intersection, sets)
+    {2}
+    >>> pytlz.reduce_sets(set.difference, *sets)
+    {0, 1, 3}
+    >>> pytlz.reduce_sets(set.symmetric_difference, sets)
+    {0, 1, 2, 3, 4, 8}
+
+    >>> set_union = pytlz.reduce_sets(set.union)
+    >>> type(set_union)
+    <class 'toolz.functoolz.curry'>
+    >>> set_union(x, y, z)
+    {0, 1, 2, 3, 4, 6, 8}
+    """
+    return toolz.pipe(sets, flatten, map(set), reduce(func))
 
 
 @toolz.curry

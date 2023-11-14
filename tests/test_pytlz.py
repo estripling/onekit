@@ -2,6 +2,7 @@ import datetime as dt
 import math
 
 import pytest
+import toolz
 
 from onekit import pytlz
 
@@ -149,6 +150,32 @@ def test_isodd(x):
 )
 def test_num_to_str(n, expected):
     actual = pytlz.num_to_str(n)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "func, expected",
+    [
+        (set.intersection, {2}),
+        (set.union, {0, 1, 2, 3, 4, 6, 8}),
+        (set.difference, {0, 1, 3}),
+        (set.symmetric_difference, {0, 1, 2, 3, 4, 8}),
+    ],
+)
+def test_reduce_sets(func, expected):
+    x = {0, 1, 2, 3}
+    y = {2, 4, 6}
+    z = {2, 6, 8}
+
+    f = pytlz.reduce_sets(func)
+    assert isinstance(f, toolz.curry)
+
+    actual = f(x, y, z)
+    assert isinstance(actual, set)
+    assert actual == expected
+
+    actual = pytlz.reduce_sets(func, [x, y, z])
+    assert isinstance(actual, set)
     assert actual == expected
 
 
