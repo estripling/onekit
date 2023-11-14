@@ -13,8 +13,7 @@ from onekit import pytlz
     ],
 )
 def test_all_predicate_true(x, expected):
-    is_div_3_5 = pytlz.all_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])
-    actual = is_div_3_5(x)
+    actual = pytlz.all_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0], x)
     assert actual == expected
 
 
@@ -27,8 +26,7 @@ def test_all_predicate_true(x, expected):
     ],
 )
 def test_any_predicate_true(x, expected):
-    is_div_3_5 = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])
-    actual = is_div_3_5(x)
+    actual = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0], x)
     assert actual == expected
 
 
