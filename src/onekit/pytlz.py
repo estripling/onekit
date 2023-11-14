@@ -224,6 +224,12 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
 
     >>> pytlz.extend_range(0.0, 1.0, factor=0.1)
     (-0.1, 1.1)
+
+    >>> extend_range = pytlz.extend_range(factor=0.2)
+    >>> type(extend_range)
+    <class 'toolz.functoolz.curry'>
+    >>> extend_range(0.0, 1.0)
+    (-0.2, 1.2)
     """
     if not isinstance(factor, float) or factor < 0:
         raise ValueError(f"{factor=} - must be a non-negative float")
