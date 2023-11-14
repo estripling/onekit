@@ -1,19 +1,202 @@
 """Python toolz."""
 
 import datetime as dt
+import inspect
+import math
 from typing import (
     Any,
+    Callable,
     Generator,
     Iterator,
+    List,
     Sequence,
+    Tuple,
     Union,
 )
 
-__all__ = (
-    "date_to_str",
-    "flatten",
-    "num_to_str",
+import toolz
+from toolz.curried import (
+    map,
+    reduce,
 )
+
+__all__ = (
+    "all_predicate_true",
+    "any_predicate_true",
+    "contrast_sets",
+    "date_to_str",
+    "extend_range",
+    "flatten",
+    "func_name",
+    "isdivisibleby",
+    "iseven",
+    "isodd",
+    "num_to_str",
+    "reduce_sets",
+    "signif",
+    "source_code",
+)
+
+
+Pair = Tuple[float, float]
+
+
+@toolz.curry
+def all_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
+    """Check if all predicates are true.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> is_divisible_by_3_and_5 = pytlz.all_predicate_true(
+    ...     [
+    ...         pytlz.isdivisibleby(3),
+    ...         pytlz.isdivisibleby(5),
+    ...     ]
+    ... )
+    >>> type(is_divisible_by_3_and_5)
+    <class 'toolz.functoolz.curry'>
+    >>> is_divisible_by_3_and_5(60)
+    True
+    >>> is_divisible_by_3_and_5(9)
+    False
+    """
+    return all(predicate(x) for predicate in predicates)
+
+
+@toolz.curry
+def any_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bool:
+    """Check if any predicate is true.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> is_divisible_by_3_and_5 = pytlz.any_predicate_true(
+    ...     [
+    ...         pytlz.isdivisibleby(3),
+    ...         pytlz.isdivisibleby(5),
+    ...     ]
+    ... )
+    >>> type(is_divisible_by_3_and_5)
+    <class 'toolz.functoolz.curry'>
+    >>> is_divisible_by_3_and_5(60)
+    True
+    >>> is_divisible_by_3_and_5(9)
+    True
+    >>> is_divisible_by_3_and_5(13)
+    False
+    """
+    return any(predicate(x) for predicate in predicates)
+
+
+def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
+    """Contrast sets.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> a = {"a", "c", "b", "g", "h", "i", "j", "k"}
+    >>> b = {"c", "d", "e", "f", "g", "p", "q"}
+    >>> summary = pytlz.contrast_sets(a, b)
+    >>> isinstance(summary, dict)
+    True
+    >>> summary["x"] == a
+    True
+    >>> summary["y"] == b
+    True
+    >>> summary["x | y"] == a.union(b)
+    True
+    >>> summary["x & y"] == a.intersection(b)
+    True
+    >>> summary["x - y"] == a.difference(b)
+    True
+    >>> summary["y - x"] == b.difference(a)
+    True
+    >>> summary["x ^ y"] == a.symmetric_difference(b)
+    True
+    >>> print(summary["report"])
+        x (n= 8): {'a', 'b', 'c', ...}
+        y (n= 7): {'c', 'd', 'e', ...}
+    x | y (n=13): {'a', 'b', 'c', ...}
+    x & y (n= 2): {'c', 'g'}
+    x - y (n= 6): {'a', 'b', 'h', ...}
+    y - x (n= 5): {'d', 'e', 'f', ...}
+    x ^ y (n=11): {'a', 'b', 'd', ...}
+    jaccard = 0.153846
+    overlap = 0.285714
+    dice = 0.266667
+    disjoint?: False
+    x == y: False
+    x <= y: False
+    x <  y: False
+    y <= x: False
+    y <  x: False
+    """
+    x, y = set(x), set(y)
+    union = x.union(y)
+    intersection = x.intersection(y)
+    in_x_but_not_y = x.difference(y)
+    in_y_but_not_x = y.difference(x)
+    symmetric_diff = x ^ y
+    jaccard = len(intersection) / len(union)
+    overlap = len(intersection) / min(len(x), len(y))
+    dice = 2 * len(intersection) / (len(x) + len(y))
+
+    output = {
+        "x": x,
+        "y": y,
+        "x | y": union,
+        "x & y": intersection,
+        "x - y": in_x_but_not_y,
+        "y - x": in_y_but_not_x,
+        "x ^ y": symmetric_diff,
+        "jaccard": jaccard,
+        "overlap": overlap,
+        "dice": dice,
+    }
+
+    max_set_size = max(
+        len(num_to_str(len(v))) for v in output.values() if isinstance(v, set)
+    )
+
+    lines = []
+    for k, v in output.items():
+        if isinstance(v, set):
+            elements = f"{sorted(v)[:n]}".replace("[", "{")
+            elements = (
+                elements.replace("]", ", ...}")
+                if len(v) > n
+                else elements.replace("]", "}")
+            )
+            elements = elements.replace(",", "") if len(v) == 1 else elements
+
+            set_size = num_to_str(len(v)).rjust(max_set_size)
+            desc = f"{k} (n={set_size})"
+
+            if k in ["x", "y"]:
+                desc = f"    {desc}"
+            msg = f"{desc}: {elements}"
+            lines.append(msg)
+
+        else:
+            lines.append(f"{k} = {v:g}")
+
+    tmp = {
+        "disjoint?": x.isdisjoint(y),
+        "x == y": x == y,
+        "x <= y": x <= y,
+        "x <  y": x < y,
+        "y <= x": y <= x,
+        "y <  x": y < x,
+    }
+
+    for k, v in tmp.items():
+        lines.append(f"{k}: {v}")
+
+    output.update(tmp)
+    output["report"] = "\n".join(lines)
+
+    return output
 
 
 def date_to_str(d: dt.date, /) -> str:
@@ -27,6 +210,37 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+@toolz.curry
+def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
+    """Extend value range ``xmax - xmin`` by factor.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.extend_range(0.0, 1.0)
+    (-0.05, 1.05)
+
+    >>> pytlz.extend_range(0.0, 1.0, factor=0.1)
+    (-0.1, 1.1)
+
+    >>> extend_range = pytlz.extend_range(factor=0.2)
+    >>> type(extend_range)
+    <class 'toolz.functoolz.curry'>
+    >>> extend_range(0.0, 1.0)
+    (-0.2, 1.2)
+    """
+    if not isinstance(factor, float) or factor < 0:
+        raise ValueError(f"{factor=} - must be a non-negative float")
+
+    xmin, xmax = sorted([xmin, xmax])
+    value_range = xmax - xmin
+
+    new_xmin = xmin - factor * value_range
+    new_xmax = xmax + factor * value_range
+
+    return new_xmin, new_xmax
 
 
 def flatten(*items: Sequence[Any]) -> Generator:
@@ -55,7 +269,79 @@ def flatten(*items: Sequence[Any]) -> Generator:
     return _flatten(items)
 
 
-def num_to_str(n: Union[int, float], /) -> str:
+def func_name() -> str:
+    """Get name of called function.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> def foobar():
+    ...     return pytlz.func_name()
+    ...
+    >>> foobar()
+    'foobar'
+    """
+    return inspect.stack()[1].function
+
+
+@toolz.curry
+def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is evenly divisible by :math:`n`.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.isdivisibleby(7, 49)
+    True
+
+    >>> is_div_5 = pytlz.isdivisibleby(5)
+    >>> type(is_div_5)
+    <class 'toolz.functoolz.curry'>
+    >>> is_div_5(10)
+    True
+    >>> is_div_5(11.0)
+    False
+    """
+    return x % n == 0
+
+
+def iseven(x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is even.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.iseven(0)
+    True
+
+    >>> pytlz.iseven(1)
+    False
+
+    >>> pytlz.iseven(2)
+    True
+    """
+    return isdivisibleby(2)(x)
+
+
+def isodd(x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is odd.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.isodd(0)
+    False
+
+    >>> pytlz.isodd(1)
+    True
+
+    >>> pytlz.isodd(2)
+    False
+    """
+    return toolz.complement(iseven)(x)
+
+
+def num_to_str(x: Union[int, float], /) -> str:
     """Cast number to string with underscores as thousands separator.
 
     Examples
@@ -67,4 +353,80 @@ def num_to_str(n: Union[int, float], /) -> str:
     >>> pytlz.num_to_str(100000.0)
     '100_000.0'
     """
-    return f"{n:_}"
+    return f"{x:_}"
+
+
+@toolz.curry
+def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set:
+    """Apply function of two set arguments to reduce a sequence of sets.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> x = {0, 1, 2, 3}
+    >>> y = {2, 4, 6}
+    >>> z = {2, 6, 8}
+    >>> sets = [x, y, z]
+    >>> pytlz.reduce_sets(set.intersection, sets)
+    {2}
+    >>> pytlz.reduce_sets(set.difference, *sets)
+    {0, 1, 3}
+    >>> pytlz.reduce_sets(set.symmetric_difference, sets)
+    {0, 1, 2, 3, 4, 8}
+
+    >>> set_union = pytlz.reduce_sets(set.union)
+    >>> type(set_union)
+    <class 'toolz.functoolz.curry'>
+    >>> set_union(x, y, z)
+    {0, 1, 2, 3, 4, 6, 8}
+    """
+    return toolz.pipe(sets, flatten, map(set), reduce(func))
+
+
+@toolz.curry
+def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
+    """Round :math:`x` to its :math:`n` significant digits.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.signif(987654321)
+    988000000
+
+    >>> pytlz.signif(14393237.76, n=2)
+    14000000.0
+
+    >>> pytlz.signif(14393237.76, n=3)
+    14400000.0
+
+    >>> signif3 = pytlz.signif(n=3)
+    >>> type(signif3)
+    <class 'toolz.functoolz.curry'>
+    >>> signif3(14393237.76)
+    14400000.0
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError(f"{n=} - must be a positive integer")
+
+    if not math.isfinite(x) or math.isclose(x, 0.0):
+        return x
+
+    n -= math.ceil(math.log10(abs(x)))
+    return round(x, n)
+
+
+def source_code(x: object, /) -> str:
+    """Get source code of an object.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> def greet():
+    ...     return "Hello, World!"
+    ...
+    >>> print(pytlz.source_code(greet))
+    def greet():
+        return "Hello, World!"
+    <BLANKLINE>
+    """
+    return inspect.getsource(x)

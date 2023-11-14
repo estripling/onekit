@@ -19,6 +19,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<4.0"
+toolz = "^0.12.0"
 
 [tool.poetry.group.precommit.dependencies]
 autoflake = "^2.2.1"
@@ -31,6 +32,7 @@ pre-commit-hooks = "^4.5.0"
 [tool.poetry.group.testing.dependencies]
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
+pytest-skip-slow = "^0.0.5"
 
 [tool.poetry.group.docs.dependencies]
 furo = "^2023.9.10"
@@ -62,6 +64,12 @@ skip_gitignore = true
 line_length = 88
 force_grid_wrap = 2
 multi_line_output = 3
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial",
+]
 
 [tool.semantic_release]
 branch = "main"
