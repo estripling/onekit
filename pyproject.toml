@@ -64,6 +64,12 @@ line_length = 88
 force_grid_wrap = 2
 multi_line_output = 3
 
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial",
+]
+
 [tool.semantic_release]
 branch = "main"
 version_variables = ["pyproject.toml:version"]

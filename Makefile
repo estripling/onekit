@@ -25,7 +25,7 @@ POETRY := poetry
 
 help:
 	@echo 'commands:'
-	@echo ' - check                             ;; run pre-commit, tests, and clear cache'
+	@echo ' - check                             ;; run pre-commit and tests consecutively'
 	@echo ' - run-precommit                     ;; run pre-commit'
 	@echo ' - run-tests                         ;; run pytest with coverage report'
 	@echo ' - clear-cache                       ;; clear cache files and directories'
@@ -44,7 +44,7 @@ help:
 	@echo ' - install-dependencies-sparktlz     ;; auxiliary command to install dependencies with poetry for spark toolz'
 
 
-check: run-precommit run-tests clear-cache
+check: run-precommit run-tests
 
 
 run-precommit:
@@ -53,7 +53,7 @@ run-precommit:
 
 
 run-tests:
-	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
+	$(PYTHON) -m pytest -m "not slow" --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
 	@echo
 
 
