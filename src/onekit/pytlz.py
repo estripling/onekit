@@ -23,6 +23,7 @@ from toolz.curried import (
 __all__ = (
     "all_predicate_true",
     "any_predicate_true",
+    "contrast_sets",
     "date_to_str",
     "extend_range",
     "flatten",
@@ -82,6 +83,116 @@ def any_predicate_true(predicates: List[Callable[[Any], bool]], x: Any, /) -> bo
     False
     """
     return any(predicate(x) for predicate in predicates)
+
+
+def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
+    """Contrast sets.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> a = {"a", "c", "b", "g", "h", "i", "j", "k"}
+    >>> b = {"c", "d", "e", "f", "g", "p", "q"}
+    >>> summary = pytlz.contrast_sets(a, b)
+    >>> isinstance(summary, dict)
+    True
+    >>> summary["x"] == a
+    True
+    >>> summary["y"] == b
+    True
+    >>> summary["x | y"] == a.union(b)
+    True
+    >>> summary["x & y"] == a.intersection(b)
+    True
+    >>> summary["x - y"] == a.difference(b)
+    True
+    >>> summary["y - x"] == b.difference(a)
+    True
+    >>> summary["x ^ y"] == a.symmetric_difference(b)
+    True
+    >>> print(summary["report"])
+        x (n= 8): {'a', 'b', 'c', ...}
+        y (n= 7): {'c', 'd', 'e', ...}
+    x | y (n=13): {'a', 'b', 'c', ...}
+    x & y (n= 2): {'c', 'g'}
+    x - y (n= 6): {'a', 'b', 'h', ...}
+    y - x (n= 5): {'d', 'e', 'f', ...}
+    x ^ y (n=11): {'a', 'b', 'd', ...}
+    jaccard = 0.153846
+    overlap = 0.285714
+    dice = 0.266667
+    disjoint?: False
+    x == y: False
+    x <= y: False
+    x <  y: False
+    y <= x: False
+    y <  x: False
+    """
+    x, y = set(x), set(y)
+    union = x.union(y)
+    intersection = x.intersection(y)
+    in_x_but_not_y = x.difference(y)
+    in_y_but_not_x = y.difference(x)
+    symmetric_diff = x ^ y
+    jaccard = len(intersection) / len(union)
+    overlap = len(intersection) / min(len(x), len(y))
+    dice = 2 * len(intersection) / (len(x) + len(y))
+
+    output = {
+        "x": x,
+        "y": y,
+        "x | y": union,
+        "x & y": intersection,
+        "x - y": in_x_but_not_y,
+        "y - x": in_y_but_not_x,
+        "x ^ y": symmetric_diff,
+        "jaccard": jaccard,
+        "overlap": overlap,
+        "dice": dice,
+    }
+
+    max_set_size = max(
+        len(num_to_str(len(v))) for v in output.values() if isinstance(v, set)
+    )
+
+    lines = []
+    for k, v in output.items():
+        if isinstance(v, set):
+            elements = f"{sorted(v)[:n]}".replace("[", "{")
+            elements = (
+                elements.replace("]", ", ...}")
+                if len(v) > n
+                else elements.replace("]", "}")
+            )
+            elements = elements.replace(",", "") if len(v) == 1 else elements
+
+            set_size = num_to_str(len(v)).rjust(max_set_size)
+            desc = f"{k} (n={set_size})"
+
+            if k in ["x", "y"]:
+                desc = f"    {desc}"
+            msg = f"{desc}: {elements}"
+            lines.append(msg)
+
+        else:
+            lines.append(f"{k} = {v:g}")
+
+    tmp = {
+        "disjoint?": x.isdisjoint(y),
+        "x == y": x == y,
+        "x <= y": x <= y,
+        "x <  y": x < y,
+        "y <= x": y <= x,
+        "y <  x": y < x,
+    }
+
+    for k, v in tmp.items():
+        lines.append(f"{k}: {v}")
+
+    output.update(tmp)
+    output["report"] = "\n".join(lines)
+
+    return output
 
 
 def date_to_str(d: dt.date, /) -> str:
