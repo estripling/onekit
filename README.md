@@ -31,21 +31,3 @@ pip install onekit
 
 `onekit` was created by onekit developers.
 It is licensed under the terms of the BSD 3-Clause license.
-
-## Examples
-
-Easily [`flatten`](https://onekit.readthedocs.io/en/stable/autoapi/onekit/pytlz/index.html#onekit.pytlz.flatten) an irregular list:
-
-```python
->>> from onekit import pytlz
->>> irregular_list = [
-...     ["one", 2],
-...     3,
-...     [(4, "five")],
-...     [[["six"]]],
-...     "seven",
-...     [],
-... ]
->>> list(pytlz.flatten(irregular_list, 8, [9, ("ten",)]))
-['one', 2, 3, 4, 'five', 'six', 'seven', 8, 9, 'ten']
-```
