@@ -104,6 +104,15 @@ def test_flatten(items, expected):
     assert actual == expected
 
 
+def test_func_name():
+    def foobar():
+        return pytlz.func_name()
+
+    actual = foobar()
+    expected = "foobar"
+    assert actual == expected
+
+
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_isdivisibleby(x):
     actual = pytlz.isdivisibleby(2, x)

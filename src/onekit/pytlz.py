@@ -1,6 +1,7 @@
 """Python toolz."""
 
 import datetime as dt
+import inspect
 from typing import (
     Any,
     Callable,
@@ -20,6 +21,7 @@ __all__ = (
     "date_to_str",
     "extend_range",
     "flatten",
+    "func_name",
     "isdivisibleby",
     "iseven",
     "isodd",
@@ -136,6 +138,21 @@ def flatten(*items: Sequence[Any]) -> Generator:
                 yield item
 
     return _flatten(items)
+
+
+def func_name() -> str:
+    """Get name of called function.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> def foobar():
+    ...     return pytlz.func_name()
+    ...
+    >>> foobar()
+    'foobar'
+    """
+    return inspect.stack()[1].function
 
 
 @toolz.curry
