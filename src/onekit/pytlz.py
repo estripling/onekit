@@ -2,9 +2,9 @@
 
 import datetime as dt
 from typing import (
+    Any,
     Generator,
     Iterator,
-    List,
     Sequence,
     Union,
 )
@@ -29,8 +29,8 @@ def date_to_str(d: dt.date, /) -> str:
     return d.isoformat()
 
 
-def flatten(*items: List) -> Generator:
-    """Flatten collection of items.
+def flatten(*items: Sequence[Any]) -> Generator:
+    """Flatten sequence of items.
 
     Examples
     --------
