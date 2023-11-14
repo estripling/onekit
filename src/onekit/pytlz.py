@@ -15,6 +15,7 @@ __all__ = (
     "date_to_str",
     "flatten",
     "isdivisibleby",
+    "iseven",
     "num_to_str",
 )
 
@@ -72,6 +73,24 @@ def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
     False
     """
     return x % n == 0
+
+
+def iseven(x: Union[int, float], /) -> bool:
+    """Check if :math:`x` is even.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.iseven(0)
+    True
+
+    >>> pytlz.iseven(1)
+    False
+
+    >>> pytlz.iseven(2)
+    True
+    """
+    return isdivisibleby(2)(x)
 
 
 def num_to_str(n: Union[int, float], /) -> str:
