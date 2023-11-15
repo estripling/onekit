@@ -108,7 +108,7 @@ def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
 def collatz(n: int, /) -> Generator:
     """Generate a Collatz sequence.
 
-    The famous 3n + 1 conjecture [1]_ [2]_. Given a positive integer :math:`n > 0`,
+    The famous 3n + 1 conjecture [c1]_ [c2]_. Given a positive integer :math:`n > 0`,
     the next term in the Collatz sequence is half of :math:`n`
     if :math:`n` is even; otherwise, if :math:`n` is odd,
     the next term is 3 times :math:`n` plus 1.
@@ -142,10 +142,10 @@ def collatz(n: int, /) -> Generator:
 
     References
     ----------
-    .. [1] "Collatz", The On-Line Encyclopedia of Integer Sequences®,
-           https://oeis.org/A006370
-    .. [2] "Collatz conjecture", Wikipedia,
-           https://en.wikipedia.org/wiki/Collatz_conjecture
+    .. [c1] "Collatz", The On-Line Encyclopedia of Integer Sequences®,
+            https://oeis.org/A006370
+    .. [c2] "Collatz conjecture", Wikipedia,
+            https://en.wikipedia.org/wiki/Collatz_conjecture
 
     Examples
     --------
