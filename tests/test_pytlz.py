@@ -1,5 +1,6 @@
 import datetime as dt
 import math
+import random
 
 import pytest
 import toolz
@@ -35,6 +36,16 @@ def test_all_predicate_true(x, expected):
 def test_any_predicate_true(x, expected):
     actual = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])(x)
     assert actual == expected
+
+
+@pytest.mark.parametrize("seed", [None, 0, random.Random(1), "invalid seed", 3.0])
+def test_check_random_state(seed):
+    if seed is None or isinstance(seed, (int, random.Random)):
+        assert isinstance(pytlz.check_random_state(seed), random.Random)
+    else:
+        with pytest.raises(ValueError):
+            # noinspection PyTypeChecker
+            pytlz.check_random_state(seed)
 
 
 @pytest.mark.parametrize(

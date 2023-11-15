@@ -3,11 +3,13 @@
 import datetime as dt
 import inspect
 import math
+import random
 from typing import (
     Any,
     Callable,
     Generator,
     Iterator,
+    Optional,
     Sequence,
     Tuple,
     Union,
@@ -22,6 +24,7 @@ from toolz.curried import (
 __all__ = (
     "all_predicate_true",
     "any_predicate_true",
+    "check_random_state",
     "collatz",
     "contrast_sets",
     "date_to_str",
@@ -41,6 +44,7 @@ __all__ = (
 
 Pair = Tuple[float, float]
 Predicate = Callable[[Any], bool]
+Seed = Optional[Union[int, random.Random]]
 
 
 def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
@@ -103,6 +107,32 @@ def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
         return any(predicate(x) for predicate in flatten(predicates))
 
     return inner
+
+
+def check_random_state(seed: Seed = None, /) -> random.Random:
+    """Turn seed into random.Random instance.
+
+    Examples
+    --------
+    >>> import random
+    >>> from onekit import pytlz
+    >>> rng = pytlz.check_random_state()
+    >>> isinstance(rng, random.Random)
+    True
+    """
+    singleton_instance = getattr(random, "_inst")
+
+    if seed is None or seed is singleton_instance:
+        return singleton_instance
+
+    elif isinstance(seed, int):
+        return random.Random(seed)
+
+    elif isinstance(seed, random.Random):
+        return seed
+
+    else:
+        raise ValueError(f"{seed=} - cannot be used to seed Random instance")
 
 
 def collatz(n: int, /) -> Generator:
