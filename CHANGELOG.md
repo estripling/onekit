@@ -2,6 +2,47 @@
 
 
 
+## v0.6.0 (2023-11-15)
+
+### Documentation
+
+* docs(pytlz): rephrase docstring of bool functions (#20) ([`fa8a1df`](https://github.com/estripling/onekit/commit/fa8a1df96aaf72e77f9462c0ac4bd161784d4ac0))
+
+### Feature
+
+* feat: migrate bumbag random functions (#22)
+
+* feat(pytlz): add check_random_state
+
+* feat(pytlz): add coinflip
+
+* test: add raises checks in else clause
+
+* docs(coinflip): add docstring example
+
+* docs(coinflip): add docstring example with biased coin ([`8906f15`](https://github.com/estripling/onekit/commit/8906f15047a57970b88eb61aef52e20a6210a60b))
+
+* feat(pytlz): add collatz and fibonacci (#21)
+
+* feat(pytlz): add collatz
+
+* feat(pytlz): add fibonacci
+
+* style(collatz): update references in docstring ([`0881625`](https://github.com/estripling/onekit/commit/088162506219ef5a95acb3dbde81dd108d686071))
+
+### Refactor
+
+* refactor: curry functions only where necessary (#23)
+
+* refactor(extend_range): replace curry with partial
+
+* docs(isdivisibleby): indicate function is curried
+
+* docs(reduce_sets): indicate function is curried
+
+* refactor(signif): replace curry with partial ([`acbbcea`](https://github.com/estripling/onekit/commit/acbbcea2f31f063469cb140ea70f18d63cbea099))
+
+
 ## v0.5.0 (2023-11-14)
 
 ### Build
