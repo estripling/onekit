@@ -359,7 +359,6 @@ def date_to_str(d: dt.date, /) -> str:
     return d.isoformat()
 
 
-@toolz.curry
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     """Extend value range ``xmax - xmin`` by factor.
 
@@ -371,12 +370,6 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
 
     >>> pytlz.extend_range(0.0, 1.0, factor=0.1)
     (-0.1, 1.1)
-
-    >>> extend_range = pytlz.extend_range(factor=0.2)
-    >>> type(extend_range)
-    <class 'toolz.functoolz.curry'>
-    >>> extend_range(0.0, 1.0)
-    (-0.2, 1.2)
     """
     if not isinstance(factor, float) or factor < 0:
         raise ValueError(f"{factor=} - must be a non-negative float")
@@ -485,9 +478,10 @@ def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
     >>> pytlz.isdivisibleby(7, 49)
     True
 
+    >>> # function is curried
+    >>> pytlz.isdivisibleby(5)(10)
+    True
     >>> is_divisible_by_5 = pytlz.isdivisibleby(5)
-    >>> type(is_divisible_by_5)
-    <class 'toolz.functoolz.curry'>
     >>> is_divisible_by_5(10)
     True
     >>> is_divisible_by_5(11.0)
@@ -557,24 +551,26 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set
     >>> x = {0, 1, 2, 3}
     >>> y = {2, 4, 6}
     >>> z = {2, 6, 8}
-    >>> sets = [x, y, z]
-    >>> pytlz.reduce_sets(set.intersection, sets)
+    >>> pytlz.reduce_sets(set.intersection, x, y, z)
     {2}
-    >>> pytlz.reduce_sets(set.difference, *sets)
-    {0, 1, 3}
+    >>> sets = [x, y, z]
     >>> pytlz.reduce_sets(set.symmetric_difference, sets)
     {0, 1, 2, 3, 4, 8}
+    >>> pytlz.reduce_sets(set.difference, *sets)
+    {0, 1, 3}
 
+    >>> # function is curried
+    >>> pytlz.reduce_sets(set.union)(x, y, z)
+    {0, 1, 2, 3, 4, 6, 8}
+    >>> pytlz.reduce_sets(set.union)(sets)
+    {0, 1, 2, 3, 4, 6, 8}
     >>> set_union = pytlz.reduce_sets(set.union)
-    >>> type(set_union)
-    <class 'toolz.functoolz.curry'>
-    >>> set_union(x, y, z)
+    >>> set_union(*sets)
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, map(set), reduce(func))
 
 
-@toolz.curry
 def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
     """Round :math:`x` to its :math:`n` significant digits.
 
@@ -588,12 +584,6 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
     14000000.0
 
     >>> pytlz.signif(14393237.76, n=3)
-    14400000.0
-
-    >>> signif3 = pytlz.signif(n=3)
-    >>> type(signif3)
-    <class 'toolz.functoolz.curry'>
-    >>> signif3(14393237.76)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:

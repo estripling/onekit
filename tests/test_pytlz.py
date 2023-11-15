@@ -1,4 +1,5 @@
 import datetime as dt
+import functools
 import math
 import random
 
@@ -154,7 +155,7 @@ def test_date_to_str(d, expected):
     ],
 )
 def test_extend_range(xmin, xmax, factor, expected):
-    extend_range = pytlz.extend_range(factor=factor)
+    extend_range = functools.partial(pytlz.extend_range, factor=factor)
     if factor >= 0:
         actual = extend_range(xmin, xmax)
         assert actual == expected
@@ -324,7 +325,7 @@ def test_reduce_sets(func, expected):
     ],
 )
 def test_signif(x, n, expected):
-    f = pytlz.signif(n=n)
+    f = functools.partial(pytlz.signif, n=n)
     if n > 0:
         actual = f(x)
         assert actual == expected
