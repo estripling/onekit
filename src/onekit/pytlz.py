@@ -551,18 +551,21 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set
     >>> x = {0, 1, 2, 3}
     >>> y = {2, 4, 6}
     >>> z = {2, 6, 8}
-    >>> sets = [x, y, z]
-    >>> pytlz.reduce_sets(set.intersection, sets)
+    >>> pytlz.reduce_sets(set.intersection, x, y, z)
     {2}
-    >>> pytlz.reduce_sets(set.difference, *sets)
-    {0, 1, 3}
+    >>> sets = [x, y, z]
     >>> pytlz.reduce_sets(set.symmetric_difference, sets)
     {0, 1, 2, 3, 4, 8}
+    >>> pytlz.reduce_sets(set.difference, *sets)
+    {0, 1, 3}
 
+    >>> # function is curried
+    >>> pytlz.reduce_sets(set.union)(x, y, z)
+    {0, 1, 2, 3, 4, 6, 8}
+    >>> pytlz.reduce_sets(set.union)(sets)
+    {0, 1, 2, 3, 4, 6, 8}
     >>> set_union = pytlz.reduce_sets(set.union)
-    >>> type(set_union)
-    <class 'toolz.functoolz.curry'>
-    >>> set_union(x, y, z)
+    >>> set_union(*sets)
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, map(set), reduce(func))
