@@ -48,6 +48,17 @@ def test_check_random_state(seed):
             pytlz.check_random_state(seed)
 
 
+@pytest.mark.parametrize("bias", [0.25, 0.5, 0.75, -0.1, 1.1, 11])
+def test_coinflip(bias):
+    if 0 <= bias <= 1:
+        actual = {pytlz.coinflip(bias) for _ in range(30)}
+        expected = {True, False}
+        assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            pytlz.coinflip(bias)
+
+
 @pytest.mark.parametrize(
     "n, expected",
     [
