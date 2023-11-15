@@ -478,9 +478,10 @@ def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
     >>> pytlz.isdivisibleby(7, 49)
     True
 
+    >>> # function is curried
+    >>> pytlz.isdivisibleby(5)(10)
+    True
     >>> is_divisible_by_5 = pytlz.isdivisibleby(5)
-    >>> type(is_divisible_by_5)
-    <class 'toolz.functoolz.curry'>
     >>> is_divisible_by_5(10)
     True
     >>> is_divisible_by_5(11.0)
