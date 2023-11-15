@@ -571,7 +571,6 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set
     return toolz.pipe(sets, flatten, map(set), reduce(func))
 
 
-@toolz.curry
 def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
     """Round :math:`x` to its :math:`n` significant digits.
 
@@ -585,12 +584,6 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
     14000000.0
 
     >>> pytlz.signif(14393237.76, n=3)
-    14400000.0
-
-    >>> signif3 = pytlz.signif(n=3)
-    >>> type(signif3)
-    <class 'toolz.functoolz.curry'>
-    >>> signif3(14393237.76)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:

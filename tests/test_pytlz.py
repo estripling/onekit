@@ -325,7 +325,7 @@ def test_reduce_sets(func, expected):
     ],
 )
 def test_signif(x, n, expected):
-    f = pytlz.signif(n=n)
+    f = functools.partial(pytlz.signif, n=n)
     if n > 0:
         actual = f(x)
         assert actual == expected
