@@ -37,6 +37,29 @@ def test_any_predicate_true(x, expected):
     assert actual == expected
 
 
+@pytest.mark.parametrize(
+    "n, expected",
+    [
+        (-2, None),
+        (-1, None),
+        (0, None),
+        (1, (1,)),
+        (2, (2, 1)),
+        (4, (4, 2, 1)),
+        (7, (7, 22, 11, 34, 17, 52, 26, 13, 40, 20, 10, 5, 16, 8, 4, 2, 1)),
+        (11, (11, 34, 17, 52, 26, 13, 40, 20, 10, 5, 16, 8, 4, 2, 1)),
+        (12, (12, 6, 3, 10, 5, 16, 8, 4, 2, 1)),
+    ],
+)
+def test_collatz(n, expected):
+    if n < 1:
+        with pytest.raises(ValueError):
+            tuple(pytlz.collatz(n))
+    else:
+        actual = tuple(pytlz.collatz(n))
+        assert actual == expected
+
+
 def test_contrast_sets():
     x = {"a", "c", "b", "g", "h"}
     y = {"c", "d", "e", "f", "g"}
@@ -116,6 +139,12 @@ def test_extend_range(xmin, xmax, factor, expected):
     else:
         actual = extend_range(xmin, xmax)
         assert actual == expected
+
+
+def test_fibonacci():
+    actual = tuple(toolz.take(16, pytlz.fibonacci()))
+    expected = (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
