@@ -42,7 +42,9 @@ Predicate = Callable[[Any], bool]
 
 
 def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
-    """Check every predicate :math:`P\\colon X \\rightarrow \\{False, True\\}` is true.
+    """Evaluate if every predicate is true.
+
+    A predicate is of the form :math:`P\\colon X \\rightarrow \\{False, True\\}`
 
     Examples
     --------
@@ -70,7 +72,9 @@ def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
 
 
 def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
-    """Check any predicate :math:`P\\colon X \\rightarrow \\{False, True\\}` is true.
+    """Evaluate if any predicate is true.
+
+    A predicate is of the form :math:`P\\colon X \\rightarrow \\{False, True\\}`
 
     Examples
     --------
@@ -296,7 +300,7 @@ def func_name() -> str:
 
 @toolz.curry
 def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
-    """Check if :math:`x` is evenly divisible by :math:`n`.
+    """Evaluate if :math:`x` is evenly divisible by :math:`n`.
 
     Examples
     --------
@@ -316,7 +320,7 @@ def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
 
 
 def iseven(x: Union[int, float], /) -> bool:
-    """Check if :math:`x` is even.
+    """Evaluate if :math:`x` is even.
 
     Examples
     --------
@@ -334,7 +338,7 @@ def iseven(x: Union[int, float], /) -> bool:
 
 
 def isodd(x: Union[int, float], /) -> bool:
-    """Check if :math:`x` is odd.
+    """Evaluate if :math:`x` is odd.
 
     Examples
     --------
