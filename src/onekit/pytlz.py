@@ -22,6 +22,7 @@ from toolz.curried import (
 __all__ = (
     "all_predicate_true",
     "any_predicate_true",
+    "collatz",
     "contrast_sets",
     "date_to_str",
     "extend_range",
@@ -101,6 +102,71 @@ def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
         return any(predicate(x) for predicate in flatten(predicates))
 
     return inner
+
+
+def collatz(n: int, /) -> Generator:
+    """Generate a Collatz sequence.
+
+    The famous 3n + 1 conjecture [1]_ [2]_. Given a positive integer :math:`n > 0`,
+    the next term in the Collatz sequence is half of :math:`n`
+    if :math:`n` is even; otherwise, if :math:`n` is odd,
+    the next term is 3 times :math:`n` plus 1.
+    Symbolically,
+
+    .. math::
+
+        f(n) =
+        \\begin{cases}
+             n / 2 & \\text{ if } n \\equiv 0 \\text{ (mod 2) } \\\\[6pt]
+            3n + 1 & \\text{ if } n \\equiv 1 \\text{ (mod 2) }
+        \\end{cases}
+
+    The Collatz conjecture is that the sequence always reaches 1
+    for any positive integer :math:`n`.
+
+    Parameters
+    ----------
+    n : int
+        A positive integer seeding the Collatz sequence.
+
+    Yields
+    ------
+    int
+        A generator of Collatz numbers that breaks when 1 is reached.
+
+    Raises
+    ------
+    ValueError
+        If ``n`` is not a positive integer.
+
+    References
+    ----------
+    .. [1] "Collatz", The On-Line Encyclopedia of Integer Sequences®,
+           https://oeis.org/A006370
+    .. [2] "Collatz conjecture", Wikipedia,
+           https://en.wikipedia.org/wiki/Collatz_conjecture
+
+    Examples
+    --------
+    >>> import toolz
+    >>> from onekit import pytlz
+    >>> n = 12
+    >>> list(pytlz.collatz(n))
+    [12, 6, 3, 10, 5, 16, 8, 4, 2, 1]
+    >>> toolz.count(pytlz.collatz(n))
+    10
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError(f"{n=} - must be a positive integer")
+
+    while True:
+        yield n
+
+        if n == 1:
+            break
+
+        # update
+        n = n // 2 if iseven(n) else 3 * n + 1
 
 
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
