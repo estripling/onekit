@@ -141,11 +141,11 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
 
     Examples
     --------
+    >>> from functools import partial
     >>> from onekit import pytlz
     >>> {pytlz.coinflip(0.5) for _ in range(30)} == {True, False}
     True
 
-    >>> from functools import partial
     >>> fair_coin = partial(pytlz.coinflip, 0.5)
     >>> type(fair_coin)
     <class 'functools.partial'>
@@ -156,6 +156,12 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     >>> rng = pytlz.check_random_state(2)
     >>> [fair_coin(seed=rng) for _ in range(6)]  # doctest: +SKIP
     [False, False, True, True, False, False]
+
+    >>> biased_coin = partial(pytlz.coinflip, 0.6, seed=pytlz.check_random_state(3))
+    >>> type(biased_coin)
+    <class 'functools.partial'>
+    >>> [biased_coin() for _ in range(6)]  # doctest: +SKIP
+    [True, True, True, False, False, True]
     """
     if not (0 <= bias <= 1):
         raise ValueError(f"{bias=} - must be a float in [0, 1]")
