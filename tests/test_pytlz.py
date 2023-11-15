@@ -74,12 +74,12 @@ def test_coinflip(bias):
     ],
 )
 def test_collatz(n, expected):
-    if n < 1:
-        with pytest.raises(ValueError):
-            tuple(pytlz.collatz(n))
-    else:
+    if n > 0:
         actual = tuple(pytlz.collatz(n))
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            tuple(pytlz.collatz(n))
 
 
 def test_contrast_sets():
@@ -155,12 +155,12 @@ def test_date_to_str(d, expected):
 )
 def test_extend_range(xmin, xmax, factor, expected):
     extend_range = pytlz.extend_range(factor=factor)
-    if factor < 0:
-        with pytest.raises(ValueError):
-            extend_range(xmin, xmax)
-    else:
+    if factor >= 0:
         actual = extend_range(xmin, xmax)
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            extend_range(xmin, xmax)
 
 
 def test_fibonacci():
@@ -325,12 +325,12 @@ def test_reduce_sets(func, expected):
 )
 def test_signif(x, n, expected):
     f = pytlz.signif(n=n)
-    if n < 1:
-        with pytest.raises(ValueError):
-            f(x)
-    else:
+    if n > 0:
         actual = f(x)
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            f(x)
 
 
 def test_source_code():
