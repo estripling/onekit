@@ -3,11 +3,13 @@
 import datetime as dt
 import inspect
 import math
+import random
 from typing import (
     Any,
     Callable,
     Generator,
     Iterator,
+    Optional,
     Sequence,
     Tuple,
     Union,
@@ -22,6 +24,8 @@ from toolz.curried import (
 __all__ = (
     "all_predicate_true",
     "any_predicate_true",
+    "check_random_state",
+    "coinflip",
     "collatz",
     "contrast_sets",
     "date_to_str",
@@ -41,6 +45,7 @@ __all__ = (
 
 Pair = Tuple[float, float]
 Predicate = Callable[[Any], bool]
+Seed = Optional[Union[int, random.Random]]
 
 
 def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
@@ -103,6 +108,67 @@ def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
         return any(predicate(x) for predicate in flatten(predicates))
 
     return inner
+
+
+def check_random_state(seed: Seed = None, /) -> random.Random:
+    """Turn seed into random.Random instance.
+
+    Examples
+    --------
+    >>> import random
+    >>> from onekit import pytlz
+    >>> rng = pytlz.check_random_state()
+    >>> isinstance(rng, random.Random)
+    True
+    """
+    singleton_instance = getattr(random, "_inst")
+
+    if seed is None or seed is singleton_instance:
+        return singleton_instance
+
+    elif isinstance(seed, int):
+        return random.Random(seed)
+
+    elif isinstance(seed, random.Random):
+        return seed
+
+    else:
+        raise ValueError(f"{seed=} - cannot be used to seed Random instance")
+
+
+def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
+    """Flip coin with adjustable bias.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> {pytlz.coinflip(0.5) for _ in range(30)} == {True, False}
+    True
+
+    >>> fair_coin = partial(pytlz.coinflip, 0.5)
+    >>> type(fair_coin)
+    <class 'functools.partial'>
+    >>> # fix coinflip outcome
+    >>> fair_coin(seed=1)  # doctest: +SKIP
+    True
+    >>> # fix sequence of coinflip outcomes
+    >>> rng = pytlz.check_random_state(2)
+    >>> [fair_coin(seed=rng) for _ in range(6)]  # doctest: +SKIP
+    [False, False, True, True, False, False]
+
+    >>> biased_coin = partial(pytlz.coinflip, 0.6, seed=pytlz.check_random_state(3))
+    >>> type(biased_coin)
+    <class 'functools.partial'>
+    >>> [biased_coin() for _ in range(6)]  # doctest: +SKIP
+    [True, True, True, False, False, True]
+    """
+    if not (0 <= bias <= 1):
+        raise ValueError(f"{bias=} - must be a float in [0, 1]")
+
+    rng = check_random_state(seed)
+
+    return rng.random() < bias
 
 
 def collatz(n: int, /) -> Generator:

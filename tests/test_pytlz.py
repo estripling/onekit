@@ -1,5 +1,6 @@
 import datetime as dt
 import math
+import random
 
 import pytest
 import toolz
@@ -37,6 +38,27 @@ def test_any_predicate_true(x, expected):
     assert actual == expected
 
 
+@pytest.mark.parametrize("seed", [None, 0, random.Random(1), "invalid seed", 3.0])
+def test_check_random_state(seed):
+    if seed is None or isinstance(seed, (int, random.Random)):
+        assert isinstance(pytlz.check_random_state(seed), random.Random)
+    else:
+        with pytest.raises(ValueError):
+            # noinspection PyTypeChecker
+            pytlz.check_random_state(seed)
+
+
+@pytest.mark.parametrize("bias", [0.25, 0.5, 0.75, -0.1, 1.1, 11])
+def test_coinflip(bias):
+    if 0 <= bias <= 1:
+        actual = {pytlz.coinflip(bias) for _ in range(30)}
+        expected = {True, False}
+        assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            pytlz.coinflip(bias)
+
+
 @pytest.mark.parametrize(
     "n, expected",
     [
@@ -52,12 +74,12 @@ def test_any_predicate_true(x, expected):
     ],
 )
 def test_collatz(n, expected):
-    if n < 1:
-        with pytest.raises(ValueError):
-            tuple(pytlz.collatz(n))
-    else:
+    if n > 0:
         actual = tuple(pytlz.collatz(n))
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            tuple(pytlz.collatz(n))
 
 
 def test_contrast_sets():
@@ -133,12 +155,12 @@ def test_date_to_str(d, expected):
 )
 def test_extend_range(xmin, xmax, factor, expected):
     extend_range = pytlz.extend_range(factor=factor)
-    if factor < 0:
-        with pytest.raises(ValueError):
-            extend_range(xmin, xmax)
-    else:
+    if factor >= 0:
         actual = extend_range(xmin, xmax)
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            extend_range(xmin, xmax)
 
 
 def test_fibonacci():
@@ -303,12 +325,12 @@ def test_reduce_sets(func, expected):
 )
 def test_signif(x, n, expected):
     f = pytlz.signif(n=n)
-    if n < 1:
-        with pytest.raises(ValueError):
-            f(x)
-    else:
+    if n > 0:
         actual = f(x)
         assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            f(x)
 
 
 def test_source_code():
