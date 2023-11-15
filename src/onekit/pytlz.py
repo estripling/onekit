@@ -136,14 +136,26 @@ def check_random_state(seed: Seed = None, /) -> random.Random:
         raise ValueError(f"{seed=} - cannot be used to seed Random instance")
 
 
-def coinflip(bias: float = 0.5, /, *, seed: Seed = None) -> bool:
+def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     """Flip coin with adjustable bias.
 
     Examples
     --------
     >>> from onekit import pytlz
-    >>> {pytlz.coinflip() for _ in range(30)} == {True, False}
+    >>> {pytlz.coinflip(0.5) for _ in range(30)} == {True, False}
     True
+
+    >>> from functools import partial
+    >>> fair_coin = partial(pytlz.coinflip, 0.5)
+    >>> type(fair_coin)
+    <class 'functools.partial'>
+    >>> # fix coinflip outcome
+    >>> fair_coin(seed=1)  # doctest: +SKIP
+    True
+    >>> # fix sequence of coinflip outcomes
+    >>> rng = pytlz.check_random_state(2)
+    >>> [fair_coin(seed=rng) for _ in range(6)]  # doctest: +SKIP
+    [False, False, True, True, False, False]
     """
     if not (0 <= bias <= 1):
         raise ValueError(f"{bias=} - must be a float in [0, 1]")
