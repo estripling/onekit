@@ -1,6 +1,7 @@
 import datetime as dt
 import functools
 import math
+import os
 import random
 
 import pytest
@@ -132,6 +133,25 @@ def test_contrast_sets():
     ]
     report = "\n".join(lines)
     assert summary["report"] == report
+
+
+@pytest.mark.parametrize(
+    "strings, expected",
+    [
+        (["path", "to", "file"], "path/to/file"),
+        (["hdfs:", "path", "to", "file"], "hdfs:/path/to/file"),
+        (["hdfs:/", "path", "to", "file"], "hdfs:/path/to/file"),
+        (["hdfs://", "path", "to", "file"], "hdfs://path/to/file"),
+    ],
+)
+def test_create_path(strings, expected):
+    expected = expected.replace("/", os.sep)
+
+    actual = pytlz.create_path(strings)
+    assert actual == expected
+
+    actual = pytlz.create_path(*strings)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(

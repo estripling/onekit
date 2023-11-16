@@ -1,8 +1,10 @@
 """Python toolz."""
 
 import datetime as dt
+import functools
 import inspect
 import math
+import os
 import random
 from typing import (
     Any,
@@ -28,6 +30,7 @@ __all__ = (
     "collatz",
     "concat_strings",
     "contrast_sets",
+    "create_path",
     "date_to_str",
     "extend_range",
     "fibonacci",
@@ -360,6 +363,21 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     output["report"] = "\n".join(lines)
 
     return output
+
+
+def create_path(*strings: Sequence[str]) -> str:
+    """Create path by concatenating strings.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.create_path("path", "to", "file")
+    'path/to/file'
+
+    >>> pytlz.create_path(["hdfs://", "path", "to", "file"])
+    'hdfs://path/to/file'
+    """
+    return functools.reduce(os.path.join, flatten(strings))
 
 
 def date_to_str(d: dt.date, /) -> str:
