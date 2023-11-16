@@ -597,7 +597,7 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
 
 
 def source_code(x: object, /) -> str:
-    """Get source code of an object.
+    """Get source code of an object :math:`x`.
 
     Examples
     --------
