@@ -26,6 +26,7 @@ __all__ = (
     "check_random_state",
     "coinflip",
     "collatz",
+    "concat_strings",
     "contrast_sets",
     "date_to_str",
     "extend_range",
@@ -228,6 +229,27 @@ def collatz(n: int, /) -> Generator:
 
         # update
         n = n // 2 if iseven(n) else 3 * n + 1
+
+
+def concat_strings(sep: str, /, *strings: Sequence[str]) -> str:
+    """Concatenate strings.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> pytlz.concat_strings(" ", "Hello", "World")
+    'Hello World'
+    >>> pytlz.concat_strings(" ", ["Hello", "World"])
+    'Hello World'
+
+    >>> plus_concat = partial(pytlz.concat_strings, " + ")
+    >>> plus_concat("Hello", "World")
+    'Hello + World'
+    >>> plus_concat(["Hello", "World"])
+    'Hello + World'
+    """
+    return sep.join(toolz.pipe(strings, flatten, map(str)))
 
 
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:

@@ -77,6 +77,18 @@ def test_collatz(n, expected):
             tuple(pytlz.collatz(n))
 
 
+def test_concat_strings():
+    strings = ["Hello", "World"]
+    actual = pytlz.concat_strings(" ", strings)
+    expected = " ".join(strings)
+    assert actual == expected
+
+    plus_concat = functools.partial(pytlz.concat_strings, " + ")
+    actual = plus_concat(strings)
+    expected = " + ".join(strings)
+    assert actual == expected
+
+
 def test_contrast_sets():
     x = {"a", "c", "b", "g", "h"}
     y = {"c", "d", "e", "f", "g"}
