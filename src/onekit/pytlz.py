@@ -560,12 +560,12 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set
     {0, 1, 3}
 
     >>> # function is curried
-    >>> pytlz.reduce_sets(set.union)(x, y, z)
+    >>> pytlz.reduce_sets(set.union)(*sets)
     {0, 1, 2, 3, 4, 6, 8}
     >>> pytlz.reduce_sets(set.union)(sets)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> set_union = pytlz.reduce_sets(set.union)
-    >>> set_union(*sets)
+    >>> union_sets = pytlz.reduce_sets(set.union)
+    >>> union_sets(x, y, z)
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, map(set), reduce(func))
@@ -597,7 +597,7 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
 
 
 def source_code(x: object, /) -> str:
-    """Get source code of an object.
+    """Get source code of an object :math:`x`.
 
     Examples
     --------
