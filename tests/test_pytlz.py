@@ -10,32 +10,26 @@ from onekit import pytlz
 
 
 @pytest.mark.parametrize(
-    "x, expected",
+    "x, func, expected",
     [
-        (3, False),
-        (5, False),
-        (60, True),
-        (9, False),
+        (3, all, False),
+        (5, all, False),
+        (60, all, True),
+        (9, all, False),
+        (3, any, True),
+        (5, any, True),
+        (60, any, True),
+        (9, any, True),
+        (12, any, True),
+        (13, any, False),
     ],
 )
-def test_all_predicate_true(x, expected):
-    actual = pytlz.all_predicate_true([lambda x: x % 3 == 0, lambda x: x % 5 == 0])(x)
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
-    "x, expected",
-    [
-        (3, True),
-        (5, True),
-        (60, True),
-        (9, True),
-        (12, True),
-        (13, False),
-    ],
-)
-def test_any_predicate_true(x, expected):
-    actual = pytlz.any_predicate_true([lambda n: n % 3 == 0, lambda n: n % 5 == 0])(x)
+def test_are_predicates_true(x, func, expected):
+    predicates = [
+        lambda x: x % 3 == 0,
+        lambda x: x % 5 == 0,
+    ]
+    actual = pytlz.are_predicates_true(func, predicates)(x)
     assert actual == expected
 
 

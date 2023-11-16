@@ -22,8 +22,7 @@ from toolz.curried import (
 )
 
 __all__ = (
-    "all_predicate_true",
-    "any_predicate_true",
+    "are_predicates_true",
     "check_random_state",
     "coinflip",
     "collatz",
@@ -48,18 +47,31 @@ Predicate = Callable[[Any], bool]
 Seed = Optional[Union[int, random.Random]]
 
 
-def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
-    """Evaluate if every predicate is true.
+def are_predicates_true(
+    func: Callable[..., bool],
+    *predicates: Sequence[Predicate],
+) -> Predicate:
+    """Evaluate if predicates are true.
 
     A predicate is of the form :math:`P\\colon X \\rightarrow \\{False, True\\}`
 
     Examples
     --------
     >>> from onekit import pytlz
-    >>> pytlz.all_predicate_true(lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
+    >>> pytlz.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
     True
 
-    >>> is_divisible_by_3_and_5 = pytlz.all_predicate_true(
+    >>> pytlz.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
+    False
+
+    >>> pytlz.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
+    True
+
+    >>> pytlz.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(13)
+    False
+
+    >>> is_divisible_by_3_and_5 = pytlz.are_predicates_true(
+    ...     all,
     ...     pytlz.isdivisibleby(3),
     ...     pytlz.isdivisibleby(5),
     ... )
@@ -69,27 +81,9 @@ def all_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
     True
     >>> is_divisible_by_3_and_5(9)
     False
-    """
 
-    def inner(x: Any, /) -> bool:
-        """Evaluate all specified predicates :math:`P_i` for value :math:`x \\in X`."""
-        return all(predicate(x) for predicate in flatten(predicates))
-
-    return inner
-
-
-def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
-    """Evaluate if any predicate is true.
-
-    A predicate is of the form :math:`P\\colon X \\rightarrow \\{False, True\\}`
-
-    Examples
-    --------
-    >>> from onekit import pytlz
-    >>> pytlz.any_predicate_true(lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
-    True
-
-    >>> is_divisible_by_3_or_5 = pytlz.any_predicate_true(
+    >>> is_divisible_by_3_or_5 = pytlz.are_predicates_true(
+    ...     any,
     ...     pytlz.isdivisibleby(3),
     ...     pytlz.isdivisibleby(5),
     ... )
@@ -105,7 +99,7 @@ def any_predicate_true(*predicates: Sequence[Predicate]) -> Predicate:
 
     def inner(x: Any, /) -> bool:
         """Evaluate all specified predicates :math:`P_i` for value :math:`x \\in X`."""
-        return any(predicate(x) for predicate in flatten(predicates))
+        return func(predicate(x) for predicate in flatten(predicates))
 
     return inner
 
