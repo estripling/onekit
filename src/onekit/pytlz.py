@@ -1065,29 +1065,29 @@ def remove_punctuation(text: str, /) -> str:
 
 
 @toolz.curry
-def relative_date(n: int, d0: dt.date, /) -> dt.date:
-    """Compute relative date.
+def relative_date(d0: dt.date, /, n: int) -> dt.date:
+    """Compute date :math:`n \\in \\mathbb{Z}` days from reference date :math:`d_{0}`.
 
     Examples
     --------
     >>> import datetime as dt
     >>> from onekit import pytlz
     >>> d0 = dt.date(2022, 1, 1)
-    >>> pytlz.relative_date(0, d0)
-    datetime.date(2022, 1, 1)
-
-    >>> pytlz.relative_date(1, d0)
-    datetime.date(2022, 1, 2)
 
     >>> # function is curried
-    >>> pytlz.relative_date(2)(d0)
+    >>> today_ds = pytlz.relative_date(d0)
+    >>> today_ds(n=0)
+    datetime.date(2022, 1, 1)
+    >>> today_ds(1)
+    datetime.date(2022, 1, 2)
+    >>> today_ds(2)
     datetime.date(2022, 1, 3)
 
-    >>> lead3 = pytlz.relative_date(3)
+    >>> lead3 = pytlz.relative_date(n=3)
     >>> lead3(d0)
     datetime.date(2022, 1, 4)
 
-    >>> lag3 = pytlz.relative_date(-4)
+    >>> lag3 = pytlz.relative_date(n=-4)
     >>> lag3(d0)
     datetime.date(2021, 12, 28)
     """

@@ -588,7 +588,7 @@ def test_remove_punctuation(text: str, expected: str):
     ],
 )
 def test_relative_date(n: int, d0: dt.date, expected: dt.date):
-    actual = pytlz.relative_date(n, d0)
+    actual = pytlz.relative_date(d0, n)
     assert actual == expected
 
     days = pytlz.daterange(d0, actual, incl_start=True, incl_end=True)
