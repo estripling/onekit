@@ -3,17 +3,20 @@ import functools
 import math
 import os
 import random
+import re
+import time
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
     Optional,
     Tuple,
+    Union,
 )
 
 import pytest
 import toolz
-from toolz.curried import map
+from toolz import curried
 
 from onekit import pytlz
 
@@ -199,6 +202,60 @@ def test_date_to_str(d, expected):
 
 
 @pytest.mark.parametrize(
+    "start, end, expected",
+    [
+        (
+            dt.date(2022, 1, 1),
+            dt.date(2022, 1, 5),
+            (
+                dt.date(2022, 1, 1),
+                dt.date(2022, 1, 2),
+                dt.date(2022, 1, 3),
+                dt.date(2022, 1, 4),
+                dt.date(2022, 1, 5),
+            ),
+        ),
+        (
+            dt.date(2022, 1, 5),
+            dt.date(2022, 1, 1),
+            (
+                dt.date(2022, 1, 1),
+                dt.date(2022, 1, 2),
+                dt.date(2022, 1, 3),
+                dt.date(2022, 1, 4),
+                dt.date(2022, 1, 5),
+            ),
+        ),
+        (dt.date(2022, 1, 1), dt.date(2022, 1, 1), (dt.date(2022, 1, 1),)),
+    ],
+)
+def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
+    actual = tuple(pytlz.daterange(start, end))
+    assert actual == expected
+
+    actual = tuple(pytlz.daterange(start, end, incl_start=False))
+    assert actual == expected[1:]
+
+    actual = tuple(pytlz.daterange(start, end, incl_end=False))
+    assert actual == expected[:-1]
+
+    actual = tuple(pytlz.daterange(start, end, incl_start=False, incl_end=False))
+    assert actual == expected[1:-1]
+
+
+def test_daycount():
+    start = dt.date(2022, 1, 1)
+
+    actual = toolz.pipe(pytlz.daycount(start, forward=True), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
+    assert actual == expected
+
+    actual = toolz.pipe(pytlz.daycount(start, forward=False), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
     "xmin, xmax, factor, expected",
     [
         (0, 1, -0.1, None),
@@ -298,6 +355,46 @@ def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str)
     assert actual == expected
 
 
+@pytest.mark.parametrize(
+    "seconds, expected",
+    [
+        (-2.0, None),
+        (-1, None),
+        (0, "0s"),
+        (1, "1s"),
+        (59, "59s"),
+        (59.0, "59s"),
+        (60, "1m"),
+        (60.1, "1m"),
+        (61, "1m 1s"),
+        (61.1, "1m 1s"),
+        (120, "2m"),
+        (120.1, "2m"),
+        (60 * 60, "1h"),
+        (60 * 60 + 1, "1h 1s"),
+        (60 * 60 * 24, "1d"),
+        (60 * 60 * 24 + 1, "1d 1s"),
+        (110.0, "1m 50s"),
+        (0.4142135623730951, "0.414214s"),
+        (0.5, "0.5s"),
+        (1.4142135623730951, "1.41421s"),
+        (1.5, "1.5s"),
+        (2.4142135623730951, "2.41421s"),
+        (59.4142135623730951, "59.4142s"),
+        (60.4142135623730951, "1m"),
+        (60.5142135623730951, "1m 1s"),
+        (60 * 60 * 24 + 123456, "2d 10h 17m 36s"),
+    ],
+)
+def test_humantime(seconds: Union[int, float], expected: Optional[str]):
+    if seconds >= 0:
+        actual = pytlz.humantime(seconds)
+        assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            pytlz.humantime(seconds)
+
+
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_isdivisibleby(x):
     actual = pytlz.isdivisibleby(2, x)
@@ -320,6 +417,38 @@ def test_isodd(x):
     assert actual == expected
 
 
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 1, 1), dt.date(2022, 1, 31)),
+        (dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (dt.date(2022, 3, 1), dt.date(2022, 3, 31)),
+        (dt.date(2022, 4, 1), dt.date(2022, 4, 30)),
+        (dt.date(2022, 5, 1), dt.date(2022, 5, 31)),
+        (dt.date(2022, 6, 1), dt.date(2022, 6, 30)),
+        (dt.date(2022, 7, 1), dt.date(2022, 7, 31)),
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (dt.date(2022, 9, 1), dt.date(2022, 9, 30)),
+        (dt.date(2022, 10, 1), dt.date(2022, 10, 31)),
+        (dt.date(2022, 11, 1), dt.date(2022, 11, 30)),
+        (dt.date(2022, 12, 1), dt.date(2022, 12, 31)),
+        (dt.date(1970, 1, 1), dt.date(1970, 1, 31)),
+        (dt.date(1970, 1, 15), dt.date(1970, 1, 31)),
+        (dt.date(1970, 1, 31), dt.date(1970, 1, 31)),
+        (dt.date(2020, 2, 2), dt.date(2020, 2, 29)),
+        (dt.date(2022, 2, 3), dt.date(2022, 2, 28)),
+        (dt.date(2000, 2, 4), dt.date(2000, 2, 29)),
+        (dt.date(1900, 2, 5), dt.date(1900, 2, 28)),
+        (dt.date(2012, 2, 27), dt.date(2012, 2, 29)),
+        (dt.date(2012, 2, 28), dt.date(2012, 2, 29)),
+        (dt.date(2012, 2, 29), dt.date(2012, 2, 29)),
+    ],
+)
+def test_last_date_of_month(d: dt.date, expected: dt.date):
+    actual = pytlz.last_date_of_month(d.year, d.month)
+    assert actual == expected
+
+
 def test_lazy_read_lines():
     expected = ("one", "two", "three")
 
@@ -329,7 +458,7 @@ def test_lazy_read_lines():
         with path.open("w") as fh:
             fh.write(pytlz.concat_strings(os.linesep, expected))
 
-        actual = toolz.pipe(pytlz.lazy_read_lines(path), map(str.rstrip), tuple)
+        actual = toolz.pipe(pytlz.lazy_read_lines(path), curried.map(str.rstrip), tuple)
         assert actual == expected
 
         for i, line in enumerate(pytlz.lazy_read_lines(str(path))):
@@ -338,6 +467,20 @@ def test_lazy_read_lines():
 
         with pytest.raises(FileNotFoundError):
             tuple(pytlz.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
+
+
+@pytest.mark.parametrize(
+    "d1, d2, expected",
+    [
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 1), 1),
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 7), 7),
+        (dt.date(2022, 8, 7), dt.date(2022, 8, 1), 7),
+        (dt.date(2014, 1, 1), dt.date(2016, 5, 6), 857),
+    ],
+)
+def test_n_days(d1: dt.date, d2: dt.date, expected: int):
+    actual = pytlz.n_days(d1, d2)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -425,6 +568,36 @@ def test_remove_punctuation(text: str, expected: str):
 
 
 @pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2022, 1, 2)),
+        (-1, dt.date(2022, 1, 1), dt.date(2021, 12, 31)),
+        (2, dt.date(2022, 1, 1), dt.date(2022, 1, 3)),
+        (-2, dt.date(2022, 1, 1), dt.date(2021, 12, 30)),
+        (3, dt.date(2022, 1, 1), dt.date(2022, 1, 4)),
+        (-3, dt.date(2022, 1, 1), dt.date(2021, 12, 29)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 8, 8)),
+        (-7, dt.date(2022, 8, 8), dt.date(2022, 8, 1)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 3, 1)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 2, 28)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 2, 29)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
+    ],
+)
+def test_relative_date(n: int, d0: dt.date, expected: dt.date):
+    actual = pytlz.relative_date(n, d0)
+    assert actual == expected
+
+    days = pytlz.daterange(d0, actual, incl_start=True, incl_end=True)
+    num_days = curried.count(days)
+    num_days_expected = abs(n) + 1
+    assert num_days == num_days_expected
+
+
+@pytest.mark.parametrize(
     "x, n, expected",
     [
         (math.inf, 3, math.inf),
@@ -501,7 +674,11 @@ class TestPromptYesNo:
         ],
     )
     def test_normal_usage(
-        self, monkeypatch, default: Optional[str], answer: str, expected: bool
+        self,
+        monkeypatch,
+        default: Optional[str],
+        answer: str,
+        expected: bool,
     ):
         monkeypatch.setattr("sys.stdin", StringIO(answer))
         actual = pytlz.prompt_yes_no("Do you like onekit?", default=default)
@@ -522,7 +699,7 @@ class TestRegexFunctions:
     def test_filter_regex(self, zen_of_python: Tuple[str]):
         actual = list(pytlz.filter_regex("python", zen_of_python))
         expected = ["The Zen of Python, by Tim Peters"]
-        assert actual == expected, "filter_python_regex fails"
+        assert actual == expected
 
         filter_regex__better = functools.partial(pytlz.filter_regex, "better")
         actual = list(filter_regex__better(*zen_of_python))
@@ -536,7 +713,7 @@ class TestRegexFunctions:
             "Now is better than never.",
             "Although never is often better than *right* now.",
         ]
-        assert actual == expected, "filter_better_regex fails"
+        assert actual == expected
 
     def test_map_regex(self, zen_of_python: Tuple[str]):
         actual = list(pytlz.map_regex("python", zen_of_python))
@@ -578,3 +755,394 @@ class TestRegexFunctions:
             "If the implementation is easy to explain, it may be a good idea.",
             "Namespaces are one honking great idea -- let's do more of those!",
         )
+
+
+class TestStopwatch:
+    def test_context_manager__default_call(
+        self,
+        slumber,
+        regex_default_message,
+        capsys,
+    ):
+        with pytlz.stopwatch():
+            slumber()
+
+        actual = capsys.readouterr().out
+        expected = regex_default_message
+        assert re.search(expected, actual) is not None
+
+    def test_context_manager__instance(self, slumber, regex_default_message):
+        with pytlz.stopwatch() as sw:
+            slumber()
+
+        actual = str(sw)
+        expected = regex_default_message
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize("label", [None, "lbl", 1])
+    def test_context_manager__label(
+        self,
+        slumber,
+        regex_default_message,
+        label,
+    ):
+        with pytlz.stopwatch(label) as sw:
+            slumber()
+
+        actual = str(sw)
+        expected = (
+            regex_default_message
+            if label is None
+            else regex_default_message.replace("$", f" - {label}$")
+        )
+        assert re.search(expected, actual) is not None
+        assert sw.label is None if label is None else sw.label == label
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.label = label
+
+        with pytest.raises(
+            TypeError,
+            match=r"got some positional-only arguments passed as keyword arguments",
+        ):
+            with pytlz.stopwatch(label=label) as sw:
+                slumber()
+
+    @pytest.mark.parametrize("flush", [True, False])
+    def test_context_manager__flush(self, slumber, regex_default_message, flush):
+        with pytlz.stopwatch(flush=flush) as sw:
+            slumber()
+
+        actual = str(sw)
+        expected = regex_default_message
+        assert re.search(expected, actual) is not None
+        assert sw.flush == flush
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.flush = flush
+
+    @pytest.mark.parametrize(
+        "case,fmt",
+        [
+            (1, None),
+            (2, "%Y-%m-%d %H:%M:%S"),
+            (3, "%H:%M:%S"),
+            (4, "%A, %d %B %Y %H:%M:%S"),
+        ],
+    )
+    def test_context_manager__fmt(
+        self,
+        slumber,
+        regex_default_message,
+        case,
+        fmt,
+        default_fmt="%Y-%m-%d %H:%M:%S",
+    ):
+        with pytlz.stopwatch(fmt=fmt) as sw:
+            slumber()
+
+        actual = str(sw)
+        expected = (
+            regex_default_message
+            if case in (1, 2)
+            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+            if case == 3
+            else self.create_regex_for_message(
+                r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+            )
+            if case == 4
+            else None
+        )
+        assert re.search(expected, actual) is not None
+        assert sw.fmt == default_fmt if fmt is None else sw.fmt == fmt
+
+        # change timestamp format but not data
+        sw.fmt = default_fmt
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.start_time = dt.datetime.now()
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.stop_time = dt.datetime.now()
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.elapsed_time = dt.timedelta(days=42)
+
+        actual = str(sw)
+        expected = regex_default_message
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize("label", [None, "lbl"])
+    @pytest.mark.parametrize("flush", [True, False])
+    @pytest.mark.parametrize(
+        "case,fmt", [(1, None), (2, "%Y-%m-%d %H:%M:%S"), (3, "%H:%M:%S")]
+    )
+    def test_context_manager__many_param(
+        self,
+        slumber,
+        regex_default_message,
+        label,
+        flush,
+        case,
+        fmt,
+        default_fmt="%Y-%m-%d %H:%M:%S",
+    ):
+        with pytlz.stopwatch(label, flush=flush, fmt=fmt) as sw:
+            slumber()
+
+        actual = str(sw)
+        expected_message = (
+            regex_default_message
+            if case in (1, 2)
+            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+            if case == 3
+            else None
+        )
+        expected = (
+            expected_message
+            if label is None
+            else expected_message.replace("$", f" - {label}$")
+        )
+        assert re.search(expected, actual) is not None
+        assert sw.label == label
+        assert sw.flush == flush
+        assert sw.fmt == default_fmt if fmt is None else sw.fmt == fmt
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.label = label
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.flush = flush
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.start_time = dt.datetime.now()
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.stop_time = dt.datetime.now()
+
+        with pytest.raises(AttributeError, match=r"can't set attribute"):
+            sw.elapsed_time = dt.timedelta(days=42)
+
+    def test_context_manager__total_elapsed_time(self, slumber, regex_default_message):
+        with pytlz.stopwatch(1) as sw1:
+            slumber()
+
+        with pytlz.stopwatch(2) as sw2:
+            slumber()
+
+        with pytlz.stopwatch(3) as sw3:
+            slumber()
+
+        for i, sw in enumerate([sw1, sw2, sw3]):
+            label = str(i + 1)
+            actual = str(sw)
+            expected = regex_default_message.replace("$", f" - {label}$")
+            assert re.search(expected, actual) is not None
+
+        additions = [
+            (1, sum([sw1])),
+            (2, sw1 + sw2),
+            (3, sum([sw2], start=sw1)),
+            (4, sum([sw1, sw2])),
+            (5, sw1 + sw2 + sw3),
+            (6, sum([sw2, sw3], start=sw1)),
+            (7, sum([sw1, sw2, sw3])),
+        ]
+        for case, total in additions:
+            actual = str(total)
+            num_stopwatches = 1 if case == 1 else 2 if 2 <= case <= 4 else 3
+            expected = rf"^0\.0{num_stopwatches}(\d*)?s - total elapsed time$"
+            assert re.search(expected, actual) is not None
+
+    def test_decorator__default_call(self, slumber, regex_default_message, capsys):
+        @pytlz.stopwatch()
+        def func():
+            slumber()
+
+        func()
+
+        actual = capsys.readouterr().out
+        expected = regex_default_message.replace("$", f" - {func.__name__}$")
+        assert re.search(expected, actual) is not None
+
+    def test_decorator__label(
+        self,
+        slumber,
+        regex_default_message,
+        capsys,
+        label="lbl",
+    ):
+        @pytlz.stopwatch(label)
+        def func():
+            slumber()
+
+        func()
+
+        actual = capsys.readouterr().out
+        expected = regex_default_message.replace("$", f" - {label}$")
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize("flush", [True, False])
+    def test_decorator__flush(self, slumber, regex_default_message, flush, capsys):
+        @pytlz.stopwatch(flush=flush)
+        def func():
+            slumber()
+
+        func()
+
+        actual = capsys.readouterr().out
+        expected = regex_default_message.replace("$", f" - {func.__name__}$")
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize(
+        "case,fmt",
+        [
+            (1, None),
+            (2, "%Y-%m-%d %H:%M:%S"),
+            (3, "%H:%M:%S"),
+            (4, "%A, %d %B %Y %H:%M:%S"),
+        ],
+    )
+    def test_decorator__fmt(
+        self,
+        slumber,
+        regex_default_message,
+        case,
+        fmt,
+        capsys,
+    ):
+        @pytlz.stopwatch(fmt=fmt)
+        def func():
+            slumber()
+
+        func()
+
+        actual = capsys.readouterr().out
+        expected_message = (
+            regex_default_message
+            if case in [1, 2]
+            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+            if case == 3
+            else self.create_regex_for_message(
+                r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+            )
+            if case == 4
+            else None
+        )
+        expected = expected_message.replace("$", f" - {func.__name__}$")
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize("label", [None, "lbl"])
+    @pytest.mark.parametrize("flush", [True, False])
+    @pytest.mark.parametrize(
+        "case,fmt", [(1, None), (2, "%Y-%m-%d %H:%M:%S"), (3, "%H:%M:%S")]
+    )
+    def test_decorator__many_param(
+        self,
+        slumber,
+        regex_default_message,
+        label,
+        flush,
+        case,
+        fmt,
+        capsys,
+    ):
+        @pytlz.stopwatch(label, fmt=fmt, flush=flush)
+        def func():
+            slumber()
+
+        func()
+
+        actual = capsys.readouterr().out
+        expected_message = (
+            regex_default_message
+            if case in (1, 2)
+            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+            if case == 3
+            else None
+        )
+        expected = (
+            expected_message.replace("$", f" - {func.__name__}$")
+            if label is None
+            else expected_message.replace("$", f" - {label}$")
+        )
+        assert re.search(expected, actual) is not None
+
+    @pytest.mark.parametrize("label", [True, 0.0, set(), [2]])
+    def test_raises_type_error__label(self, slumber, label):
+        with pytest.raises(
+            TypeError,
+            match=r"label=.* - must be str, int, or NoneType",
+        ):
+            with pytlz.stopwatch(label):
+                slumber()
+
+    @pytest.mark.parametrize("flush", [None, 0, 1.0, set(), [2]])
+    def test_raises_type_error__flush(self, slumber, flush):
+        with pytest.raises(TypeError, match=r"flush=.* - must be bool"):
+            with pytlz.stopwatch(flush=flush):
+                slumber()
+
+    @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
+    def test_raises_type_error__fmt(self, slumber, fmt):
+        with pytest.raises(TypeError, match=r"fmt=.* - must be str or NoneType"):
+            with pytlz.stopwatch(fmt=fmt):
+                slumber()
+
+    @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
+    def test_raises_type_error__fmt_setter(self, slumber, fmt):
+        with pytlz.stopwatch() as sw:
+            slumber()
+
+        with pytest.raises(TypeError, match=r"value=.* - `fmt` must be str"):
+            sw.fmt = fmt
+
+    @pytest.fixture(scope="class")
+    def slumber(self):
+        def _():
+            time.sleep(0.01)
+
+        return _
+
+    @pytest.fixture(scope="class")
+    def regex_default_message(self, regex_default_fmt):
+        """Regex: default output message."""
+        return self.create_regex_for_message(regex_default_fmt)
+
+    @pytest.fixture(scope="class")
+    def regex_default_fmt(self):
+        """Regex: default timestamp format."""
+        return r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+
+    @staticmethod
+    def create_regex_for_message(regex_fmt):
+        return rf"^{regex_fmt} -> {regex_fmt} = 0\.01(\d*)?s$"
+
+
+@pytest.mark.parametrize(
+    "string, expected",
+    [
+        ("2022-01-01", dt.date(2022, 1, 1)),
+        ("2022-01-31", dt.date(2022, 1, 31)),
+    ],
+)
+def test_str_to_date(string: str, expected: dt.date):
+    actual = pytlz.str_to_date(string)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 8, 1), "Mon"),
+        (dt.date(2022, 8, 2), "Tue"),
+        (dt.date(2022, 8, 3), "Wed"),
+        (dt.date(2022, 8, 4), "Thu"),
+        (dt.date(2022, 8, 5), "Fri"),
+        (dt.date(2022, 8, 6), "Sat"),
+        (dt.date(2022, 8, 7), "Sun"),
+    ],
+)
+def test_weekday(d: dt.date, expected: str):
+    actual = pytlz.weekday(d)
+    assert actual == expected
