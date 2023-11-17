@@ -1,6 +1,7 @@
 """Python toolz."""
 
 import datetime as dt
+import distutils
 import functools
 import inspect
 import itertools
@@ -49,6 +50,7 @@ __all__ = (
     "lazy_read_lines",
     "map_regex",
     "num_to_str",
+    "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
     "signif",
@@ -718,6 +720,55 @@ def num_to_str(x: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{x:_}"
+
+
+def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
+    """Prompt yes-no question.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.prompt_yes_no("Is all clear?")  # doctest: +SKIP
+    Is all clear? [y/n] y<enter>
+    True
+
+    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    Do you like onekit? [Y/n] <enter>
+    True
+
+    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    Do you like onekit? [Y/n] yay<enter>
+    Do you like onekit? Please respond with 'yes' [Y] or 'no' [n] <enter>
+    True
+    """
+    prompt = (
+        "[y/n]"
+        if default is None
+        else "[Y/n]"
+        if default == "yes"
+        else "[y/N]"
+        if default == "no"
+        else "invalid"
+    )
+
+    if prompt == "invalid":
+        raise ValueError(f"{default=} - must be either None, 'yes', or 'no'")
+
+    answer = input(f"{question} {prompt} ").lower()
+
+    while True:
+        try:
+            if answer == "" and default in ["yes", "no"]:
+                return bool(distutils.util.strtobool(default))
+            return bool(distutils.util.strtobool(answer))
+
+        except ValueError:
+            response_text = "{} Please respond with 'yes' [{}] or 'no' [{}] ".format(
+                question,
+                "Y" if default == "yes" else "y",
+                "N" if default == "no" else "n",
+            )
+            answer = input(response_text).lower()
 
 
 @toolz.curry

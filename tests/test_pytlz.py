@@ -3,9 +3,13 @@ import functools
 import math
 import os
 import random
+from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Tuple
+from typing import (
+    Optional,
+    Tuple,
+)
 
 import pytest
 import toolz
@@ -456,6 +460,38 @@ def test_source_code():
     actual = pytlz.source_code(greet)
     expected = '    def greet():\n        return "Hello, World!"\n'
     assert actual == expected
+
+
+class TestPromptYesNo:
+    @pytest.mark.parametrize(
+        "default, answer, expected",
+        [
+            (None, "yes", True),
+            (None, "no", False),
+            ("yes", "yes", True),
+            ("yes", "no", False),
+            ("no", "yes", True),
+            ("no", "no", False),
+            ("yes", "\n", True),
+            ("no", "\n", False),
+        ],
+    )
+    def test_normal_usage(
+        self, monkeypatch, default: Optional[str], answer: str, expected: bool
+    ):
+        monkeypatch.setattr("sys.stdin", StringIO(answer))
+        actual = pytlz.prompt_yes_no("Do you like onekit?", default=default)
+        assert actual == expected
+
+    @pytest.mark.parametrize("default", [1, "noo", "yeah"])
+    def test_invalid_default_value(self, default):
+        with pytest.raises(ValueError):
+            pytlz.prompt_yes_no("Do you like onekit?", default=default)
+
+    def test_subsequent_prompt(self, monkeypatch):
+        monkeypatch.setattr("sys.stdin", StringIO("yay"))
+        with pytest.raises(EOFError):
+            pytlz.prompt_yes_no("Do you like onekit?", default="yes")
 
 
 class TestRegexFunctions:
