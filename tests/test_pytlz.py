@@ -3,6 +3,7 @@ import functools
 import math
 import os
 import random
+from typing import Tuple
 
 import pytest
 import toolz
@@ -367,3 +368,49 @@ def test_source_code():
     actual = pytlz.source_code(greet)
     expected = '    def greet():\n        return "Hello, World!"\n'
     assert actual == expected
+
+
+class TestRegexFunctions:
+    def test_filter_regex(self, zen_of_python: Tuple[str]):
+        actual = list(pytlz.filter_regex("python", zen_of_python))
+        expected = ["The Zen of Python, by Tim Peters"]
+        assert actual == expected, "filter_python_regex fails"
+
+        filter_regex__better = functools.partial(pytlz.filter_regex, "better")
+        actual = list(filter_regex__better(*zen_of_python))
+        expected = [
+            "Beautiful is better than ugly.",
+            "Explicit is better than implicit.",
+            "Simple is better than complex.",
+            "Complex is better than complicated.",
+            "Flat is better than nested.",
+            "Sparse is better than dense.",
+            "Now is better than never.",
+            "Although never is often better than *right* now.",
+        ]
+        assert actual == expected, "filter_better_regex fails"
+
+    @pytest.fixture(scope="class")
+    def zen_of_python(self) -> Tuple[str]:
+        return (
+            "The Zen of Python, by Tim Peters",
+            "Beautiful is better than ugly.",
+            "Explicit is better than implicit.",
+            "Simple is better than complex.",
+            "Complex is better than complicated.",
+            "Flat is better than nested.",
+            "Sparse is better than dense.",
+            "Readability counts.",
+            "Special cases aren't special enough to break the rules.",
+            "Although practicality beats purity.",
+            "Errors should never pass silently.",
+            "Unless explicitly silenced.",
+            "In the face of ambiguity, refuse the temptation to guess.",
+            "There should be one--and preferably only one--obvious way to do it.",
+            "Although that way may not be obvious at first unless you're Dutch.",
+            "Now is better than never.",
+            "Although never is often better than *right* now.",
+            "If the implementation is hard to explain, it's a bad idea.",
+            "If the implementation is easy to explain, it may be a good idea.",
+            "Namespaces are one honking great idea -- let's do more of those!",
+        )

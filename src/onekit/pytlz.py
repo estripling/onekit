@@ -6,10 +6,12 @@ import inspect
 import math
 import os
 import random
+import re
 from typing import (
     Any,
     Callable,
     Generator,
+    Iterable,
     Iterator,
     Optional,
     Sequence,
@@ -35,6 +37,7 @@ __all__ = (
     "extend_range",
     "fibonacci",
     "flatten",
+    "filter_regex",
     "func_name",
     "isdivisibleby",
     "iseven",
@@ -459,6 +462,37 @@ def fibonacci() -> Generator:
         lag0 = lag2 + lag1
         yield lag0
         lag2, lag1 = lag1, lag0
+
+
+def filter_regex(
+    pattern: str,
+    /,
+    *strings: Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
+    """Filter iterable of strings with regex.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> list(pytlz.filter_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    ['Hello, World!', 'Hello!']
+
+    >>> strings = [
+    ...     "Guiding principles for Python's design: The Zen of Python",
+    ...     "Beautiful is better than ugly.",
+    ...     "Explicit is better than implicit.",
+    ...     "Simple is better than complex.",
+    ... ]
+    >>> list(pytlz.filter_regex("python", strings))
+    ["Guiding principles for Python's design: The Zen of Python"]
+
+    >>> filter_regex__hi = partial(pytlz.filter_regex, "hi")
+    >>> list(filter_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
+    ['Hi, there!']
+    """
+    return filter(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
 def flatten(*items: Sequence[Any]) -> Generator:
