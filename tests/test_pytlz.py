@@ -18,6 +18,30 @@ from toolz.curried import map
 from onekit import pytlz
 
 
+@pytest.mark.parametrize("kind", ["zip", "gztar"])
+def test_archive_files(kind):
+    with TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir).joinpath("test_file_for_archive_files.txt")
+        glue_strings = functools.partial(pytlz.concat_strings, "")
+
+        with path.open("w") as fh:
+            fh.write(glue_strings("Hello, World!", os.linesep))
+
+        dir_path = Path(tmpdir).joinpath("test_directory_for_archive_files/")
+        os.makedirs(dir_path)
+        path2 = Path(dir_path).joinpath("test_file_for_archive_files2.txt")
+
+        with path2.open("w") as fh:
+            fh.write(glue_strings("Hello, Again!", os.linesep))
+
+        pytlz.archive_files(tmpdir, name="archive", kind=kind)
+
+    if kind == "gztar":
+        kind = "tar.gz"
+
+    os.remove(f"archive.{kind}")
+
+
 @pytest.mark.parametrize(
     "x, func, expected",
     [

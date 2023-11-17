@@ -9,13 +9,17 @@ import math
 import os
 import random
 import re
+import shutil
 import string
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Callable,
     Generator,
     Iterable,
     Iterator,
+    List,
     Optional,
     Sequence,
     Tuple,
@@ -29,6 +33,7 @@ from toolz.curried import (
 )
 
 __all__ = (
+    "archive_files",
     "are_predicates_true",
     "check_random_state",
     "coinflip",
@@ -61,6 +66,65 @@ __all__ = (
 Pair = Tuple[float, float]
 Predicate = Callable[[Any], bool]
 Seed = Optional[Union[int, random.Random]]
+
+
+def archive_files(
+    target: str,
+    /,
+    *,
+    wildcards: Optional[List[str]] = None,
+    name: Optional[str] = None,
+    kind: str = "zip",
+) -> None:
+    """Archive files in target directory.
+
+    Parameters
+    ----------
+    target : str
+        Specify the target directory to archive.
+    wildcards : None, list of str, default=None
+        Specify a wildcard to archive files. If ``wildcards`` is None,
+        all files in target directory are archived.
+    name : None, str, default=None
+        Optionally specify the name of the resulting archive.
+        If ``name`` is None, the name of the resulting archive is the name of the
+        target directory with timestamp.
+    kind : str, default="zip"
+        Specify the archive type. Value is passed to the ``format`` argument of
+        ``shutil.make_archive``, i.e., possible values are "zip", "tar",
+        "gztar", "bztar", "xztar", or any other registered format.
+
+    Returns
+    -------
+    NoneType
+        Function has no return value. However, the archive of files of
+        the target directory is stored in the current working directory.
+
+    Examples
+    --------
+    >>> # archive all Python files and Notebooks in current working directory
+    >>> from onekit import pytlz
+    >>> pytlz.archive_files("./", wildcards=["*.py", "*.ipynb"])  # doctest: +SKIP
+    """
+    target = Path(target).resolve()
+    wildcards = wildcards or ["**/*"]
+    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+    name = name or f"{timestamp}_{target.stem}"
+    makedir = functools.partial(os.makedirs, exist_ok=True)
+
+    with TemporaryDirectory() as tmpdir:
+        for wildcard in wildcards:
+            for src_file in target.rglob(wildcard):
+                if os.path.isdir(src_file):
+                    makedir(src_file)
+                    continue
+
+                dst_file = str(src_file).replace(str(target), tmpdir)
+                dst_dir = str(src_file.parent).replace(str(target), tmpdir)
+                makedir(dst_dir)
+                shutil.copy(str(src_file), dst_file)
+
+        shutil.make_archive(name, kind, tmpdir)
 
 
 def are_predicates_true(
