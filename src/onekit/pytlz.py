@@ -41,6 +41,7 @@ __all__ = (
     "contrast_sets",
     "create_path",
     "date_to_str",
+    "daterange",
     "daycount",
     "extend_range",
     "fibonacci",
@@ -472,6 +473,64 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+def daterange(
+    start: dt.date,
+    end: dt.date,
+    /,
+    *,
+    incl_start: bool = True,
+    incl_end: bool = True,
+) -> Generator:
+    """Generate sequence of consecutive dates between two dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> from onekit import pytlz
+    >>> d1 = dt.date(2022, 1, 1)
+    >>> d2 = dt.date(2022, 1, 3)
+
+    >>> curried.pipe(pytlz.daterange(d1, d2), curried.map(pytlz.date_to_str), list)
+    ['2022-01-01', '2022-01-02', '2022-01-03']
+
+    >>> curried.pipe(
+    ...     pytlz.daterange(d1, d2, incl_start=False, incl_end=True),
+    ...     curried.map(pytlz.date_to_str),
+    ...     list,
+    ... )
+    ['2022-01-02', '2022-01-03']
+
+    >>> curried.pipe(
+    ...     pytlz.daterange(d1, d2, incl_start=True, incl_end=False),
+    ...     curried.map(pytlz.date_to_str),
+    ...     list,
+    ... )
+    ['2022-01-01', '2022-01-02']
+
+    >>> curried.pipe(
+    ...     pytlz.daterange(d1, d2, incl_start=False, incl_end=False),
+    ...     curried.map(pytlz.date_to_str),
+    ...     list,
+    ... )
+    ['2022-01-02']
+
+    >>> list(pytlz.daterange(d1, dt.date(2022, 1, 1)))
+    [datetime.date(2022, 1, 1)]
+
+    >>> list(pytlz.daterange(d1, dt.date(2022, 1, 1), incl_start=False))
+    []
+
+    >>> # function makes sure: start <= end
+    >>> curried.pipe(pytlz.daterange(d2, d1), curried.map(pytlz.date_to_str), list)
+    ['2022-01-01', '2022-01-02', '2022-01-03']
+    """
+    start, end = sorted([start, end])
+    start = start if incl_start else start + dt.timedelta(1)
+    end = end if incl_end else end - dt.timedelta(1)
+    return itertools.takewhile(lambda d: d <= end, daycount(start, forward=True))
 
 
 def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
