@@ -3,12 +3,43 @@ import functools
 import math
 import os
 import random
-from typing import Tuple
+from io import StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import (
+    Optional,
+    Tuple,
+)
 
 import pytest
 import toolz
+from toolz.curried import map
 
 from onekit import pytlz
+
+
+@pytest.mark.parametrize("kind", ["zip", "gztar"])
+def test_archive_files(kind):
+    with TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir).joinpath("test_file_for_archive_files.txt")
+        glue_strings = functools.partial(pytlz.concat_strings, "")
+
+        with path.open("w") as fh:
+            fh.write(glue_strings("Hello, World!", os.linesep))
+
+        dir_path = Path(tmpdir).joinpath("test_directory_for_archive_files/")
+        os.makedirs(dir_path)
+        path2 = Path(dir_path).joinpath("test_file_for_archive_files2.txt")
+
+        with path2.open("w") as fh:
+            fh.write(glue_strings("Hello, Again!", os.linesep))
+
+        pytlz.archive_files(tmpdir, name="archive", kind=kind)
+
+    if kind == "gztar":
+        kind = "tar.gz"
+
+    os.remove(f"archive.{kind}")
 
 
 @pytest.mark.parametrize(
@@ -289,6 +320,26 @@ def test_isodd(x):
     assert actual == expected
 
 
+def test_lazy_read_lines():
+    expected = ("one", "two", "three")
+
+    with TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir).joinpath("test_file_for_lazy_read_lines.txt")
+
+        with path.open("w") as fh:
+            fh.write(pytlz.concat_strings(os.linesep, expected))
+
+        actual = toolz.pipe(pytlz.lazy_read_lines(path), map(str.rstrip), tuple)
+        assert actual == expected
+
+        for i, line in enumerate(pytlz.lazy_read_lines(str(path))):
+            actual = line.replace(os.linesep, "")
+            assert actual == expected[i]
+
+        with pytest.raises(FileNotFoundError):
+            tuple(pytlz.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
+
+
 @pytest.mark.parametrize(
     "n, expected",
     [
@@ -433,6 +484,38 @@ def test_source_code():
     actual = pytlz.source_code(greet)
     expected = '    def greet():\n        return "Hello, World!"\n'
     assert actual == expected
+
+
+class TestPromptYesNo:
+    @pytest.mark.parametrize(
+        "default, answer, expected",
+        [
+            (None, "yes", True),
+            (None, "no", False),
+            ("yes", "yes", True),
+            ("yes", "no", False),
+            ("no", "yes", True),
+            ("no", "no", False),
+            ("yes", "\n", True),
+            ("no", "\n", False),
+        ],
+    )
+    def test_normal_usage(
+        self, monkeypatch, default: Optional[str], answer: str, expected: bool
+    ):
+        monkeypatch.setattr("sys.stdin", StringIO(answer))
+        actual = pytlz.prompt_yes_no("Do you like onekit?", default=default)
+        assert actual == expected
+
+    @pytest.mark.parametrize("default", [1, "noo", "yeah"])
+    def test_invalid_default_value(self, default):
+        with pytest.raises(ValueError):
+            pytlz.prompt_yes_no("Do you like onekit?", default=default)
+
+    def test_subsequent_prompt(self, monkeypatch):
+        monkeypatch.setattr("sys.stdin", StringIO("yay"))
+        with pytest.raises(EOFError):
+            pytlz.prompt_yes_no("Do you like onekit?", default="yes")
 
 
 class TestRegexFunctions:

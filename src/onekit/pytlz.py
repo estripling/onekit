@@ -1,6 +1,7 @@
 """Python toolz."""
 
 import datetime as dt
+import distutils
 import functools
 import inspect
 import itertools
@@ -8,13 +9,17 @@ import math
 import os
 import random
 import re
+import shutil
 import string
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Callable,
     Generator,
     Iterable,
     Iterator,
+    List,
     Optional,
     Sequence,
     Tuple,
@@ -28,6 +33,7 @@ from toolz.curried import (
 )
 
 __all__ = (
+    "archive_files",
     "are_predicates_true",
     "check_random_state",
     "coinflip",
@@ -46,8 +52,10 @@ __all__ = (
     "isdivisibleby",
     "iseven",
     "isodd",
+    "lazy_read_lines",
     "map_regex",
     "num_to_str",
+    "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
     "signif",
@@ -58,6 +66,65 @@ __all__ = (
 Pair = Tuple[float, float]
 Predicate = Callable[[Any], bool]
 Seed = Optional[Union[int, random.Random]]
+
+
+def archive_files(
+    target: str,
+    /,
+    *,
+    wildcards: Optional[List[str]] = None,
+    name: Optional[str] = None,
+    kind: str = "zip",
+) -> None:
+    """Archive files in target directory.
+
+    Parameters
+    ----------
+    target : str
+        Specify the target directory to archive.
+    wildcards : None, list of str, default=None
+        Specify a wildcard to archive files. If ``wildcards`` is None,
+        all files in target directory are archived.
+    name : None, str, default=None
+        Optionally specify the name of the resulting archive.
+        If ``name`` is None, the name of the resulting archive is the name of the
+        target directory with timestamp.
+    kind : str, default="zip"
+        Specify the archive type. Value is passed to the ``format`` argument of
+        ``shutil.make_archive``, i.e., possible values are "zip", "tar",
+        "gztar", "bztar", "xztar", or any other registered format.
+
+    Returns
+    -------
+    NoneType
+        Function has no return value. However, the archive of files of
+        the target directory is stored in the current working directory.
+
+    Examples
+    --------
+    >>> # archive all Python files and Notebooks in current working directory
+    >>> from onekit import pytlz
+    >>> pytlz.archive_files("./", wildcards=["*.py", "*.ipynb"])  # doctest: +SKIP
+    """
+    target = Path(target).resolve()
+    wildcards = wildcards or ["**/*"]
+    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+    name = name or f"{timestamp}_{target.stem}"
+    makedir = functools.partial(os.makedirs, exist_ok=True)
+
+    with TemporaryDirectory() as tmpdir:
+        for wildcard in wildcards:
+            for src_file in target.rglob(wildcard):
+                if os.path.isdir(src_file):
+                    makedir(src_file)
+                    continue
+
+                dst_file = str(src_file).replace(str(target), tmpdir)
+                dst_dir = str(src_file.parent).replace(str(target), tmpdir)
+                makedir(dst_dir)
+                shutil.copy(str(src_file), dst_file)
+
+        shutil.make_archive(name, kind, tmpdir)
 
 
 def are_predicates_true(
@@ -643,6 +710,36 @@ def isodd(x: Union[int, float], /) -> bool:
     return toolz.complement(iseven)(x)
 
 
+def lazy_read_lines(
+    path: str,
+    /,
+    *,
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+    newline: Optional[str] = None,
+) -> Generator:
+    """Lazily read text file line by line.
+
+    Examples
+    --------
+    >>> import inspect
+    >>> from toolz import curried
+    >>> from onekit import pytlz
+    >>> inspect.isgeneratorfunction(pytlz.lazy_read_lines)
+    True
+
+    >>> text_lines = curried.pipe(  # doctest: +SKIP
+    ...     pytlz.lazy_read_lines("./my_text_file.txt"),
+    ...     curried.map(str.rstrip),
+    ... )
+    """
+    with open(
+        file=str(path), mode="r", encoding=encoding, errors=errors, newline=newline
+    ) as lines:
+        for line in lines:
+            yield line
+
+
 def map_regex(
     pattern: str,
     /,
@@ -687,6 +784,55 @@ def num_to_str(x: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{x:_}"
+
+
+def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
+    """Prompt yes-no question.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.prompt_yes_no("Is all clear?")  # doctest: +SKIP
+    Is all clear? [y/n] y<enter>
+    True
+
+    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    Do you like onekit? [Y/n] <enter>
+    True
+
+    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    Do you like onekit? [Y/n] yay<enter>
+    Do you like onekit? Please respond with 'yes' [Y] or 'no' [n] <enter>
+    True
+    """
+    prompt = (
+        "[y/n]"
+        if default is None
+        else "[Y/n]"
+        if default == "yes"
+        else "[y/N]"
+        if default == "no"
+        else "invalid"
+    )
+
+    if prompt == "invalid":
+        raise ValueError(f"{default=} - must be either None, 'yes', or 'no'")
+
+    answer = input(f"{question} {prompt} ").lower()
+
+    while True:
+        try:
+            if answer == "" and default in ["yes", "no"]:
+                return bool(distutils.util.strtobool(default))
+            return bool(distutils.util.strtobool(answer))
+
+        except ValueError:
+            response_text = "{} Please respond with 'yes' [{}] or 'no' [{}] ".format(
+                question,
+                "Y" if default == "yes" else "y",
+                "N" if default == "no" else "n",
+            )
+            answer = input(response_text).lower()
 
 
 @toolz.curry
