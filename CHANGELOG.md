@@ -2,6 +2,41 @@
 
 
 
+## v0.7.0 (2023-11-17)
+
+### Documentation
+
+* docs: update docstrings (#24)
+
+* docs(reduce_sets): update docstring example
+
+* docs(source_code): update docstring ([`1585554`](https://github.com/estripling/onekit/commit/15855544eb2b85abe55ff34908028e9c10d45a54))
+
+### Feature
+
+* feat: migrate bumbag string functions (#26)
+
+* feat(pytlz): add concat_strings
+
+* feat(pytlz): add create_path
+
+* feat(pytlz): add filter_regex
+
+* refactor: use iterable instead of sequence
+
+* feat(pytlz): add map_regex
+
+* feat(pytlz): add headline
+
+* feat(pytlz): add remove_punctuation
+
+* feat(pytlz): add highlight_string_differences ([`95b8e7d`](https://github.com/estripling/onekit/commit/95b8e7dc4b405c58b49a021fea26f2ac20a87f07))
+
+* feat(pytlz): add are_predicates_true (#25)
+
+- Apply DRY principle: replace all_predicates_true and any_predicates_true ([`de96017`](https://github.com/estripling/onekit/commit/de960173809febc8947b80e2a7735ae140574fd7))
+
+
 ## v0.6.0 (2023-11-15)
 
 ### Documentation
