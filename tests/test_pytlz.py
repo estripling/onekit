@@ -396,9 +396,10 @@ def test_humantime(seconds: Union[int, float], expected: Optional[str]):
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
-def test_isdivisibleby(x):
-    actual = pytlz.isdivisibleby(2, x)
-    expected = x % 2 == 0
+@pytest.mark.parametrize("n", [2, 5])
+def test_isdivisible(x: Union[int, float], n: int):
+    actual = pytlz.isdivisible(x, n)
+    expected = x % n == 0
     assert actual == expected
 
 
