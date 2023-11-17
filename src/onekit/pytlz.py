@@ -7,6 +7,7 @@ import math
 import os
 import random
 import re
+import string
 from typing import (
     Any,
     Callable,
@@ -46,6 +47,7 @@ __all__ = (
     "map_regex",
     "num_to_str",
     "reduce_sets",
+    "remove_punctuation",
     "signif",
     "source_code",
 )
@@ -682,6 +684,18 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, map(set), reduce(func))
+
+
+def remove_punctuation(text: str, /) -> str:
+    """Remove punctuation from text string.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.remove_punctuation("I think, therefore I am. --Descartes")
+    'I think therefore I am Descartes'
+    """
+    return text.translate(str.maketrans("", "", string.punctuation))
 
 
 def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
