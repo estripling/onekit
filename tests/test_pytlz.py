@@ -16,7 +16,7 @@ from typing import (
 
 import pytest
 import toolz
-from toolz.curried import map
+from toolz import curried
 
 from onekit import pytlz
 
@@ -372,7 +372,7 @@ def test_lazy_read_lines():
         with path.open("w") as fh:
             fh.write(pytlz.concat_strings(os.linesep, expected))
 
-        actual = toolz.pipe(pytlz.lazy_read_lines(path), map(str.rstrip), tuple)
+        actual = toolz.pipe(pytlz.lazy_read_lines(path), curried.map(str.rstrip), tuple)
         assert actual == expected
 
         for i, line in enumerate(pytlz.lazy_read_lines(str(path))):

@@ -28,10 +28,7 @@ from typing import (
 )
 
 import toolz
-from toolz.curried import (
-    map,
-    reduce,
-)
+from toolz import curried
 
 __all__ = (
     "archive_files",
@@ -334,7 +331,7 @@ def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
     >>> plus_concat(["Hello", "World"])
     'Hello + World'
     """
-    return sep.join(toolz.pipe(strings, flatten, map(str)))
+    return sep.join(toolz.pipe(strings, flatten, curried.map(str)))
 
 
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
@@ -797,7 +794,11 @@ def lazy_read_lines(
     ... )
     """
     with open(
-        file=str(path), mode="r", encoding=encoding, errors=errors, newline=newline
+        file=str(path),
+        mode="r",
+        encoding=encoding,
+        errors=errors,
+        newline=newline,
     ) as lines:
         for line in lines:
             yield line
@@ -925,7 +926,7 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set
     >>> union_sets(x, y, z)
     {0, 1, 2, 3, 4, 6, 8}
     """
-    return toolz.pipe(sets, flatten, map(set), reduce(func))
+    return toolz.pipe(sets, flatten, curried.map(set), curried.reduce(func))
 
 
 def remove_punctuation(text: str, /) -> str:
