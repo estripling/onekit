@@ -58,6 +58,7 @@ __all__ = (
     "last_date_of_month",
     "lazy_read_lines",
     "map_regex",
+    "n_days",
     "num_to_str",
     "prompt_yes_no",
     "reduce_sets",
@@ -933,6 +934,27 @@ def map_regex(
     [[], ['Hi'], []]
     """
     return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
+
+
+def n_days(d1: dt.date, d2: dt.date, /) -> int:
+    """Compute number of days between two dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from onekit import pytlz
+    >>> pytlz.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
+    1
+
+    >>> pytlz.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
+    7
+
+    >>> # function makes sure: start <= end
+    >>> pytlz.n_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
+    7
+    """
+    start, end = sorted([d1, d2])
+    return (end - start).days + 1
 
 
 def num_to_str(x: Union[int, float], /) -> str:

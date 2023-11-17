@@ -470,6 +470,20 @@ def test_lazy_read_lines():
 
 
 @pytest.mark.parametrize(
+    "d1, d2, expected",
+    [
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 1), 1),
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 7), 7),
+        (dt.date(2022, 8, 7), dt.date(2022, 8, 1), 7),
+        (dt.date(2014, 1, 1), dt.date(2016, 5, 6), 857),
+    ],
+)
+def test_n_days(d1: dt.date, d2: dt.date, expected: int):
+    actual = pytlz.n_days(d1, d2)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
     "n, expected",
     [
         (1, "1"),
