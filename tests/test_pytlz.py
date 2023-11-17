@@ -542,7 +542,11 @@ class TestPromptYesNo:
         ],
     )
     def test_normal_usage(
-        self, monkeypatch, default: Optional[str], answer: str, expected: bool
+        self,
+        monkeypatch,
+        default: Optional[str],
+        answer: str,
+        expected: bool,
     ):
         monkeypatch.setattr("sys.stdin", StringIO(answer))
         actual = pytlz.prompt_yes_no("Do you like onekit?", default=default)
