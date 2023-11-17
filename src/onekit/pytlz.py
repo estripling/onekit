@@ -46,6 +46,7 @@ __all__ = (
     "isdivisibleby",
     "iseven",
     "isodd",
+    "lazy_read_lines",
     "map_regex",
     "num_to_str",
     "reduce_sets",
@@ -641,6 +642,36 @@ def isodd(x: Union[int, float], /) -> bool:
     False
     """
     return toolz.complement(iseven)(x)
+
+
+def lazy_read_lines(
+    path: str,
+    /,
+    *,
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+    newline: Optional[str] = None,
+) -> Generator:
+    """Lazily read text file line by line.
+
+    Examples
+    --------
+    >>> import inspect
+    >>> from toolz import curried
+    >>> from onekit import pytlz
+    >>> inspect.isgeneratorfunction(pytlz.lazy_read_lines)
+    True
+
+    >>> text_lines = curried.pipe(  # doctest: +SKIP
+    ...     pytlz.lazy_read_lines("./my_text_file.txt"),
+    ...     curried.map(str.rstrip),
+    ... )
+    """
+    with open(
+        file=str(path), mode="r", encoding=encoding, errors=errors, newline=newline
+    ) as lines:
+        for line in lines:
+            yield line
 
 
 def map_regex(

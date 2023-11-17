@@ -3,10 +3,13 @@ import functools
 import math
 import os
 import random
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Tuple
 
 import pytest
 import toolz
+from toolz.curried import map
 
 from onekit import pytlz
 
@@ -287,6 +290,26 @@ def test_isodd(x):
     is_even_number = x % 2 == 0
     expected = not is_even_number
     assert actual == expected
+
+
+def test_lazy_read_lines():
+    expected = ("one", "two", "three")
+
+    with TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir).joinpath("test_file_for_lazy_read_lines.txt")
+
+        with path.open("w") as fh:
+            fh.write(pytlz.concat_strings(os.linesep, expected))
+
+        actual = toolz.pipe(pytlz.lazy_read_lines(path), map(str.rstrip), tuple)
+        assert actual == expected
+
+        for i, line in enumerate(pytlz.lazy_read_lines(str(path))):
+            actual = line.replace(os.linesep, "")
+            assert actual == expected[i]
+
+        with pytest.raises(FileNotFoundError):
+            tuple(pytlz.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
 
 
 @pytest.mark.parametrize(
