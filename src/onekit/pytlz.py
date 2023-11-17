@@ -1,13 +1,19 @@
 """Python toolz."""
 
 import datetime as dt
+import functools
 import inspect
+import itertools
 import math
+import os
 import random
+import re
+import string
 from typing import (
     Any,
     Callable,
     Generator,
+    Iterable,
     Iterator,
     Optional,
     Sequence,
@@ -26,17 +32,24 @@ __all__ = (
     "check_random_state",
     "coinflip",
     "collatz",
+    "concat_strings",
     "contrast_sets",
+    "create_path",
     "date_to_str",
     "extend_range",
     "fibonacci",
     "flatten",
+    "filter_regex",
     "func_name",
+    "headline",
+    "highlight_string_differences",
     "isdivisibleby",
     "iseven",
     "isodd",
+    "map_regex",
     "num_to_str",
     "reduce_sets",
+    "remove_punctuation",
     "signif",
     "source_code",
 )
@@ -49,7 +62,7 @@ Seed = Optional[Union[int, random.Random]]
 
 def are_predicates_true(
     func: Callable[..., bool],
-    *predicates: Sequence[Predicate],
+    *predicates: Iterable[Predicate],
 ) -> Predicate:
     """Evaluate if predicates are true.
 
@@ -230,6 +243,27 @@ def collatz(n: int, /) -> Generator:
         n = n // 2 if iseven(n) else 3 * n + 1
 
 
+def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
+    """Concatenate strings.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> pytlz.concat_strings(" ", "Hello", "World")
+    'Hello World'
+    >>> pytlz.concat_strings(" ", ["Hello", "World"])
+    'Hello World'
+
+    >>> plus_concat = partial(pytlz.concat_strings, " + ")
+    >>> plus_concat("Hello", "World")
+    'Hello + World'
+    >>> plus_concat(["Hello", "World"])
+    'Hello + World'
+    """
+    return sep.join(toolz.pipe(strings, flatten, map(str)))
+
+
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     """Contrast sets.
 
@@ -340,6 +374,21 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     return output
 
 
+def create_path(*strings: Iterable[str]) -> str:
+    """Create path by concatenating strings.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.create_path("path", "to", "file")
+    'path/to/file'
+
+    >>> pytlz.create_path(["hdfs://", "path", "to", "file"])
+    'hdfs://path/to/file'
+    """
+    return functools.reduce(os.path.join, flatten(strings))
+
+
 def date_to_str(d: dt.date, /) -> str:
     """Cast date to string in ISO format: YYYY-MM-DD.
 
@@ -421,8 +470,39 @@ def fibonacci() -> Generator:
         lag2, lag1 = lag1, lag0
 
 
-def flatten(*items: Sequence[Any]) -> Generator:
-    """Flatten sequence of items.
+def filter_regex(
+    pattern: str,
+    /,
+    *strings: Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
+    """Filter iterable of strings with regex.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> list(pytlz.filter_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    ['Hello, World!', 'Hello!']
+
+    >>> strings = [
+    ...     "Guiding principles for Python's design: The Zen of Python",
+    ...     "Beautiful is better than ugly.",
+    ...     "Explicit is better than implicit.",
+    ...     "Simple is better than complex.",
+    ... ]
+    >>> list(pytlz.filter_regex("python", strings))
+    ["Guiding principles for Python's design: The Zen of Python"]
+
+    >>> filter_regex__hi = partial(pytlz.filter_regex, "hi")
+    >>> list(filter_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
+    ['Hi, there!']
+    """
+    return filter(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
+
+
+def flatten(*items: Iterable[Any]) -> Generator:
+    """Flatten iterable of items.
 
     Examples
     --------
@@ -460,6 +540,49 @@ def func_name() -> str:
     'foobar'
     """
     return inspect.stack()[1].function
+
+
+def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
+    """Create headline string.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.headline("Hello, World!", n=30)
+    '------- Hello, World! --------'
+    """
+    return f" {text} ".center(n, fillchar)
+
+
+def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
+    """Highlight differences between two strings.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> print(pytlz.highlight_string_differences("hello", "hall"))
+    hello
+     |  |
+    hall
+
+    >>> # no differences when there is no '|' character
+    >>> print(pytlz.highlight_string_differences("hello", "hello"))
+    hello
+    <BLANKLINE>
+    hello
+    """
+    return concat_strings(
+        os.linesep,
+        lft_str,
+        concat_strings(
+            "",
+            (
+                " " if x == y else "|"
+                for x, y in itertools.zip_longest(lft_str, rgt_str, fillvalue="")
+            ),
+        ),
+        rgt_str,
+    )
 
 
 @toolz.curry
@@ -520,6 +643,37 @@ def isodd(x: Union[int, float], /) -> bool:
     return toolz.complement(iseven)(x)
 
 
+def map_regex(
+    pattern: str,
+    /,
+    *strings: Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
+    """Match regex to iterable of strings.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> list(pytlz.map_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    [['Hello'], [], ['Hello']]
+
+    >>> strings = [
+    ...     "Guiding principles for Python's design: The Zen of Python",
+    ...     "Beautiful is better than ugly.",
+    ...     "Explicit is better than implicit.",
+    ...     "Simple is better than complex.",
+    ... ]
+    >>> list(pytlz.map_regex("python", strings))
+    [['Python', 'Python'], [], [], []]
+
+    >>> map_regex__hi = partial(pytlz.map_regex, "hi")
+    >>> list(map_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
+    [[], ['Hi'], []]
+    """
+    return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
+
+
 def num_to_str(x: Union[int, float], /) -> str:
     """Cast number to string with underscores as thousands separator.
 
@@ -536,8 +690,8 @@ def num_to_str(x: Union[int, float], /) -> str:
 
 
 @toolz.curry
-def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set:
-    """Apply function of two set arguments to reduce a sequence of sets.
+def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set:
+    """Apply function of two set arguments to reduce iterable of sets.
 
     Examples
     --------
@@ -563,6 +717,18 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, map(set), reduce(func))
+
+
+def remove_punctuation(text: str, /) -> str:
+    """Remove punctuation from text string.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.remove_punctuation("I think, therefore I am. --Descartes")
+    'I think therefore I am Descartes'
+    """
+    return text.translate(str.maketrans("", "", string.punctuation))
 
 
 def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
