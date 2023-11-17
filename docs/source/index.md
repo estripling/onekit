@@ -14,7 +14,7 @@
 :maxdepth: 1
 :hidden:
 
-example.ipynb
+examples.ipynb
 changelog.md
 developers.md
 conduct.md
