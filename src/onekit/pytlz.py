@@ -6,6 +6,7 @@ import functools
 import inspect
 import itertools
 import math
+import operator
 import os
 import random
 import re
@@ -40,6 +41,7 @@ __all__ = (
     "contrast_sets",
     "create_path",
     "date_to_str",
+    "daycount",
     "extend_range",
     "fibonacci",
     "flatten",
@@ -470,6 +472,30 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
+    """Generate sequence of consecutive dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> from onekit import pytlz
+    >>> start = dt.date(2022, 1, 1)
+    >>> curried.pipe(pytlz.daycount(start), curried.take(3), list)
+    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
+
+    >>> curried.pipe(
+    ...     pytlz.daycount(start, forward=False),
+    ...     curried.map(pytlz.date_to_str),
+    ...     curried.take(3),
+    ...     list,
+    ... )
+    ['2022-01-01', '2021-12-31', '2021-12-30']
+    """
+    successor = operator.add if forward else operator.sub
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), start)
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
