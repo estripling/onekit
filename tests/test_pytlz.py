@@ -244,6 +244,12 @@ def test_func_name():
     assert actual == expected
 
 
+def test_headline():
+    actual = pytlz.headline("Hello, World!", n=30)
+    expected = "------- Hello, World! --------"
+    assert actual == expected
+
+
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_isdivisibleby(x):
     actual = pytlz.isdivisibleby(2, x)

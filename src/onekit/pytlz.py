@@ -39,6 +39,7 @@ __all__ = (
     "flatten",
     "filter_regex",
     "func_name",
+    "headline",
     "isdivisibleby",
     "iseven",
     "isodd",
@@ -535,6 +536,18 @@ def func_name() -> str:
     'foobar'
     """
     return inspect.stack()[1].function
+
+
+def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
+    """Create headline string.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.headline("Hello, World!", n=30)
+    '------- Hello, World! --------'
+    """
+    return f" {text} ".center(n, fillchar)
 
 
 @toolz.curry
