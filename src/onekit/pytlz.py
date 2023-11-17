@@ -1,5 +1,6 @@
 """Python toolz."""
 
+import calendar
 import datetime as dt
 import distutils
 import functools
@@ -54,6 +55,7 @@ __all__ = (
     "isdivisibleby",
     "iseven",
     "isodd",
+    "last_date_of_month",
     "lazy_read_lines",
     "map_regex",
     "num_to_str",
@@ -853,6 +855,19 @@ def isodd(x: Union[int, float], /) -> bool:
     False
     """
     return toolz.complement(iseven)(x)
+
+
+def last_date_of_month(year: int, month: int, /) -> dt.date:
+    """Get the last date of the month.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.last_date_of_month(2022, 1)
+    datetime.date(2022, 1, 31)
+    """
+    _, number_of_days_in_month = calendar.monthrange(year, month)
+    return dt.date(year, month, number_of_days_in_month)
 
 
 def lazy_read_lines(

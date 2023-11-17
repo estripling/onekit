@@ -417,6 +417,38 @@ def test_isodd(x):
     assert actual == expected
 
 
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 1, 1), dt.date(2022, 1, 31)),
+        (dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (dt.date(2022, 3, 1), dt.date(2022, 3, 31)),
+        (dt.date(2022, 4, 1), dt.date(2022, 4, 30)),
+        (dt.date(2022, 5, 1), dt.date(2022, 5, 31)),
+        (dt.date(2022, 6, 1), dt.date(2022, 6, 30)),
+        (dt.date(2022, 7, 1), dt.date(2022, 7, 31)),
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (dt.date(2022, 9, 1), dt.date(2022, 9, 30)),
+        (dt.date(2022, 10, 1), dt.date(2022, 10, 31)),
+        (dt.date(2022, 11, 1), dt.date(2022, 11, 30)),
+        (dt.date(2022, 12, 1), dt.date(2022, 12, 31)),
+        (dt.date(1970, 1, 1), dt.date(1970, 1, 31)),
+        (dt.date(1970, 1, 15), dt.date(1970, 1, 31)),
+        (dt.date(1970, 1, 31), dt.date(1970, 1, 31)),
+        (dt.date(2020, 2, 2), dt.date(2020, 2, 29)),
+        (dt.date(2022, 2, 3), dt.date(2022, 2, 28)),
+        (dt.date(2000, 2, 4), dt.date(2000, 2, 29)),
+        (dt.date(1900, 2, 5), dt.date(1900, 2, 28)),
+        (dt.date(2012, 2, 27), dt.date(2012, 2, 29)),
+        (dt.date(2012, 2, 28), dt.date(2012, 2, 29)),
+        (dt.date(2012, 2, 29), dt.date(2012, 2, 29)),
+    ],
+)
+def test_last_date_of_month(d: dt.date, expected: dt.date):
+    actual = pytlz.last_date_of_month(d.year, d.month)
+    assert actual == expected
+
+
 def test_lazy_read_lines():
     expected = ("one", "two", "three")
 
