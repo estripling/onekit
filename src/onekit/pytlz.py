@@ -3,6 +3,7 @@
 import datetime as dt
 import functools
 import inspect
+import itertools
 import math
 import os
 import random
@@ -41,6 +42,7 @@ __all__ = (
     "filter_regex",
     "func_name",
     "headline",
+    "highlight_string_differences",
     "isdivisibleby",
     "iseven",
     "isodd",
@@ -550,6 +552,37 @@ def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
     '------- Hello, World! --------'
     """
     return f" {text} ".center(n, fillchar)
+
+
+def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
+    """Highlight differences between two strings.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> print(pytlz.highlight_string_differences("hello", "hall"))
+    hello
+     |  |
+    hall
+
+    >>> # no differences when there is no '|' character
+    >>> print(pytlz.highlight_string_differences("hello", "hello"))
+    hello
+    <BLANKLINE>
+    hello
+    """
+    return concat_strings(
+        os.linesep,
+        lft_str,
+        concat_strings(
+            "",
+            (
+                " " if x == y else "|"
+                for x, y in itertools.zip_longest(lft_str, rgt_str, fillvalue="")
+            ),
+        ),
+        rgt_str,
+    )
 
 
 @toolz.curry

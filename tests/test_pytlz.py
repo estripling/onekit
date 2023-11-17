@@ -250,6 +250,23 @@ def test_headline():
     assert actual == expected
 
 
+@pytest.mark.parametrize(
+    "lft_str, rgt_str, expected",
+    [
+        ("hello", "hello", "hello\n     \nhello"),
+        ("hello", "hallo", "hello\n |   \nhallo"),
+        ("hello", "hell", "hello\n    |\nhell"),
+        ("hello", "hall", "hello\n |  |\nhall"),
+        ("hall", "hello", "hall\n |  |\nhello"),
+        ("1234", "11342", "1234\n |  |\n11342"),
+        ("1234.56", "1234,56", "1234.56\n    |  \n1234,56"),
+    ],
+)
+def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str):
+    actual = pytlz.highlight_string_differences(lft_str, rgt_str)
+    assert actual == expected
+
+
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_isdivisibleby(x):
     actual = pytlz.isdivisibleby(2, x)
