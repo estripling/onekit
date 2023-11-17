@@ -999,3 +999,20 @@ class TestStopwatch:
 def test_str_to_date(string: str, expected: dt.date):
     actual = pytlz.str_to_date(string)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 8, 1), "Mon"),
+        (dt.date(2022, 8, 2), "Tue"),
+        (dt.date(2022, 8, 3), "Wed"),
+        (dt.date(2022, 8, 4), "Thu"),
+        (dt.date(2022, 8, 5), "Fri"),
+        (dt.date(2022, 8, 6), "Sat"),
+        (dt.date(2022, 8, 7), "Sun"),
+    ],
+)
+def test_weekday(d: dt.date, expected: str):
+    actual = pytlz.weekday(d)
+    assert actual == expected

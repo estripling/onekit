@@ -64,6 +64,7 @@ __all__ = (
     "source_code",
     "stopwatch",
     "str_to_date",
+    "weekday",
 )
 
 
@@ -1249,3 +1250,18 @@ def str_to_date(string: str, /) -> dt.date:
     datetime.date(2022, 1, 1)
     """
     return dt.datetime.strptime(string, "%Y-%m-%d").date()
+
+
+def weekday(d: dt.date, /) -> str:
+    """Get name of the weekday.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from onekit import pytlz
+    >>> pytlz.weekday(dt.date(2022, 8, 1))
+    'Mon'
+    >>> pytlz.weekday(dt.date(2022, 8, 7))
+    'Sun'
+    """
+    return d.strftime("%a")
