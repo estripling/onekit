@@ -1,7 +1,7 @@
 """PySpark toolz."""
 
 import functools
-from typing import Sequence
+from typing import Iterable
 
 from pyspark.sql import DataFrame as SparkDF
 
@@ -10,8 +10,8 @@ from onekit import pytlz
 __all__ = ("union",)
 
 
-def union(*dataframes: Sequence[SparkDF]) -> SparkDF:
-    """Union sequence of Spark dataframes by name.
+def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
+    """Union iterable of Spark dataframes by name.
 
     Examples
     --------

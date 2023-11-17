@@ -56,7 +56,7 @@ Seed = Optional[Union[int, random.Random]]
 
 def are_predicates_true(
     func: Callable[..., bool],
-    *predicates: Sequence[Predicate],
+    *predicates: Iterable[Predicate],
 ) -> Predicate:
     """Evaluate if predicates are true.
 
@@ -237,7 +237,7 @@ def collatz(n: int, /) -> Generator:
         n = n // 2 if iseven(n) else 3 * n + 1
 
 
-def concat_strings(sep: str, /, *strings: Sequence[str]) -> str:
+def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
     """Concatenate strings.
 
     Examples
@@ -368,7 +368,7 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     return output
 
 
-def create_path(*strings: Sequence[str]) -> str:
+def create_path(*strings: Iterable[str]) -> str:
     """Create path by concatenating strings.
 
     Examples
@@ -495,8 +495,8 @@ def filter_regex(
     return filter(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
-def flatten(*items: Sequence[Any]) -> Generator:
-    """Flatten sequence of items.
+def flatten(*items: Iterable[Any]) -> Generator:
+    """Flatten iterable of items.
 
     Examples
     --------
@@ -610,8 +610,8 @@ def num_to_str(x: Union[int, float], /) -> str:
 
 
 @toolz.curry
-def reduce_sets(func: Callable[[set, set], set], /, *sets: Sequence[set]) -> set:
-    """Apply function of two set arguments to reduce a sequence of sets.
+def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set:
+    """Apply function of two set arguments to reduce iterable of sets.
 
     Examples
     --------
