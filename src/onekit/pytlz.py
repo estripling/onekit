@@ -49,6 +49,7 @@ __all__ = (
     "func_name",
     "headline",
     "highlight_string_differences",
+    "humantime",
     "isdivisibleby",
     "iseven",
     "isodd",
@@ -650,6 +651,63 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
         ),
         rgt_str,
     )
+
+
+def humantime(seconds: Union[int, float], /) -> str:
+    """Convert seconds to human-readable time.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> # 1 second
+    >>> pytlz.humantime(1)
+    '1s'
+
+    >>> # 1 minute
+    >>> pytlz.humantime(60)
+    '1m'
+
+    >>> # 1 hour
+    >>> pytlz.humantime(60 * 60)
+    '1h'
+
+    >>> # 1 day
+    >>> pytlz.humantime(60 * 60 * 24)
+    '1d'
+
+    >>> pytlz.humantime(60 * 60 * 24 + 60 * 60 + 60 + 1)
+    '1d 1h 1m 1s'
+
+    >>> pytlz.humantime(3 * 60 * 60 * 24 + 2 * 60)
+    '3d 2m'
+    """
+    if seconds < 0:
+        raise ValueError(f"{seconds=} - must be a non-negative number")
+
+    if math.isclose(seconds, 0):
+        return "0s"
+
+    if 0 < seconds < 60:
+        return f"{seconds:g}s"
+
+    minutes, seconds = divmod(int(round(seconds, 0)), 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+
+    output = []
+    if days:
+        output.append(f"{days}d")
+
+    if hours:
+        output.append(f"{hours}h")
+
+    if minutes:
+        output.append(f"{minutes}m")
+
+    if seconds:
+        output.append(f"{seconds}s")
+
+    return " ".join(output)
 
 
 @toolz.curry

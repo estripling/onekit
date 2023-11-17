@@ -9,6 +9,7 @@ from tempfile import TemporaryDirectory
 from typing import (
     Optional,
     Tuple,
+    Union,
 )
 
 import pytest
@@ -296,6 +297,46 @@ def test_headline():
 def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str):
     actual = pytlz.highlight_string_differences(lft_str, rgt_str)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "seconds, expected",
+    [
+        (-2.0, None),
+        (-1, None),
+        (0, "0s"),
+        (1, "1s"),
+        (59, "59s"),
+        (59.0, "59s"),
+        (60, "1m"),
+        (60.1, "1m"),
+        (61, "1m 1s"),
+        (61.1, "1m 1s"),
+        (120, "2m"),
+        (120.1, "2m"),
+        (60 * 60, "1h"),
+        (60 * 60 + 1, "1h 1s"),
+        (60 * 60 * 24, "1d"),
+        (60 * 60 * 24 + 1, "1d 1s"),
+        (110.0, "1m 50s"),
+        (0.4142135623730951, "0.414214s"),
+        (0.5, "0.5s"),
+        (1.4142135623730951, "1.41421s"),
+        (1.5, "1.5s"),
+        (2.4142135623730951, "2.41421s"),
+        (59.4142135623730951, "59.4142s"),
+        (60.4142135623730951, "1m"),
+        (60.5142135623730951, "1m 1s"),
+        (60 * 60 * 24 + 123456, "2d 10h 17m 36s"),
+    ],
+)
+def test_humantime(seconds: Union[int, float], expected: Optional[str]):
+    if seconds >= 0:
+        actual = pytlz.humantime(seconds)
+        assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            pytlz.humantime(seconds)
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
