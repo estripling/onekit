@@ -987,3 +987,15 @@ class TestStopwatch:
     @staticmethod
     def create_regex_for_message(regex_fmt):
         return rf"^{regex_fmt} -> {regex_fmt} = 0\.01(\d*)?s$"
+
+
+@pytest.mark.parametrize(
+    "string, expected",
+    [
+        ("2022-01-01", dt.date(2022, 1, 1)),
+        ("2022-01-31", dt.date(2022, 1, 31)),
+    ],
+)
+def test_str_to_date(string: str, expected: dt.date):
+    actual = pytlz.str_to_date(string)
+    assert actual == expected

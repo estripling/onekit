@@ -63,6 +63,7 @@ __all__ = (
     "signif",
     "source_code",
     "stopwatch",
+    "str_to_date",
 )
 
 
@@ -1236,3 +1237,15 @@ class stopwatch(ContextDecorator):
         total._fmt = None
         total._is_total = True
         return total
+
+
+def str_to_date(string: str, /) -> dt.date:
+    """Cast ISO date string to date.
+
+    Examples
+    --------
+    >>> from onekit import pytlz
+    >>> pytlz.str_to_date("2022-01-01")
+    datetime.date(2022, 1, 1)
+    """
+    return dt.datetime.strptime(string, "%Y-%m-%d").date()
