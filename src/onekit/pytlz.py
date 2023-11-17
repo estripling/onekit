@@ -52,7 +52,7 @@ __all__ = (
     "headline",
     "highlight_string_differences",
     "humantime",
-    "isdivisibleby",
+    "isdivisible",
     "iseven",
     "isodd",
     "last_date_of_month",
@@ -160,30 +160,30 @@ def are_predicates_true(
     >>> pytlz.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(13)
     False
 
-    >>> is_divisible_by_3_and_5 = pytlz.are_predicates_true(
+    >>> is_x_divisible_by_3_and_5 = pytlz.are_predicates_true(
     ...     all,
-    ...     pytlz.isdivisibleby(3),
-    ...     pytlz.isdivisibleby(5),
+    ...     pytlz.isdivisible(n=3),
+    ...     pytlz.isdivisible(n=5),
     ... )
-    >>> type(is_divisible_by_3_and_5)
+    >>> type(is_x_divisible_by_3_and_5)
     <class 'function'>
-    >>> is_divisible_by_3_and_5(60)
+    >>> is_x_divisible_by_3_and_5(60)
     True
-    >>> is_divisible_by_3_and_5(9)
+    >>> is_x_divisible_by_3_and_5(9)
     False
 
-    >>> is_divisible_by_3_or_5 = pytlz.are_predicates_true(
+    >>> is_x_divisible_by_3_or_5 = pytlz.are_predicates_true(
     ...     any,
-    ...     pytlz.isdivisibleby(3),
-    ...     pytlz.isdivisibleby(5),
+    ...     pytlz.isdivisible(n=3),
+    ...     pytlz.isdivisible(n=5),
     ... )
-    >>> type(is_divisible_by_3_or_5)
+    >>> type(is_x_divisible_by_3_or_5)
     <class 'function'>
-    >>> is_divisible_by_3_or_5(60)
+    >>> is_x_divisible_by_3_or_5(60)
     True
-    >>> is_divisible_by_3_or_5(9)
+    >>> is_x_divisible_by_3_or_5(9)
     True
-    >>> is_divisible_by_3_or_5(13)
+    >>> is_x_divisible_by_3_or_5(13)
     False
     """
 
@@ -802,22 +802,25 @@ def humantime(seconds: Union[int, float], /) -> str:
 
 
 @toolz.curry
-def isdivisibleby(n: int, x: Union[int, float], /) -> bool:
+def isdivisible(x: Union[int, float], /, n: int) -> bool:
     """Evaluate if :math:`x` is evenly divisible by :math:`n`.
 
     Examples
     --------
     >>> from onekit import pytlz
-    >>> pytlz.isdivisibleby(7, 49)
+    >>> pytlz.isdivisible(49, 7)
     True
 
     >>> # function is curried
-    >>> pytlz.isdivisibleby(5)(10)
+    >>> pytlz.isdivisible(10)(5)
     True
-    >>> is_divisible_by_5 = pytlz.isdivisibleby(5)
-    >>> is_divisible_by_5(10)
+    >>> is_10_divisible_by = pytlz.isdivisible(10)
+    >>> is_10_divisible_by(5)
     True
-    >>> is_divisible_by_5(11.0)
+    >>> is_x_divisible_by_5 = pytlz.isdivisible(n=5)
+    >>> is_x_divisible_by_5(10)
+    True
+    >>> is_x_divisible_by_5(11.0)
     False
     """
     return x % n == 0
@@ -838,7 +841,7 @@ def iseven(x: Union[int, float], /) -> bool:
     >>> pytlz.iseven(2)
     True
     """
-    return isdivisibleby(2)(x)
+    return isdivisible(x, n=2)
 
 
 def isodd(x: Union[int, float], /) -> bool:
