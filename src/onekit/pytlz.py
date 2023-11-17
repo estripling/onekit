@@ -11,6 +11,7 @@ import random
 import re
 import shutil
 import string
+from contextlib import ContextDecorator
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
@@ -61,6 +62,7 @@ __all__ = (
     "remove_punctuation",
     "signif",
     "source_code",
+    "stopwatch",
 )
 
 
@@ -976,3 +978,261 @@ def source_code(x: object, /) -> str:
     <BLANKLINE>
     """
     return inspect.getsource(x)
+
+
+class stopwatch(ContextDecorator):
+    """Measure elapsed wall-clock time and print it to standard output.
+
+    Parameters
+    ----------
+    label : None, str, int, default=None
+        Optionally specify label. When used as a decorator and label is not specified,
+        label is the name of the function.
+    flush : bool, default=True
+        Passed to built-in print function:
+         - If ``True``, prints start time before stop time.
+         - If ``False``, prints start time and stop time all at once.
+    fmt : None, str, default=None
+        Optionally specify a timestamp format to be used in the output message.
+        If ``fmt`` is None, the following format is used: ``%Y-%m-%d %H:%M:%S``.
+
+    Notes
+    -----
+    - Instantiation and use of an instance's properties is only possible
+      when ``stopwatch`` is used as a context manager (see examples).
+    - The total elapsed time is computed when multiple ``stopwatch`` instances
+      are added (see examples).
+
+    Examples
+    --------
+    >>> # as context manager
+    >>> import time
+    >>> from onekit import pytlz
+    >>> with pytlz.stopwatch():  # doctest: +SKIP
+    ...     time.sleep(0.1)
+    ...
+    2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100691s
+
+    >>> # as decorator
+    >>> import time
+    >>> from onekit import pytlz
+    >>> @pytlz.stopwatch()
+    ... def func():
+    ...     time.sleep(0.1)
+    ...
+    >>> func()  # doctest: +SKIP
+    2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100709s - func
+
+    >>> # stopwatch instance
+    >>> import time
+    >>> from onekit import pytlz
+    >>> with pytlz.stopwatch("instance-example") as sw:  # doctest: +SKIP
+    ...     time.sleep(0.1)
+    ...
+    2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100647s - instance-example
+    >>> sw.label  # doctest: +SKIP
+    'instance-example'
+    >>> sw.flush  # doctest: +SKIP
+    True
+    >>> sw.fmt  # doctest: +SKIP
+    '%Y-%m-%d %H:%M:%S'
+    >>> sw.start_time  # doctest: +SKIP
+    datetime.datetime(2023, 1, 1, 12, 0, 0, 732176)
+    >>> sw.stop_time  # doctest: +SKIP
+    datetime.datetime(2023, 1, 1, 12, 0, 0, 832823)
+    >>> sw.elapsed_time  # doctest: +SKIP
+    datetime.timedelta(microseconds=100647)
+    >>> sw  # doctest: +SKIP
+    2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100647s - instance-example
+
+    >>> # compute total elapsed time
+    >>> import time
+    >>> from onekit import pytlz
+    >>> with pytlz.stopwatch(1) as sw1:  # doctest: +SKIP
+    ...     time.sleep(1)
+    ...
+    2023-01-01 12:00:00 -> 2023-01-01 12:00:01 = 1.00122s - 1
+    >>> with pytlz.stopwatch(2) as sw2:  # doctest: +SKIP
+    ...     time.sleep(1)
+    ...
+    2023-01-01 12:01:00 -> 2023-01-01 12:01:01 = 1.00121s - 2
+    >>> with pytlz.stopwatch(3) as sw3:  # doctest: +SKIP
+    ...     time.sleep(1)
+    ...
+    2023-01-01 12:02:00 -> 2023-01-01 12:02:01 = 1.00119s - 3
+    >>> sw1 + sw2 + sw3  # doctest: +SKIP
+    3.00362s - total elapsed time
+    >>> sum([sw1, sw2, sw3])  # doctest: +SKIP
+    3.00362s - total elapsed time
+    """
+
+    def __init__(
+        self,
+        label: Optional[Union[str, int]] = None,
+        /,
+        *,
+        flush: bool = True,
+        fmt: Optional[str] = None,
+    ):
+        if isinstance(label, bool) or (
+            label is not None and not isinstance(label, (str, int))
+        ):
+            raise TypeError(f"{label=} - must be str, int, or NoneType")
+
+        if not isinstance(flush, bool):
+            raise TypeError(f"{flush=} - must be bool")
+
+        if fmt is not None and not isinstance(fmt, str):
+            raise TypeError(f"{fmt=} - must be str or NoneType")
+
+        self._label = label
+        self._flush = flush
+        self._fmt = "%Y-%m-%d %H:%M:%S" if fmt is None else fmt
+        self._start_time = None
+        self._stop_time = None
+        self._elapsed_time = None
+        self._is_total = False
+
+    def __repr__(self):
+        return (
+            super().__repr__() if self.elapsed_time is None else self._output_message()
+        )
+
+    @property
+    def label(self):
+        """Retrieve label value.
+
+        Returns
+        -------
+        NoneType or str
+            Label if specified in the call else None when used as context manager.
+            When used as decorator, label is the name of the decorated function.
+        """
+        return self._label
+
+    @property
+    def flush(self):
+        """Retrieve flush value.
+
+        Returns
+        -------
+        bool
+            Value used in the built-in function when printing to standard output.
+        """
+        return self._flush
+
+    @property
+    def fmt(self):
+        """Retrieve timestamp format.
+
+        The timestamp format can be changed by passing a new value that is accepted
+        by ``strftime``. Note that the underlying data remain unchanged.
+
+        Returns
+        -------
+        str
+            Format to use to convert a ``datetime`` object to a string via ``strftime``.
+        """
+        return self._fmt
+
+    @fmt.setter
+    def fmt(self, value):
+        if not isinstance(value, str):
+            raise TypeError(f"{value=} - `fmt` must be str")
+        self._fmt = value
+
+    @property
+    def start_time(self):
+        """Retrieve start time value.
+
+        Returns
+        -------
+        datetime.datetime
+            Timestamp of the start time.
+        """
+        return self._start_time
+
+    @property
+    def stop_time(self):
+        """Retrieve stop time value.
+
+        Returns
+        -------
+        datetime.datetime
+            Timestamp of the stop time.
+        """
+        return self._stop_time
+
+    @property
+    def elapsed_time(self):
+        """Retrieve elapsed time value.
+
+        Returns
+        -------
+        datetime.timedelta
+            The elapsed time between start and stop.
+        """
+        return self._elapsed_time
+
+    def __call__(self, func):
+        if self.label is None:
+            self._label = func.__name__
+        return super().__call__(func)
+
+    def __enter__(self):
+        self._start_time = dt.datetime.now()
+        if self.flush:
+            print(self._message_part_1(), end="", flush=True)
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self._stop_time = dt.datetime.now()
+        self._elapsed_time = self.stop_time - self.start_time
+        print(self._message_part_2() if self.flush else self._output_message())
+        return False
+
+    def _output_message(self):
+        return (
+            f"{self._human_readable_elapsed_time()} - {self.label}"
+            if self._is_total
+            else self._message_part_1() + self._message_part_2()
+        )
+
+    def _message_part_1(self):
+        return self._datetime_to_str(self.start_time) + " -> "
+
+    def _message_part_2(self):
+        suffix = "" if self.label is None else f" - {self.label}"
+        return (
+            self._datetime_to_str(self.stop_time)
+            + " = "
+            + self._human_readable_elapsed_time()
+            + suffix
+        )
+
+    def _human_readable_elapsed_time(self):
+        if self.elapsed_time is not None:
+            return humantime(self.elapsed_time.total_seconds())
+
+    def _datetime_to_str(self, date_time):
+        return date_time.strftime(self.fmt)
+
+    def __add__(self, other):
+        total = self._create_total_instance()
+        total._elapsed_time = self.elapsed_time + other.elapsed_time
+        return total
+
+    def __radd__(self, other):
+        other_elapsed_time = (
+            other.elapsed_time if isinstance(other, stopwatch) else dt.timedelta()
+        )
+        total = self._create_total_instance()
+        total._elapsed_time = other_elapsed_time + self.elapsed_time
+        return total
+
+    @staticmethod
+    def _create_total_instance():
+        total = stopwatch("total elapsed time", fmt=None, flush=False)
+        total._fmt = None
+        total._is_total = True
+        return total
