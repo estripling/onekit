@@ -42,6 +42,7 @@ __all__ = (
     "isdivisibleby",
     "iseven",
     "isodd",
+    "map_regex",
     "num_to_str",
     "reduce_sets",
     "signif",
@@ -592,6 +593,37 @@ def isodd(x: Union[int, float], /) -> bool:
     False
     """
     return toolz.complement(iseven)(x)
+
+
+def map_regex(
+    pattern: str,
+    /,
+    *strings: Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
+    """Match regex to iterable of strings.
+
+    Examples
+    --------
+    >>> from functools import partial
+    >>> from onekit import pytlz
+    >>> list(pytlz.map_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    [['Hello'], [], ['Hello']]
+
+    >>> strings = [
+    ...     "Guiding principles for Python's design: The Zen of Python",
+    ...     "Beautiful is better than ugly.",
+    ...     "Explicit is better than implicit.",
+    ...     "Simple is better than complex.",
+    ... ]
+    >>> list(pytlz.map_regex("python", strings))
+    [['Python', 'Python'], [], [], []]
+
+    >>> map_regex__hi = partial(pytlz.map_regex, "hi")
+    >>> list(map_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
+    [[], ['Hi'], []]
+    """
+    return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
 def num_to_str(x: Union[int, float], /) -> str:

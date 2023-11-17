@@ -390,6 +390,22 @@ class TestRegexFunctions:
         ]
         assert actual == expected, "filter_better_regex fails"
 
+    def test_map_regex(self, zen_of_python: Tuple[str]):
+        actual = list(pytlz.map_regex("python", zen_of_python))
+        expected = [["Python"]] + [[] for _ in range(19)]
+        assert actual == expected
+
+        filter_regex__better = functools.partial(pytlz.map_regex, "better")
+        actual = list(filter_regex__better(zen_of_python))
+        expected = (
+            [[]]
+            + [["better"] for _ in range(6)]
+            + [[] for _ in range(8)]
+            + [["better"] for _ in range(2)]
+            + [[] for _ in range(3)]
+        )
+        assert actual == expected
+
     @pytest.fixture(scope="class")
     def zen_of_python(self) -> Tuple[str]:
         return (
