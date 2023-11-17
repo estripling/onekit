@@ -2,6 +2,67 @@
 
 
 
+## v0.8.0 (2023-11-17)
+
+### Documentation
+
+* docs: add notebook examples (#32)
+
+* docs: add examples
+
+* docs(example.ipynb): add highlight_string_differences
+
+* docs(example.ipynb): add stopwatch
+
+* refactor: example.ipynb -&gt; examples.ipynb ([`59c972b`](https://github.com/estripling/onekit/commit/59c972b9507c87bef0fe37012065b69b5632c810))
+
+### Feature
+
+* feat: migrate bumbag time functions (#29)
+
+* feat(pytlz): add humantime
+
+* style: fix minor format
+
+* feat(pytlz): add stopwatch
+
+* feat(pytlz): add str_to_date
+
+* feat(pytlz): add weekday
+
+* refactor: use from toolz import curried
+
+* test(filter_regex): remove text
+
+* feat(pytlz): add daycount
+
+* feat(pytlz): add daterange
+
+* feat(pytlz): add last_date_of_month
+
+* feat(pytlz): add n_days
+
+* feat(pytlz): add relative_date ([`692542b`](https://github.com/estripling/onekit/commit/692542beec78adc4ff272472b305451408a6e94e))
+
+* feat: migrate bumbag io functions (#27)
+
+* feat(pytlz): add lazy_read_lines
+
+* feat(pytlz): add prompt_yes_no
+
+* feat(pytlz): add archive_files ([`4fd81a3`](https://github.com/estripling/onekit/commit/4fd81a37296df9e7c71584ad2155e45a6b9bb6b9))
+
+### Refactor
+
+* refactor: isdivisibleby -&gt; isdivisible (#31) ([`bb9af5a`](https://github.com/estripling/onekit/commit/bb9af5a4893c367f36acd85b34c92751242bc8b6))
+
+* refactor(relative_date): change signature (#30) ([`049ab7d`](https://github.com/estripling/onekit/commit/049ab7d9745f2688e383dc2607202f11908aca42))
+
+### Test
+
+* test: add itertools (#28) ([`b83469d`](https://github.com/estripling/onekit/commit/b83469d1a05c139e8ff6f941119e805ba4dca4a1))
+
+
 ## v0.7.0 (2023-11-17)
 
 ### Documentation
