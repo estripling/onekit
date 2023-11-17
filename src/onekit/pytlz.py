@@ -63,6 +63,7 @@ __all__ = (
     "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
+    "relative_date",
     "signif",
     "source_code",
     "stopwatch",
@@ -1061,6 +1062,36 @@ def remove_punctuation(text: str, /) -> str:
     'I think therefore I am Descartes'
     """
     return text.translate(str.maketrans("", "", string.punctuation))
+
+
+@toolz.curry
+def relative_date(n: int, d0: dt.date, /) -> dt.date:
+    """Compute relative date.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from onekit import pytlz
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> pytlz.relative_date(0, d0)
+    datetime.date(2022, 1, 1)
+
+    >>> pytlz.relative_date(1, d0)
+    datetime.date(2022, 1, 2)
+
+    >>> # function is curried
+    >>> pytlz.relative_date(2)(d0)
+    datetime.date(2022, 1, 3)
+
+    >>> lead3 = pytlz.relative_date(3)
+    >>> lead3(d0)
+    datetime.date(2022, 1, 4)
+
+    >>> lag3 = pytlz.relative_date(-4)
+    >>> lag3(d0)
+    datetime.date(2021, 12, 28)
+    """
+    return d0 + dt.timedelta(days=n)
 
 
 def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:

@@ -568,6 +568,36 @@ def test_remove_punctuation(text: str, expected: str):
 
 
 @pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2022, 1, 2)),
+        (-1, dt.date(2022, 1, 1), dt.date(2021, 12, 31)),
+        (2, dt.date(2022, 1, 1), dt.date(2022, 1, 3)),
+        (-2, dt.date(2022, 1, 1), dt.date(2021, 12, 30)),
+        (3, dt.date(2022, 1, 1), dt.date(2022, 1, 4)),
+        (-3, dt.date(2022, 1, 1), dt.date(2021, 12, 29)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 8, 8)),
+        (-7, dt.date(2022, 8, 8), dt.date(2022, 8, 1)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 3, 1)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 2, 28)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 2, 29)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
+    ],
+)
+def test_relative_date(n: int, d0: dt.date, expected: dt.date):
+    actual = pytlz.relative_date(n, d0)
+    assert actual == expected
+
+    days = pytlz.daterange(d0, actual, incl_start=True, incl_end=True)
+    num_days = curried.count(days)
+    num_days_expected = abs(n) + 1
+    assert num_days == num_days_expected
+
+
+@pytest.mark.parametrize(
     "x, n, expected",
     [
         (math.inf, 3, math.inf),
