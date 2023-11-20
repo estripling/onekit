@@ -5,7 +5,7 @@ import math
 import pytest
 from toolz import curried
 
-from onekit import pytlz
+import onekit.pythonkit as pk
 
 
 class TestItertoolsAPI:
@@ -44,7 +44,7 @@ class TestItertoolsAPI:
 
         actual = curried.pipe(
             itertools.count(0, 0.1),
-            curried.map(pytlz.signif),
+            curried.map(pk.signif),
             takewhile(lambda x: x <= 1),
             tuple,
         )
@@ -68,7 +68,7 @@ class TestItertoolsAPI:
 
         actual = curried.pipe(
             itertools.count(0),
-            curried.filter(pytlz.iseven),
+            curried.filter(pk.iseven),
             curried.take(5),
             tuple,
         )
@@ -77,7 +77,7 @@ class TestItertoolsAPI:
 
         actual = curried.pipe(
             itertools.count(0),
-            curried.filter(pytlz.isodd),
+            curried.filter(pk.isodd),
             curried.take(5),
             tuple,
         )

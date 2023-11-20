@@ -39,7 +39,7 @@ jobs:
       run: poetry run pre-commit run --all-files
 
     - name: 🔍 run pytest
-      run: poetry run pytest --slow --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov=src/ --cov-report=xml tests/
+      run: poetry run pytest --slow --doctest-modules --ignore-glob="src/onekit/sparkkit.py" src/ --cov=src/ --cov-report=xml tests/
 
     - name: 📈 track coverage with Codecov
       uses: codecov/codecov-action@v3

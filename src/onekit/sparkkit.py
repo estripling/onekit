@@ -1,11 +1,9 @@
-"""PySpark toolz."""
-
 import functools
 from typing import Iterable
 
 from pyspark.sql import DataFrame as SparkDF
 
-from onekit import pytlz
+import onekit.pythonkit as pk
 
 __all__ = ("union",)
 
@@ -16,12 +14,12 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import SparkSession
-    >>> from onekit import sparktlz
+    >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])
     >>> df3 = spark.createDataFrame([dict(x=0, y=1), dict(x=2, y=3)])
-    >>> sparktlz.union(df1, df2, df3).show()
+    >>> sk.union(df1, df2, df3).show()
     +---+---+
     |  x|  y|
     +---+---+
@@ -34,4 +32,4 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     +---+---+
     <BLANKLINE>
     """
-    return functools.reduce(SparkDF.unionByName, pytlz.flatten(dataframes))
+    return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
