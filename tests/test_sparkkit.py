@@ -3,12 +3,29 @@ import os
 import pytest
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 
 import onekit.sparkkit as sk
 
 
 @pytest.mark.slow
-class TestSparkToolz:
+class TestSparkKit:
+    def test_peek(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                dict(x=1, y="a"),
+                dict(x=3, y=None),
+                dict(x=None, y="c"),
+            ]
+        )
+        actual = (
+            df.transform(sk.peek(n=20, shape=True, cache=True, schema=True, index=True))
+            .where(F.col("x").isNotNull())
+            .transform(sk.peek())
+        )
+        expected = df.where(F.col("x").isNotNull())
+        self.assert_dataframe_equal(actual, expected)
+
     def test_union(self, spark: SparkSession):
         df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
         df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])
