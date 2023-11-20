@@ -2,6 +2,29 @@
 
 
 
+## v0.9.0 (2023-11-20)
+
+### Feature
+
+* feat(sparkkit): add peek (#35) ([`69b08e9`](https://github.com/estripling/onekit/commit/69b08e90e6399639bf013414a0b6d45d1c008393))
+
+### Refactor
+
+* refactor(signif): curry function (#34) ([`6880f9c`](https://github.com/estripling/onekit/commit/6880f9c297f1e178612b72187528a289ffafc25a))
+
+* refactor: rename modules (#33)
+
+* refactor: pytlz -&gt; pythonkit
+
+* refactor: sparktlz -&gt; sparkkit
+
+* build(pyproject.toml): rename sparktlz -&gt; sparkkit
+
+* refactor: pdtlz -&gt; pandaskit
+
+BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.com/estripling/onekit/commit/5dfd157ae6c4ae7e89afe58e121f7dde4d2f719e))
+
+
 ## v0.8.0 (2023-11-17)
 
 ### Documentation
