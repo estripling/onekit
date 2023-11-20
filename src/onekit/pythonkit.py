@@ -1095,19 +1095,22 @@ def relative_date(d0: dt.date, /, n: int) -> dt.date:
     return d0 + dt.timedelta(days=n)
 
 
-def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
+@toolz.curry
+def signif(x: Union[int, float], /, n: int) -> Union[int, float]:
     """Round :math:`x` to its :math:`n` significant digits.
 
     Examples
     --------
     >>> import onekit.pythonkit as pk
-    >>> pk.signif(987654321)
+    >>> pk.signif(987654321, 3)
     988000000
 
-    >>> pk.signif(14393237.76, n=2)
-    14000000.0
+    >>> # function is curried
+    >>> [pk.signif(14393237.76)(n) for n in range(1, 6)]
+    [10000000.0, 14000000.0, 14400000.0, 14390000.0, 14393000.0]
 
-    >>> pk.signif(14393237.76, n=3)
+    >>> signif3 = pk.signif(n=3)
+    >>> signif3(14393237.76)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:
