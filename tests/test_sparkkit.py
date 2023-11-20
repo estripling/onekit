@@ -4,7 +4,7 @@ import pytest
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
-from onekit import sparktlz
+import onekit.sparkkit as sk
 
 
 @pytest.mark.slow
@@ -14,7 +14,7 @@ class TestSparkToolz:
         df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])
         df3 = spark.createDataFrame([dict(x=0, y=1), dict(x=2, y=3)])
 
-        actual = sparktlz.union(df1, df2, df3)
+        actual = sk.union(df1, df2, df3)
         expected = df1.unionByName(df2).unionByName(df3)
         self.assert_dataframe_equal(actual, expected)
 

@@ -20,7 +20,7 @@ POETRY := poetry
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
 	install-dependencies-pdtlz \
-	install-dependencies-sparktlz
+	install-dependencies-sparkkit
 
 
 help:
@@ -41,7 +41,7 @@ help:
 	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
 	@echo ' - install-dependencies-pythonkit    ;; auxiliary command to install dependencies with poetry for pythonkit'
 	@echo ' - install-dependencies-pdtlz        ;; auxiliary command to install dependencies with poetry for pandas toolz'
-	@echo ' - install-dependencies-sparktlz     ;; auxiliary command to install dependencies with poetry for spark toolz'
+	@echo ' - install-dependencies-sparkkit     ;; auxiliary command to install dependencies with poetry for sparkkit'
 
 
 check: run-precommit run-tests
@@ -53,7 +53,7 @@ run-precommit:
 
 
 run-tests:
-	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparktlz.py" src/ --cov-report term-missing --cov=src/ tests/
+	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparkkit.py" src/ --cov-report term-missing --cov=src/ tests/
 	@echo
 
 
@@ -88,7 +88,7 @@ install-dependencies: install-dependencies-precommit \
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
 	install-dependencies-pdtlz \
-	install-dependencies-sparktlz
+	install-dependencies-sparkkit
 
 
 install-dependencies-precommit:
@@ -134,6 +134,6 @@ install-dependencies-pdtlz:
 	"pandas>=0.23.2"
 
 
-install-dependencies-sparktlz:
-	$(POETRY) add --group sparktlz \
+install-dependencies-sparkkit:
+	$(POETRY) add --group sparkkit \
 	pyspark==3.1.1
