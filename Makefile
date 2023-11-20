@@ -19,7 +19,7 @@ POETRY := poetry
 	install-dependencies-docs \
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
-	install-dependencies-pdtlz \
+	install-dependencies-pandaskit \
 	install-dependencies-sparkkit
 
 
@@ -40,7 +40,7 @@ help:
 	@echo ' - install-dependencies-docs         ;; auxiliary command to install dependencies with poetry for documentation'
 	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
 	@echo ' - install-dependencies-pythonkit    ;; auxiliary command to install dependencies with poetry for pythonkit'
-	@echo ' - install-dependencies-pdtlz        ;; auxiliary command to install dependencies with poetry for pandas toolz'
+	@echo ' - install-dependencies-pandaskit    ;; auxiliary command to install dependencies with poetry for pandaskit'
 	@echo ' - install-dependencies-sparkkit     ;; auxiliary command to install dependencies with poetry for sparkkit'
 
 
@@ -87,7 +87,7 @@ install-dependencies: install-dependencies-precommit \
 	install-dependencies-docs \
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
-	install-dependencies-pdtlz \
+	install-dependencies-pandaskit \
 	install-dependencies-sparkkit
 
 
@@ -129,8 +129,8 @@ install-dependencies-pythonkit:
 	toolz
 
 
-install-dependencies-pdtlz:
-	$(POETRY) add --group pdtlz \
+install-dependencies-pandaskit:
+	$(POETRY) add --group pandaskit \
 	"pandas>=0.23.2"
 
 

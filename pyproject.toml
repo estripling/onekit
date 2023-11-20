@@ -46,7 +46,7 @@ time-machine = "^2.13.0"
 [tool.poetry.group.packaging.dependencies]
 python-semantic-release = "^8.3.0"
 
-[tool.poetry.group.pdtlz.dependencies]
+[tool.poetry.group.pandaskit.dependencies]
 pandas = ">=0.23.2"
 
 [tool.poetry.group.sparkkit.dependencies]
