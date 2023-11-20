@@ -18,14 +18,14 @@ import pytest
 import toolz
 from toolz import curried
 
-from onekit import pytlz
+import onekit.pythonkit as pk
 
 
 @pytest.mark.parametrize("kind", ["zip", "gztar"])
 def test_archive_files(kind):
     with TemporaryDirectory() as tmpdir:
         path = Path(tmpdir).joinpath("test_file_for_archive_files.txt")
-        glue_strings = functools.partial(pytlz.concat_strings, "")
+        glue_strings = functools.partial(pk.concat_strings, "")
 
         with path.open("w") as fh:
             fh.write(glue_strings("Hello, World!", os.linesep))
@@ -37,7 +37,7 @@ def test_archive_files(kind):
         with path2.open("w") as fh:
             fh.write(glue_strings("Hello, Again!", os.linesep))
 
-        pytlz.archive_files(tmpdir, name="archive", kind=kind)
+        pk.archive_files(tmpdir, name="archive", kind=kind)
 
     if kind == "gztar":
         kind = "tar.gz"
@@ -65,29 +65,29 @@ def test_are_predicates_true(x, func, expected):
         lambda x: x % 3 == 0,
         lambda x: x % 5 == 0,
     ]
-    actual = pytlz.are_predicates_true(func, predicates)(x)
+    actual = pk.are_predicates_true(func, predicates)(x)
     assert actual == expected
 
 
 @pytest.mark.parametrize("seed", [None, 0, random.Random(1), "invalid seed", 3.0])
 def test_check_random_state(seed):
     if seed is None or isinstance(seed, (int, random.Random)):
-        assert isinstance(pytlz.check_random_state(seed), random.Random)
+        assert isinstance(pk.check_random_state(seed), random.Random)
     else:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
-            pytlz.check_random_state(seed)
+            pk.check_random_state(seed)
 
 
 @pytest.mark.parametrize("bias", [0.25, 0.5, 0.75, -0.1, 1.1, 11])
 def test_coinflip(bias):
     if 0 <= bias <= 1:
-        actual = {pytlz.coinflip(bias) for _ in range(30)}
+        actual = {pk.coinflip(bias) for _ in range(30)}
         expected = {True, False}
         assert actual == expected
     else:
         with pytest.raises(ValueError):
-            pytlz.coinflip(bias)
+            pk.coinflip(bias)
 
 
 @pytest.mark.parametrize(
@@ -106,20 +106,20 @@ def test_coinflip(bias):
 )
 def test_collatz(n, expected):
     if n > 0:
-        actual = tuple(pytlz.collatz(n))
+        actual = tuple(pk.collatz(n))
         assert actual == expected
     else:
         with pytest.raises(ValueError):
-            tuple(pytlz.collatz(n))
+            tuple(pk.collatz(n))
 
 
 def test_concat_strings():
     strings = ["Hello", "World"]
-    actual = pytlz.concat_strings(" ", strings)
+    actual = pk.concat_strings(" ", strings)
     expected = " ".join(strings)
     assert actual == expected
 
-    plus_concat = functools.partial(pytlz.concat_strings, " + ")
+    plus_concat = functools.partial(pk.concat_strings, " + ")
     actual = plus_concat(strings)
     expected = " + ".join(strings)
     assert actual == expected
@@ -128,7 +128,7 @@ def test_concat_strings():
 def test_contrast_sets():
     x = {"a", "c", "b", "g", "h"}
     y = {"c", "d", "e", "f", "g"}
-    summary = pytlz.contrast_sets(x, y)
+    summary = pk.contrast_sets(x, y)
 
     assert isinstance(summary, dict)
     assert summary["x"] == x
@@ -182,10 +182,10 @@ def test_contrast_sets():
 def test_create_path(strings, expected):
     expected = expected.replace("/", os.sep)
 
-    actual = pytlz.create_path(strings)
+    actual = pk.create_path(strings)
     assert actual == expected
 
-    actual = pytlz.create_path(*strings)
+    actual = pk.create_path(*strings)
     assert actual == expected
 
 
@@ -197,7 +197,7 @@ def test_create_path(strings, expected):
     ],
 )
 def test_date_to_str(d, expected):
-    actual = pytlz.date_to_str(d)
+    actual = pk.date_to_str(d)
     assert actual == expected
 
 
@@ -230,27 +230,27 @@ def test_date_to_str(d, expected):
     ],
 )
 def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
-    actual = tuple(pytlz.daterange(start, end))
+    actual = tuple(pk.daterange(start, end))
     assert actual == expected
 
-    actual = tuple(pytlz.daterange(start, end, incl_start=False))
+    actual = tuple(pk.daterange(start, end, incl_start=False))
     assert actual == expected[1:]
 
-    actual = tuple(pytlz.daterange(start, end, incl_end=False))
+    actual = tuple(pk.daterange(start, end, incl_end=False))
     assert actual == expected[:-1]
 
-    actual = tuple(pytlz.daterange(start, end, incl_start=False, incl_end=False))
+    actual = tuple(pk.daterange(start, end, incl_start=False, incl_end=False))
     assert actual == expected[1:-1]
 
 
 def test_daycount():
     start = dt.date(2022, 1, 1)
 
-    actual = toolz.pipe(pytlz.daycount(start, forward=True), curried.take(3), list)
+    actual = toolz.pipe(pk.daycount(start, forward=True), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
     assert actual == expected
 
-    actual = toolz.pipe(pytlz.daycount(start, forward=False), curried.take(3), list)
+    actual = toolz.pipe(pk.daycount(start, forward=False), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
@@ -270,7 +270,7 @@ def test_daycount():
     ],
 )
 def test_extend_range(xmin, xmax, factor, expected):
-    extend_range = functools.partial(pytlz.extend_range, factor=factor)
+    extend_range = functools.partial(pk.extend_range, factor=factor)
     if factor >= 0:
         actual = extend_range(xmin, xmax)
         assert actual == expected
@@ -280,7 +280,7 @@ def test_extend_range(xmin, xmax, factor, expected):
 
 
 def test_fibonacci():
-    actual = tuple(toolz.take(16, pytlz.fibonacci()))
+    actual = tuple(toolz.take(16, pk.fibonacci()))
     expected = (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
     assert actual == expected
 
@@ -319,13 +319,13 @@ def test_fibonacci():
     ],
 )
 def test_flatten(items, expected):
-    actual = list(pytlz.flatten(items))
+    actual = list(pk.flatten(items))
     assert actual == expected
 
 
 def test_func_name():
     def foobar():
-        return pytlz.func_name()
+        return pk.func_name()
 
     actual = foobar()
     expected = "foobar"
@@ -333,7 +333,7 @@ def test_func_name():
 
 
 def test_headline():
-    actual = pytlz.headline("Hello, World!", n=30)
+    actual = pk.headline("Hello, World!", n=30)
     expected = "------- Hello, World! --------"
     assert actual == expected
 
@@ -351,7 +351,7 @@ def test_headline():
     ],
 )
 def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str):
-    actual = pytlz.highlight_string_differences(lft_str, rgt_str)
+    actual = pk.highlight_string_differences(lft_str, rgt_str)
     assert actual == expected
 
 
@@ -388,31 +388,31 @@ def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str)
 )
 def test_humantime(seconds: Union[int, float], expected: Optional[str]):
     if seconds >= 0:
-        actual = pytlz.humantime(seconds)
+        actual = pk.humantime(seconds)
         assert actual == expected
     else:
         with pytest.raises(ValueError):
-            pytlz.humantime(seconds)
+            pk.humantime(seconds)
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 @pytest.mark.parametrize("n", [2, 5])
 def test_isdivisible(x: Union[int, float], n: int):
-    actual = pytlz.isdivisible(x, n)
+    actual = pk.isdivisible(x, n)
     expected = x % n == 0
     assert actual == expected
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_iseven(x):
-    actual = pytlz.iseven(x)
+    actual = pk.iseven(x)
     expected = x % 2 == 0
     assert actual == expected
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 def test_isodd(x):
-    actual = pytlz.isodd(x)
+    actual = pk.isodd(x)
     is_even_number = x % 2 == 0
     expected = not is_even_number
     assert actual == expected
@@ -446,7 +446,7 @@ def test_isodd(x):
     ],
 )
 def test_last_date_of_month(d: dt.date, expected: dt.date):
-    actual = pytlz.last_date_of_month(d.year, d.month)
+    actual = pk.last_date_of_month(d.year, d.month)
     assert actual == expected
 
 
@@ -457,17 +457,17 @@ def test_lazy_read_lines():
         path = Path(tmpdir).joinpath("test_file_for_lazy_read_lines.txt")
 
         with path.open("w") as fh:
-            fh.write(pytlz.concat_strings(os.linesep, expected))
+            fh.write(pk.concat_strings(os.linesep, expected))
 
-        actual = toolz.pipe(pytlz.lazy_read_lines(path), curried.map(str.rstrip), tuple)
+        actual = toolz.pipe(pk.lazy_read_lines(path), curried.map(str.rstrip), tuple)
         assert actual == expected
 
-        for i, line in enumerate(pytlz.lazy_read_lines(str(path))):
+        for i, line in enumerate(pk.lazy_read_lines(str(path))):
             actual = line.replace(os.linesep, "")
             assert actual == expected[i]
 
         with pytest.raises(FileNotFoundError):
-            tuple(pytlz.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
+            tuple(pk.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
 
 
 @pytest.mark.parametrize(
@@ -480,7 +480,7 @@ def test_lazy_read_lines():
     ],
 )
 def test_n_days(d1: dt.date, d2: dt.date, expected: int):
-    actual = pytlz.n_days(d1, d2)
+    actual = pk.n_days(d1, d2)
     assert actual == expected
 
 
@@ -496,7 +496,7 @@ def test_n_days(d1: dt.date, d2: dt.date, expected: int):
     ],
 )
 def test_num_to_str(n, expected):
-    actual = pytlz.num_to_str(n)
+    actual = pk.num_to_str(n)
     assert actual == expected
 
 
@@ -514,14 +514,14 @@ def test_reduce_sets(func, expected):
     y = {2, 4, 6}
     z = {2, 6, 8}
 
-    f = pytlz.reduce_sets(func)
+    f = pk.reduce_sets(func)
     assert isinstance(f, toolz.curry)
 
     actual = f(x, y, z)
     assert isinstance(actual, set)
     assert actual == expected
 
-    actual = pytlz.reduce_sets(func, [x, y, z])
+    actual = pk.reduce_sets(func, [x, y, z])
     assert isinstance(actual, set)
     assert actual == expected
 
@@ -564,7 +564,7 @@ def test_reduce_sets(func, expected):
     ],
 )
 def test_remove_punctuation(text: str, expected: str):
-    actual = pytlz.remove_punctuation(text)
+    actual = pk.remove_punctuation(text)
     assert actual == expected
 
 
@@ -589,10 +589,10 @@ def test_remove_punctuation(text: str, expected: str):
     ],
 )
 def test_relative_date(n: int, d0: dt.date, expected: dt.date):
-    actual = pytlz.relative_date(d0, n)
+    actual = pk.relative_date(d0, n)
     assert actual == expected
 
-    days = pytlz.daterange(d0, actual, incl_start=True, incl_end=True)
+    days = pk.daterange(d0, actual, incl_start=True, incl_end=True)
     num_days = curried.count(days)
     num_days_expected = abs(n) + 1
     assert num_days == num_days_expected
@@ -642,7 +642,7 @@ def test_relative_date(n: int, d0: dt.date, expected: dt.date):
     ],
 )
 def test_signif(x, n, expected):
-    f = functools.partial(pytlz.signif, n=n)
+    f = functools.partial(pk.signif, n=n)
     if n > 0:
         actual = f(x)
         assert actual == expected
@@ -655,7 +655,7 @@ def test_source_code():
     def greet():
         return "Hello, World!"
 
-    actual = pytlz.source_code(greet)
+    actual = pk.source_code(greet)
     expected = '    def greet():\n        return "Hello, World!"\n'
     assert actual == expected
 
@@ -682,27 +682,27 @@ class TestPromptYesNo:
         expected: bool,
     ):
         monkeypatch.setattr("sys.stdin", StringIO(answer))
-        actual = pytlz.prompt_yes_no("Do you like onekit?", default=default)
+        actual = pk.prompt_yes_no("Do you like onekit?", default=default)
         assert actual == expected
 
     @pytest.mark.parametrize("default", [1, "noo", "yeah"])
     def test_invalid_default_value(self, default):
         with pytest.raises(ValueError):
-            pytlz.prompt_yes_no("Do you like onekit?", default=default)
+            pk.prompt_yes_no("Do you like onekit?", default=default)
 
     def test_subsequent_prompt(self, monkeypatch):
         monkeypatch.setattr("sys.stdin", StringIO("yay"))
         with pytest.raises(EOFError):
-            pytlz.prompt_yes_no("Do you like onekit?", default="yes")
+            pk.prompt_yes_no("Do you like onekit?", default="yes")
 
 
 class TestRegexFunctions:
     def test_filter_regex(self, zen_of_python: Tuple[str]):
-        actual = list(pytlz.filter_regex("python", zen_of_python))
+        actual = list(pk.filter_regex("python", zen_of_python))
         expected = ["The Zen of Python, by Tim Peters"]
         assert actual == expected
 
-        filter_regex__better = functools.partial(pytlz.filter_regex, "better")
+        filter_regex__better = functools.partial(pk.filter_regex, "better")
         actual = list(filter_regex__better(*zen_of_python))
         expected = [
             "Beautiful is better than ugly.",
@@ -717,11 +717,11 @@ class TestRegexFunctions:
         assert actual == expected
 
     def test_map_regex(self, zen_of_python: Tuple[str]):
-        actual = list(pytlz.map_regex("python", zen_of_python))
+        actual = list(pk.map_regex("python", zen_of_python))
         expected = [["Python"]] + [[] for _ in range(19)]
         assert actual == expected
 
-        filter_regex__better = functools.partial(pytlz.map_regex, "better")
+        filter_regex__better = functools.partial(pk.map_regex, "better")
         actual = list(filter_regex__better(zen_of_python))
         expected = (
             [[]]
@@ -765,7 +765,7 @@ class TestStopwatch:
         regex_default_message,
         capsys,
     ):
-        with pytlz.stopwatch():
+        with pk.stopwatch():
             slumber()
 
         actual = capsys.readouterr().out
@@ -773,7 +773,7 @@ class TestStopwatch:
         assert re.search(expected, actual) is not None
 
     def test_context_manager__instance(self, slumber, regex_default_message):
-        with pytlz.stopwatch() as sw:
+        with pk.stopwatch() as sw:
             slumber()
 
         actual = str(sw)
@@ -787,7 +787,7 @@ class TestStopwatch:
         regex_default_message,
         label,
     ):
-        with pytlz.stopwatch(label) as sw:
+        with pk.stopwatch(label) as sw:
             slumber()
 
         actual = str(sw)
@@ -806,12 +806,12 @@ class TestStopwatch:
             TypeError,
             match=r"got some positional-only arguments passed as keyword arguments",
         ):
-            with pytlz.stopwatch(label=label) as sw:
+            with pk.stopwatch(label=label):
                 slumber()
 
     @pytest.mark.parametrize("flush", [True, False])
     def test_context_manager__flush(self, slumber, regex_default_message, flush):
-        with pytlz.stopwatch(flush=flush) as sw:
+        with pk.stopwatch(flush=flush) as sw:
             slumber()
 
         actual = str(sw)
@@ -839,7 +839,7 @@ class TestStopwatch:
         fmt,
         default_fmt="%Y-%m-%d %H:%M:%S",
     ):
-        with pytlz.stopwatch(fmt=fmt) as sw:
+        with pk.stopwatch(fmt=fmt) as sw:
             slumber()
 
         actual = str(sw)
@@ -888,7 +888,7 @@ class TestStopwatch:
         fmt,
         default_fmt="%Y-%m-%d %H:%M:%S",
     ):
-        with pytlz.stopwatch(label, flush=flush, fmt=fmt) as sw:
+        with pk.stopwatch(label, flush=flush, fmt=fmt) as sw:
             slumber()
 
         actual = str(sw)
@@ -925,13 +925,13 @@ class TestStopwatch:
             sw.elapsed_time = dt.timedelta(days=42)
 
     def test_context_manager__total_elapsed_time(self, slumber, regex_default_message):
-        with pytlz.stopwatch(1) as sw1:
+        with pk.stopwatch(1) as sw1:
             slumber()
 
-        with pytlz.stopwatch(2) as sw2:
+        with pk.stopwatch(2) as sw2:
             slumber()
 
-        with pytlz.stopwatch(3) as sw3:
+        with pk.stopwatch(3) as sw3:
             slumber()
 
         for i, sw in enumerate([sw1, sw2, sw3]):
@@ -956,7 +956,7 @@ class TestStopwatch:
             assert re.search(expected, actual) is not None
 
     def test_decorator__default_call(self, slumber, regex_default_message, capsys):
-        @pytlz.stopwatch()
+        @pk.stopwatch()
         def func():
             slumber()
 
@@ -973,7 +973,7 @@ class TestStopwatch:
         capsys,
         label="lbl",
     ):
-        @pytlz.stopwatch(label)
+        @pk.stopwatch(label)
         def func():
             slumber()
 
@@ -985,7 +985,7 @@ class TestStopwatch:
 
     @pytest.mark.parametrize("flush", [True, False])
     def test_decorator__flush(self, slumber, regex_default_message, flush, capsys):
-        @pytlz.stopwatch(flush=flush)
+        @pk.stopwatch(flush=flush)
         def func():
             slumber()
 
@@ -1012,7 +1012,7 @@ class TestStopwatch:
         fmt,
         capsys,
     ):
-        @pytlz.stopwatch(fmt=fmt)
+        @pk.stopwatch(fmt=fmt)
         def func():
             slumber()
 
@@ -1048,7 +1048,7 @@ class TestStopwatch:
         fmt,
         capsys,
     ):
-        @pytlz.stopwatch(label, fmt=fmt, flush=flush)
+        @pk.stopwatch(label, fmt=fmt, flush=flush)
         def func():
             slumber()
 
@@ -1075,24 +1075,24 @@ class TestStopwatch:
             TypeError,
             match=r"label=.* - must be str, int, or NoneType",
         ):
-            with pytlz.stopwatch(label):
+            with pk.stopwatch(label):
                 slumber()
 
     @pytest.mark.parametrize("flush", [None, 0, 1.0, set(), [2]])
     def test_raises_type_error__flush(self, slumber, flush):
         with pytest.raises(TypeError, match=r"flush=.* - must be bool"):
-            with pytlz.stopwatch(flush=flush):
+            with pk.stopwatch(flush=flush):
                 slumber()
 
     @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__fmt(self, slumber, fmt):
         with pytest.raises(TypeError, match=r"fmt=.* - must be str or NoneType"):
-            with pytlz.stopwatch(fmt=fmt):
+            with pk.stopwatch(fmt=fmt):
                 slumber()
 
     @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__fmt_setter(self, slumber, fmt):
-        with pytlz.stopwatch() as sw:
+        with pk.stopwatch() as sw:
             slumber()
 
         with pytest.raises(TypeError, match=r"value=.* - `fmt` must be str"):
@@ -1128,7 +1128,7 @@ class TestStopwatch:
     ],
 )
 def test_str_to_date(string: str, expected: dt.date):
-    actual = pytlz.str_to_date(string)
+    actual = pk.str_to_date(string)
     assert actual == expected
 
 
@@ -1145,5 +1145,5 @@ def test_str_to_date(string: str, expected: dt.date):
     ],
 )
 def test_weekday(d: dt.date, expected: str):
-    actual = pytlz.weekday(d)
+    actual = pk.weekday(d)
     assert actual == expected

@@ -1,5 +1,3 @@
-"""Python toolz."""
-
 import calendar
 import datetime as dt
 import distutils
@@ -112,8 +110,8 @@ def archive_files(
     Examples
     --------
     >>> # archive all Python files and Notebooks in current working directory
-    >>> from onekit import pytlz
-    >>> pytlz.archive_files("./", wildcards=["*.py", "*.ipynb"])  # doctest: +SKIP
+    >>> import onekit.pythonkit as pk
+    >>> pk.archive_files("./", wildcards=["*.py", "*.ipynb"])  # doctest: +SKIP
     """
     target = Path(target).resolve()
     wildcards = wildcards or ["**/*"]
@@ -147,23 +145,23 @@ def are_predicates_true(
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
+    >>> import onekit.pythonkit as pk
+    >>> pk.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
     True
 
-    >>> pytlz.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
+    >>> pk.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
     False
 
-    >>> pytlz.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
+    >>> pk.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(12)
     True
 
-    >>> pytlz.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(13)
+    >>> pk.are_predicates_true(any, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(13)
     False
 
-    >>> is_x_divisible_by_3_and_5 = pytlz.are_predicates_true(
+    >>> is_x_divisible_by_3_and_5 = pk.are_predicates_true(
     ...     all,
-    ...     pytlz.isdivisible(n=3),
-    ...     pytlz.isdivisible(n=5),
+    ...     pk.isdivisible(n=3),
+    ...     pk.isdivisible(n=5),
     ... )
     >>> type(is_x_divisible_by_3_and_5)
     <class 'function'>
@@ -172,10 +170,10 @@ def are_predicates_true(
     >>> is_x_divisible_by_3_and_5(9)
     False
 
-    >>> is_x_divisible_by_3_or_5 = pytlz.are_predicates_true(
+    >>> is_x_divisible_by_3_or_5 = pk.are_predicates_true(
     ...     any,
-    ...     pytlz.isdivisible(n=3),
-    ...     pytlz.isdivisible(n=5),
+    ...     pk.isdivisible(n=3),
+    ...     pk.isdivisible(n=5),
     ... )
     >>> type(is_x_divisible_by_3_or_5)
     <class 'function'>
@@ -200,8 +198,8 @@ def check_random_state(seed: Seed = None, /) -> random.Random:
     Examples
     --------
     >>> import random
-    >>> from onekit import pytlz
-    >>> rng = pytlz.check_random_state()
+    >>> import onekit.pythonkit as pk
+    >>> rng = pk.check_random_state()
     >>> isinstance(rng, random.Random)
     True
     """
@@ -226,22 +224,22 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     Examples
     --------
     >>> from functools import partial
-    >>> from onekit import pytlz
-    >>> {pytlz.coinflip(0.5) for _ in range(30)} == {True, False}
+    >>> import onekit.pythonkit as pk
+    >>> {pk.coinflip(0.5) for _ in range(30)} == {True, False}
     True
 
-    >>> fair_coin = partial(pytlz.coinflip, 0.5)
+    >>> fair_coin = partial(pk.coinflip, 0.5)
     >>> type(fair_coin)
     <class 'functools.partial'>
     >>> # fix coinflip outcome
     >>> fair_coin(seed=1)  # doctest: +SKIP
     True
     >>> # fix sequence of coinflip outcomes
-    >>> rng = pytlz.check_random_state(2)
+    >>> rng = pk.check_random_state(2)
     >>> [fair_coin(seed=rng) for _ in range(6)]  # doctest: +SKIP
     [False, False, True, True, False, False]
 
-    >>> biased_coin = partial(pytlz.coinflip, 0.6, seed=pytlz.check_random_state(3))
+    >>> biased_coin = partial(pk.coinflip, 0.6, seed=pk.check_random_state(3))
     >>> type(biased_coin)
     <class 'functools.partial'>
     >>> [biased_coin() for _ in range(6)]  # doctest: +SKIP
@@ -300,11 +298,11 @@ def collatz(n: int, /) -> Generator:
     Examples
     --------
     >>> import toolz
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> n = 12
-    >>> list(pytlz.collatz(n))
+    >>> list(pk.collatz(n))
     [12, 6, 3, 10, 5, 16, 8, 4, 2, 1]
-    >>> toolz.count(pytlz.collatz(n))
+    >>> toolz.count(pk.collatz(n))
     10
     """
     if not isinstance(n, int) or n < 1:
@@ -326,13 +324,13 @@ def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
     Examples
     --------
     >>> from functools import partial
-    >>> from onekit import pytlz
-    >>> pytlz.concat_strings(" ", "Hello", "World")
+    >>> import onekit.pythonkit as pk
+    >>> pk.concat_strings(" ", "Hello", "World")
     'Hello World'
-    >>> pytlz.concat_strings(" ", ["Hello", "World"])
+    >>> pk.concat_strings(" ", ["Hello", "World"])
     'Hello World'
 
-    >>> plus_concat = partial(pytlz.concat_strings, " + ")
+    >>> plus_concat = partial(pk.concat_strings, " + ")
     >>> plus_concat("Hello", "World")
     'Hello + World'
     >>> plus_concat(["Hello", "World"])
@@ -346,10 +344,10 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
 
     Examples
     --------
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> a = {"a", "c", "b", "g", "h", "i", "j", "k"}
     >>> b = {"c", "d", "e", "f", "g", "p", "q"}
-    >>> summary = pytlz.contrast_sets(a, b)
+    >>> summary = pk.contrast_sets(a, b)
     >>> isinstance(summary, dict)
     True
     >>> summary["x"] == a
@@ -456,11 +454,11 @@ def create_path(*strings: Iterable[str]) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.create_path("path", "to", "file")
+    >>> import onekit.pythonkit as pk
+    >>> pk.create_path("path", "to", "file")
     'path/to/file'
 
-    >>> pytlz.create_path(["hdfs://", "path", "to", "file"])
+    >>> pk.create_path(["hdfs://", "path", "to", "file"])
     'hdfs://path/to/file'
     """
     return functools.reduce(os.path.join, flatten(strings))
@@ -472,8 +470,8 @@ def date_to_str(d: dt.date, /) -> str:
     Examples
     --------
     >>> import datetime as dt
-    >>> from onekit import pytlz
-    >>> pytlz.date_to_str(dt.date(2022, 1, 1))
+    >>> import onekit.pythonkit as pk
+    >>> pk.date_to_str(dt.date(2022, 1, 1))
     '2022-01-01'
     """
     return d.isoformat()
@@ -493,42 +491,42 @@ def daterange(
     --------
     >>> import datetime as dt
     >>> from toolz import curried
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> d1 = dt.date(2022, 1, 1)
     >>> d2 = dt.date(2022, 1, 3)
 
-    >>> curried.pipe(pytlz.daterange(d1, d2), curried.map(pytlz.date_to_str), list)
+    >>> curried.pipe(pk.daterange(d1, d2), curried.map(pk.date_to_str), list)
     ['2022-01-01', '2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pytlz.daterange(d1, d2, incl_start=False, incl_end=True),
-    ...     curried.map(pytlz.date_to_str),
+    ...     pk.daterange(d1, d2, incl_start=False, incl_end=True),
+    ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pytlz.daterange(d1, d2, incl_start=True, incl_end=False),
-    ...     curried.map(pytlz.date_to_str),
+    ...     pk.daterange(d1, d2, incl_start=True, incl_end=False),
+    ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-01', '2022-01-02']
 
     >>> curried.pipe(
-    ...     pytlz.daterange(d1, d2, incl_start=False, incl_end=False),
-    ...     curried.map(pytlz.date_to_str),
+    ...     pk.daterange(d1, d2, incl_start=False, incl_end=False),
+    ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-02']
 
-    >>> list(pytlz.daterange(d1, dt.date(2022, 1, 1)))
+    >>> list(pk.daterange(d1, dt.date(2022, 1, 1)))
     [datetime.date(2022, 1, 1)]
 
-    >>> list(pytlz.daterange(d1, dt.date(2022, 1, 1), incl_start=False))
+    >>> list(pk.daterange(d1, dt.date(2022, 1, 1), incl_start=False))
     []
 
     >>> # function makes sure: start <= end
-    >>> curried.pipe(pytlz.daterange(d2, d1), curried.map(pytlz.date_to_str), list)
+    >>> curried.pipe(pk.daterange(d2, d1), curried.map(pk.date_to_str), list)
     ['2022-01-01', '2022-01-02', '2022-01-03']
     """
     start, end = sorted([start, end])
@@ -544,14 +542,14 @@ def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
     --------
     >>> import datetime as dt
     >>> from toolz import curried
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> start = dt.date(2022, 1, 1)
-    >>> curried.pipe(pytlz.daycount(start), curried.take(3), list)
+    >>> curried.pipe(pk.daycount(start), curried.take(3), list)
     [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
 
     >>> curried.pipe(
-    ...     pytlz.daycount(start, forward=False),
-    ...     curried.map(pytlz.date_to_str),
+    ...     pk.daycount(start, forward=False),
+    ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
     ... )
@@ -566,11 +564,11 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.extend_range(0.0, 1.0)
+    >>> import onekit.pythonkit as pk
+    >>> pk.extend_range(0.0, 1.0)
     (-0.05, 1.05)
 
-    >>> pytlz.extend_range(0.0, 1.0, factor=0.1)
+    >>> pk.extend_range(0.0, 1.0, factor=0.1)
     (-0.1, 1.1)
     """
     if not isinstance(factor, float) or factor < 0:
@@ -615,8 +613,8 @@ def fibonacci() -> Generator:
     Examples
     --------
     >>> import toolz
-    >>> from onekit import pytlz
-    >>> list(toolz.take(13, pytlz.fibonacci()))
+    >>> import onekit.pythonkit as pk
+    >>> list(toolz.take(13, pk.fibonacci()))
     [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
     """
     lag2, lag1 = 0, 1
@@ -640,8 +638,8 @@ def filter_regex(
     Examples
     --------
     >>> from functools import partial
-    >>> from onekit import pytlz
-    >>> list(pytlz.filter_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    >>> import onekit.pythonkit as pk
+    >>> list(pk.filter_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
     ['Hello, World!', 'Hello!']
 
     >>> strings = [
@@ -650,10 +648,10 @@ def filter_regex(
     ...     "Explicit is better than implicit.",
     ...     "Simple is better than complex.",
     ... ]
-    >>> list(pytlz.filter_regex("python", strings))
+    >>> list(pk.filter_regex("python", strings))
     ["Guiding principles for Python's design: The Zen of Python"]
 
-    >>> filter_regex__hi = partial(pytlz.filter_regex, "hi")
+    >>> filter_regex__hi = partial(pk.filter_regex, "hi")
     >>> list(filter_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
     ['Hi, there!']
     """
@@ -665,14 +663,14 @@ def flatten(*items: Iterable[Any]) -> Generator:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> list(pytlz.flatten([[1, 2], *[3, 4], [5]]))
+    >>> import onekit.pythonkit as pk
+    >>> list(pk.flatten([[1, 2], *[3, 4], [5]]))
     [1, 2, 3, 4, 5]
 
-    >>> list(pytlz.flatten([1, (2, 3)], 4, [], [[[5]], 6]))
+    >>> list(pk.flatten([1, (2, 3)], 4, [], [[[5]], 6]))
     [1, 2, 3, 4, 5, 6]
 
-    >>> list(pytlz.flatten(["one", 2], 3, [(4, "five")], [[["six"]]], "seven", []))
+    >>> list(pk.flatten(["one", 2], 3, [(4, "five")], [[["six"]]], "seven", []))
     ['one', 2, 3, 4, 'five', 'six', 'seven']
     """
 
@@ -691,9 +689,9 @@ def func_name() -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> def foobar():
-    ...     return pytlz.func_name()
+    ...     return pk.func_name()
     ...
     >>> foobar()
     'foobar'
@@ -706,8 +704,8 @@ def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.headline("Hello, World!", n=30)
+    >>> import onekit.pythonkit as pk
+    >>> pk.headline("Hello, World!", n=30)
     '------- Hello, World! --------'
     """
     return f" {text} ".center(n, fillchar)
@@ -718,14 +716,14 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> print(pytlz.highlight_string_differences("hello", "hall"))
+    >>> import onekit.pythonkit as pk
+    >>> print(pk.highlight_string_differences("hello", "hall"))
     hello
      |  |
     hall
 
     >>> # no differences when there is no '|' character
-    >>> print(pytlz.highlight_string_differences("hello", "hello"))
+    >>> print(pk.highlight_string_differences("hello", "hello"))
     hello
     <BLANKLINE>
     hello
@@ -749,27 +747,27 @@ def humantime(seconds: Union[int, float], /) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> # 1 second
-    >>> pytlz.humantime(1)
+    >>> pk.humantime(1)
     '1s'
 
     >>> # 1 minute
-    >>> pytlz.humantime(60)
+    >>> pk.humantime(60)
     '1m'
 
     >>> # 1 hour
-    >>> pytlz.humantime(60 * 60)
+    >>> pk.humantime(60 * 60)
     '1h'
 
     >>> # 1 day
-    >>> pytlz.humantime(60 * 60 * 24)
+    >>> pk.humantime(60 * 60 * 24)
     '1d'
 
-    >>> pytlz.humantime(60 * 60 * 24 + 60 * 60 + 60 + 1)
+    >>> pk.humantime(60 * 60 * 24 + 60 * 60 + 60 + 1)
     '1d 1h 1m 1s'
 
-    >>> pytlz.humantime(3 * 60 * 60 * 24 + 2 * 60)
+    >>> pk.humantime(3 * 60 * 60 * 24 + 2 * 60)
     '3d 2m'
     """
     if seconds < 0:
@@ -807,17 +805,17 @@ def isdivisible(x: Union[int, float], /, n: int) -> bool:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.isdivisible(49, 7)
+    >>> import onekit.pythonkit as pk
+    >>> pk.isdivisible(49, 7)
     True
 
     >>> # function is curried
-    >>> pytlz.isdivisible(10)(5)
+    >>> pk.isdivisible(10)(5)
     True
-    >>> is_10_divisible_by = pytlz.isdivisible(10)
+    >>> is_10_divisible_by = pk.isdivisible(10)
     >>> is_10_divisible_by(5)
     True
-    >>> is_x_divisible_by_5 = pytlz.isdivisible(n=5)
+    >>> is_x_divisible_by_5 = pk.isdivisible(n=5)
     >>> is_x_divisible_by_5(10)
     True
     >>> is_x_divisible_by_5(11.0)
@@ -831,14 +829,14 @@ def iseven(x: Union[int, float], /) -> bool:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.iseven(0)
+    >>> import onekit.pythonkit as pk
+    >>> pk.iseven(0)
     True
 
-    >>> pytlz.iseven(1)
+    >>> pk.iseven(1)
     False
 
-    >>> pytlz.iseven(2)
+    >>> pk.iseven(2)
     True
     """
     return isdivisible(x, n=2)
@@ -849,14 +847,14 @@ def isodd(x: Union[int, float], /) -> bool:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.isodd(0)
+    >>> import onekit.pythonkit as pk
+    >>> pk.isodd(0)
     False
 
-    >>> pytlz.isodd(1)
+    >>> pk.isodd(1)
     True
 
-    >>> pytlz.isodd(2)
+    >>> pk.isodd(2)
     False
     """
     return toolz.complement(iseven)(x)
@@ -867,8 +865,8 @@ def last_date_of_month(year: int, month: int, /) -> dt.date:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.last_date_of_month(2022, 1)
+    >>> import onekit.pythonkit as pk
+    >>> pk.last_date_of_month(2022, 1)
     datetime.date(2022, 1, 31)
     """
     _, number_of_days_in_month = calendar.monthrange(year, month)
@@ -889,12 +887,12 @@ def lazy_read_lines(
     --------
     >>> import inspect
     >>> from toolz import curried
-    >>> from onekit import pytlz
-    >>> inspect.isgeneratorfunction(pytlz.lazy_read_lines)
+    >>> import onekit.pythonkit as pk
+    >>> inspect.isgeneratorfunction(pk.lazy_read_lines)
     True
 
     >>> text_lines = curried.pipe(  # doctest: +SKIP
-    ...     pytlz.lazy_read_lines("./my_text_file.txt"),
+    ...     pk.lazy_read_lines("./my_text_file.txt"),
     ...     curried.map(str.rstrip),
     ... )
     """
@@ -920,8 +918,8 @@ def map_regex(
     Examples
     --------
     >>> from functools import partial
-    >>> from onekit import pytlz
-    >>> list(pytlz.map_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
+    >>> import onekit.pythonkit as pk
+    >>> list(pk.map_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
     [['Hello'], [], ['Hello']]
 
     >>> strings = [
@@ -930,10 +928,10 @@ def map_regex(
     ...     "Explicit is better than implicit.",
     ...     "Simple is better than complex.",
     ... ]
-    >>> list(pytlz.map_regex("python", strings))
+    >>> list(pk.map_regex("python", strings))
     [['Python', 'Python'], [], [], []]
 
-    >>> map_regex__hi = partial(pytlz.map_regex, "hi")
+    >>> map_regex__hi = partial(pk.map_regex, "hi")
     >>> list(map_regex__hi("Hello, World!", "Hi, there!", "Hello!"))
     [[], ['Hi'], []]
     """
@@ -946,15 +944,15 @@ def n_days(d1: dt.date, d2: dt.date, /) -> int:
     Examples
     --------
     >>> import datetime as dt
-    >>> from onekit import pytlz
-    >>> pytlz.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
+    >>> import onekit.pythonkit as pk
+    >>> pk.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
     1
 
-    >>> pytlz.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
+    >>> pk.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
     7
 
     >>> # function makes sure: start <= end
-    >>> pytlz.n_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
+    >>> pk.n_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
     7
     """
     start, end = sorted([d1, d2])
@@ -966,11 +964,11 @@ def num_to_str(x: Union[int, float], /) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.num_to_str(1000000)
+    >>> import onekit.pythonkit as pk
+    >>> pk.num_to_str(1000000)
     '1_000_000'
 
-    >>> pytlz.num_to_str(100000.0)
+    >>> pk.num_to_str(100000.0)
     '100_000.0'
     """
     return f"{x:_}"
@@ -981,16 +979,16 @@ def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.prompt_yes_no("Is all clear?")  # doctest: +SKIP
+    >>> import onekit.pythonkit as pk
+    >>> pk.prompt_yes_no("Is all clear?")  # doctest: +SKIP
     Is all clear? [y/n] y<enter>
     True
 
-    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    >>> pk.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
     Do you like onekit? [Y/n] <enter>
     True
 
-    >>> pytlz.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
+    >>> pk.prompt_yes_no("Do you like onekit?", default="yes")  # doctest: +SKIP
     Do you like onekit? [Y/n] yay<enter>
     Do you like onekit? Please respond with 'yes' [Y] or 'no' [n] <enter>
     True
@@ -1031,24 +1029,24 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set
 
     Examples
     --------
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> x = {0, 1, 2, 3}
     >>> y = {2, 4, 6}
     >>> z = {2, 6, 8}
-    >>> pytlz.reduce_sets(set.intersection, x, y, z)
+    >>> pk.reduce_sets(set.intersection, x, y, z)
     {2}
     >>> sets = [x, y, z]
-    >>> pytlz.reduce_sets(set.symmetric_difference, sets)
+    >>> pk.reduce_sets(set.symmetric_difference, sets)
     {0, 1, 2, 3, 4, 8}
-    >>> pytlz.reduce_sets(set.difference, *sets)
+    >>> pk.reduce_sets(set.difference, *sets)
     {0, 1, 3}
 
     >>> # function is curried
-    >>> pytlz.reduce_sets(set.union)(*sets)
+    >>> pk.reduce_sets(set.union)(*sets)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> pytlz.reduce_sets(set.union)(sets)
+    >>> pk.reduce_sets(set.union)(sets)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> union_sets = pytlz.reduce_sets(set.union)
+    >>> union_sets = pk.reduce_sets(set.union)
     >>> union_sets(x, y, z)
     {0, 1, 2, 3, 4, 6, 8}
     """
@@ -1060,8 +1058,8 @@ def remove_punctuation(text: str, /) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.remove_punctuation("I think, therefore I am. --Descartes")
+    >>> import onekit.pythonkit as pk
+    >>> pk.remove_punctuation("I think, therefore I am. --Descartes")
     'I think therefore I am Descartes'
     """
     return text.translate(str.maketrans("", "", string.punctuation))
@@ -1074,11 +1072,11 @@ def relative_date(d0: dt.date, /, n: int) -> dt.date:
     Examples
     --------
     >>> import datetime as dt
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> d0 = dt.date(2022, 1, 1)
 
     >>> # function is curried
-    >>> today_ds = pytlz.relative_date(d0)
+    >>> today_ds = pk.relative_date(d0)
     >>> today_ds(n=0)
     datetime.date(2022, 1, 1)
     >>> today_ds(1)
@@ -1086,11 +1084,11 @@ def relative_date(d0: dt.date, /, n: int) -> dt.date:
     >>> today_ds(2)
     datetime.date(2022, 1, 3)
 
-    >>> lead3 = pytlz.relative_date(n=3)
+    >>> lead3 = pk.relative_date(n=3)
     >>> lead3(d0)
     datetime.date(2022, 1, 4)
 
-    >>> lag3 = pytlz.relative_date(n=-4)
+    >>> lag3 = pk.relative_date(n=-4)
     >>> lag3(d0)
     datetime.date(2021, 12, 28)
     """
@@ -1102,14 +1100,14 @@ def signif(x: Union[int, float], /, *, n: int = 3) -> Union[int, float]:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.signif(987654321)
+    >>> import onekit.pythonkit as pk
+    >>> pk.signif(987654321)
     988000000
 
-    >>> pytlz.signif(14393237.76, n=2)
+    >>> pk.signif(14393237.76, n=2)
     14000000.0
 
-    >>> pytlz.signif(14393237.76, n=3)
+    >>> pk.signif(14393237.76, n=3)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:
@@ -1127,11 +1125,11 @@ def source_code(x: object, /) -> str:
 
     Examples
     --------
-    >>> from onekit import pytlz
+    >>> import onekit.pythonkit as pk
     >>> def greet():
     ...     return "Hello, World!"
     ...
-    >>> print(pytlz.source_code(greet))
+    >>> print(pk.source_code(greet))
     def greet():
         return "Hello, World!"
     <BLANKLINE>
@@ -1166,16 +1164,16 @@ class stopwatch(ContextDecorator):
     --------
     >>> # as context manager
     >>> import time
-    >>> from onekit import pytlz
-    >>> with pytlz.stopwatch():  # doctest: +SKIP
+    >>> import onekit.pythonkit as pk
+    >>> with pk.stopwatch():  # doctest: +SKIP
     ...     time.sleep(0.1)
     ...
     2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100691s
 
     >>> # as decorator
     >>> import time
-    >>> from onekit import pytlz
-    >>> @pytlz.stopwatch()
+    >>> import onekit.pythonkit as pk
+    >>> @pk.stopwatch()
     ... def func():
     ...     time.sleep(0.1)
     ...
@@ -1184,8 +1182,8 @@ class stopwatch(ContextDecorator):
 
     >>> # stopwatch instance
     >>> import time
-    >>> from onekit import pytlz
-    >>> with pytlz.stopwatch("instance-example") as sw:  # doctest: +SKIP
+    >>> import onekit.pythonkit as pk
+    >>> with pk.stopwatch("instance-example") as sw:  # doctest: +SKIP
     ...     time.sleep(0.1)
     ...
     2023-01-01 12:00:00 -> 2023-01-01 12:00:00 = 0.100647s - instance-example
@@ -1206,16 +1204,16 @@ class stopwatch(ContextDecorator):
 
     >>> # compute total elapsed time
     >>> import time
-    >>> from onekit import pytlz
-    >>> with pytlz.stopwatch(1) as sw1:  # doctest: +SKIP
+    >>> import onekit.pythonkit as pk
+    >>> with pk.stopwatch(1) as sw1:  # doctest: +SKIP
     ...     time.sleep(1)
     ...
     2023-01-01 12:00:00 -> 2023-01-01 12:00:01 = 1.00122s - 1
-    >>> with pytlz.stopwatch(2) as sw2:  # doctest: +SKIP
+    >>> with pk.stopwatch(2) as sw2:  # doctest: +SKIP
     ...     time.sleep(1)
     ...
     2023-01-01 12:01:00 -> 2023-01-01 12:01:01 = 1.00121s - 2
-    >>> with pytlz.stopwatch(3) as sw3:  # doctest: +SKIP
+    >>> with pk.stopwatch(3) as sw3:  # doctest: +SKIP
     ...     time.sleep(1)
     ...
     2023-01-01 12:02:00 -> 2023-01-01 12:02:01 = 1.00119s - 3
@@ -1402,8 +1400,8 @@ def str_to_date(string: str, /) -> dt.date:
 
     Examples
     --------
-    >>> from onekit import pytlz
-    >>> pytlz.str_to_date("2022-01-01")
+    >>> import onekit.pythonkit as pk
+    >>> pk.str_to_date("2022-01-01")
     datetime.date(2022, 1, 1)
     """
     return dt.datetime.strptime(string, "%Y-%m-%d").date()
@@ -1415,10 +1413,10 @@ def weekday(d: dt.date, /) -> str:
     Examples
     --------
     >>> import datetime as dt
-    >>> from onekit import pytlz
-    >>> pytlz.weekday(dt.date(2022, 8, 1))
+    >>> import onekit.pythonkit as pk
+    >>> pk.weekday(dt.date(2022, 8, 1))
     'Mon'
-    >>> pytlz.weekday(dt.date(2022, 8, 7))
+    >>> pk.weekday(dt.date(2022, 8, 7))
     'Sun'
     """
     return d.strftime("%a")

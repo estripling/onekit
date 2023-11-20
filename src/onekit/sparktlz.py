@@ -5,7 +5,7 @@ from typing import Iterable
 
 from pyspark.sql import DataFrame as SparkDF
 
-from onekit import pytlz
+import onekit.pythonkit as pk
 
 __all__ = ("union",)
 
@@ -34,4 +34,4 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     +---+---+
     <BLANKLINE>
     """
-    return functools.reduce(SparkDF.unionByName, pytlz.flatten(dataframes))
+    return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))

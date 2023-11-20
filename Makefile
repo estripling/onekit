@@ -18,7 +18,7 @@ POETRY := poetry
 	install-dependencies-testing \
 	install-dependencies-docs \
 	install-dependencies-packaging \
-	install-dependencies-pytlz \
+	install-dependencies-pythonkit \
 	install-dependencies-pdtlz \
 	install-dependencies-sparktlz
 
@@ -39,7 +39,7 @@ help:
 	@echo ' - install-dependencies-testing      ;; auxiliary command to install dependencies with poetry for testing'
 	@echo ' - install-dependencies-docs         ;; auxiliary command to install dependencies with poetry for documentation'
 	@echo ' - install-dependencies-packaging    ;; auxiliary command to install dependencies with poetry for packaging'
-	@echo ' - install-dependencies-pytlz        ;; auxiliary command to install dependencies with poetry for Python toolz'
+	@echo ' - install-dependencies-pythonkit    ;; auxiliary command to install dependencies with poetry for pythonkit'
 	@echo ' - install-dependencies-pdtlz        ;; auxiliary command to install dependencies with poetry for pandas toolz'
 	@echo ' - install-dependencies-sparktlz     ;; auxiliary command to install dependencies with poetry for spark toolz'
 
@@ -86,7 +86,7 @@ install-dependencies: install-dependencies-precommit \
 	install-dependencies-testing \
 	install-dependencies-docs \
 	install-dependencies-packaging \
-	install-dependencies-pytlz \
+	install-dependencies-pythonkit \
 	install-dependencies-pdtlz \
 	install-dependencies-sparktlz
 
@@ -124,7 +124,7 @@ install-dependencies-packaging:
 	python-semantic-release
 
 
-install-dependencies-pytlz:
+install-dependencies-pythonkit:
 	$(POETRY) add \
 	toolz
 
