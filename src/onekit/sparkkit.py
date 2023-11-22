@@ -21,7 +21,7 @@ __all__ = (
     "union",
 )
 
-DFIdentityFunc = Callable[[SparkDF], SparkDF]
+SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
 
 
 def peek(
@@ -31,7 +31,7 @@ def peek(
     cache: bool = False,
     schema: bool = False,
     index: bool = False,
-) -> DFIdentityFunc:
+) -> SparkDFIdentityFunc:
     """Peek at dataframe between transformations.
 
     Examples
