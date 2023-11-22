@@ -28,9 +28,11 @@ class TestSparkKit:
         expected = df.where(F.col("x").isNotNull())
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("x", ["c1", F.col("c2")])
-    def test_str_to_col(self, x: Union[str, SparkCol]):
-        actual = sk.str_to_col(x)
+    def test_str_to_col(self):
+        actual = sk.str_to_col("x")
+        assert isinstance(actual, SparkCol)
+
+        actual = sk.str_to_col(F.col("x"))
         assert isinstance(actual, SparkCol)
 
     def test_union(self, spark: SparkSession):
