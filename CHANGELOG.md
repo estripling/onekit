@@ -2,6 +2,25 @@
 
 
 
+## v0.10.1 (2023-11-22)
+
+### Documentation
+
+* docs: update onekit author and description (#38)
+
+* docs: update license
+
+* build: update pyproject.toml
+
+* docs: update README.md
+
+* docs: update author ([`62947fb`](https://github.com/estripling/onekit/commit/62947fb6a8be9711fc55e31cac676697e4326022))
+
+### Fix
+
+* fix(README.md): disclaimer section ([`9428fee`](https://github.com/estripling/onekit/commit/9428feef002ba4648f1c3f63f2de6f5ad7b1fd1d))
+
+
 ## v0.10.0 (2023-11-22)
 
 ### Documentation
