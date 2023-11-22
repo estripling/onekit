@@ -2,6 +2,31 @@
 
 
 
+## v0.10.0 (2023-11-22)
+
+### Documentation
+
+* docs(sparkkit.peek): add missing shape argument (#36)
+
+* docs(sparkkit.peek): add missing shape argument
+
+* refactor: DfIdentityFunction -&gt; DFIdentityFunc ([`7810dc3`](https://github.com/estripling/onekit/commit/7810dc3e954483ae482c8cda59289513fad6a88b))
+
+### Feature
+
+* feat(sparkkit): add cvf (#37)
+
+* feat(sparkkit): add str_to_col
+
+* refactor: DFIdentityFunc -&gt; SparkDFIdentityFunc
+
+* style(peek): remove docstring of inner function
+
+* test(str_to_col): no parametrize
+
+* feat(sparkkit): add cvf ([`b989f31`](https://github.com/estripling/onekit/commit/b989f31bb4a9fa9a0e40eed24852cf8b7a6b1335))
+
+
 ## v0.9.0 (2023-11-20)
 
 ### Feature

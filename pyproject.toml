@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "onekit"
-version = "0.9.0"
+version = "0.10.0"
 description = "One package for utility functions."
 authors = ["onekit developers"]
 license = "BSD 3-Clause"
