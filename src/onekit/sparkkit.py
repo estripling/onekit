@@ -53,9 +53,9 @@ def peek(
     +----+----+
     <BLANKLINE>
     >>> filtered_df = (
-    ...     df.transform(sk.peek())
+    ...     df.transform(sk.peek(shape=True))
     ...     .where("x IS NOT NULL")
-    ...     .transform(sk.peek())
+    ...     .transform(sk.peek(shape=True))
     ... )
     shape = (3, 2)
        x    y
