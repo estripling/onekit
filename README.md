@@ -13,7 +13,7 @@
 
 ## About
 
-One package for utility functions:
+All-in-One Python Kit:
 
 - [Examples](https://onekit.readthedocs.io/en/stable/examples.html)
 - [Documentation](https://onekit.readthedocs.io/en/stable/index.html)
@@ -28,7 +28,6 @@ One package for utility functions:
 pip install onekit
 ```
 
-## License
+# Disclaimer
 
-`onekit` was created by onekit developers.
-It is licensed under the terms of the BSD 3-Clause license.
+⚠️ This is a personal project: Use at your own risk!
