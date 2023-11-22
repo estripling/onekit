@@ -1,8 +1,12 @@
 import os
 
 import pytest
+from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
-from pyspark.sql import SparkSession
+from pyspark.sql import (
+    Row,
+    SparkSession,
+)
 from pyspark.sql import functions as F
 
 import onekit.sparkkit as sk
@@ -10,6 +14,71 @@ import onekit.sparkkit as sk
 
 @pytest.mark.slow
 class TestSparkKit:
+    def test_cvf(self, spark: SparkSession):
+        # single column
+        counts = {"a": 3, "b": 1, "c": 1, "g": 2, "h": 1}
+        df = spark.createDataFrame(
+            [dict(x=v) for v, c in counts.items() for _ in range(c)]
+        )
+
+        expected_rows = [
+            Row(x="a", count=3, percent=37.5, cumul_count=3, cumul_percent=37.5),
+            Row(x="g", count=2, percent=25.0, cumul_count=5, cumul_percent=62.5),
+            Row(x="b", count=1, percent=12.5, cumul_count=6, cumul_percent=75.0),
+            Row(x="c", count=1, percent=12.5, cumul_count=7, cumul_percent=87.5),
+            Row(x="h", count=1, percent=12.5, cumul_count=8, cumul_percent=100.0),
+        ]
+        expected = spark.createDataFrame(expected_rows)
+
+        for cols in ["x", ["x"], F.col("x")]:
+            actual = df.transform(sk.cvf(cols))
+            self.assert_dataframe_equal(actual, expected)
+
+        # use as function directly
+        actual = sk.cvf("x")(df)
+        self.assert_dataframe_equal(actual, expected)
+
+        # multiple columns
+        df = spark.createDataFrame(
+            [
+                Row(x="a", y=1),
+                Row(x="c", y=1),
+                Row(x="b", y=1),
+                Row(x="g", y=2),
+                Row(x="h", y=1),
+                Row(x="a", y=1),
+                Row(x="g", y=2),
+                Row(x="a", y=2),
+            ]
+        )
+        actual = df.transform(sk.cvf("x"))  # check single column check first
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.cvf("x", "y"))
+
+        expected_rows = [
+            Row(x="a", y=1, count=2, percent=25.0, cumul_count=2, cumul_percent=25.0),
+            Row(x="g", y=2, count=2, percent=25.0, cumul_count=4, cumul_percent=50.0),
+            Row(x="a", y=2, count=1, percent=12.5, cumul_count=5, cumul_percent=62.5),
+            Row(x="b", y=1, count=1, percent=12.5, cumul_count=6, cumul_percent=75.0),
+            Row(x="c", y=1, count=1, percent=12.5, cumul_count=7, cumul_percent=87.5),
+            Row(x="h", y=1, count=1, percent=12.5, cumul_count=8, cumul_percent=100.0),
+        ]
+        expected = spark.createDataFrame(expected_rows)
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.cvf(["x", "y"]))
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.cvf("x", F.col("y")))
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.cvf(F.col("x"), F.col("y")))
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.cvf([F.col("x"), F.col("y")]))
+        self.assert_dataframe_equal(actual, expected)
+
     def test_peek(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
@@ -25,6 +94,13 @@ class TestSparkKit:
         )
         expected = df.where(F.col("x").isNotNull())
         self.assert_dataframe_equal(actual, expected)
+
+    def test_str_to_col(self):
+        actual = sk.str_to_col("x")
+        assert isinstance(actual, SparkCol)
+
+        actual = sk.str_to_col(F.col("x"))
+        assert isinstance(actual, SparkCol)
 
     def test_union(self, spark: SparkSession):
         df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
