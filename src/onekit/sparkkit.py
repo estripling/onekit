@@ -72,7 +72,6 @@ def peek(
     """
 
     def inner(df: SparkDF, /) -> SparkDF:
-        """Evaluate specified `peek` function for given dataframe."""
         df = df if df.is_cached else df.cache() if cache else df
 
         if schema:
