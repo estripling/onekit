@@ -1,6 +1,8 @@
 import os
+from typing import Union
 
 import pytest
+from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -25,6 +27,11 @@ class TestSparkKit:
         )
         expected = df.where(F.col("x").isNotNull())
         self.assert_dataframe_equal(actual, expected)
+
+    @pytest.mark.parametrize("x", ["c1", F.col("c2")])
+    def test_str_to_col(self, x: Union[str, SparkCol]):
+        actual = sk.str_to_col(x)
+        assert isinstance(actual, SparkCol)
 
     def test_union(self, spark: SparkSession):
         df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])

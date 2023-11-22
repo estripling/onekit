@@ -9,12 +9,15 @@ from IPython.display import (
     HTML,
     display,
 )
+from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
+from pyspark.sql import functions as F
 
 import onekit.pythonkit as pk
 
 __all__ = (
     "peek",
+    "str_to_col",
     "union",
 )
 
@@ -97,6 +100,22 @@ def peek(
         return df
 
     return inner
+
+
+def str_to_col(x: str, /) -> SparkCol:
+    """Cast string to Spark column else return ``x``.
+
+    Examples
+    --------
+    >>> from pyspark.sql import functions as F
+    >>> import onekit.sparkkit as sk
+    >>> sk.str_to_col("x")
+    Column<'x'>
+
+    >>> sk.str_to_col(F.col("x"))
+    Column<'x'>
+    """
+    return F.col(x) if isinstance(x, str) else x
 
 
 def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
