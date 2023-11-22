@@ -18,7 +18,7 @@ __all__ = (
     "union",
 )
 
-DfIdentityFunction = Callable[[SparkDF], SparkDF]
+DFIdentityFunc = Callable[[SparkDF], SparkDF]
 
 
 def peek(
@@ -28,7 +28,7 @@ def peek(
     cache: bool = False,
     schema: bool = False,
     index: bool = False,
-) -> DfIdentityFunction:
+) -> DFIdentityFunc:
     """Peek at dataframe between transformations.
 
     Examples
@@ -53,9 +53,9 @@ def peek(
     +----+----+
     <BLANKLINE>
     >>> filtered_df = (
-    ...     df.transform(sk.peek())
+    ...     df.transform(sk.peek(shape=True))
     ...     .where("x IS NOT NULL")
-    ...     .transform(sk.peek())
+    ...     .transform(sk.peek(shape=True))
     ... )
     shape = (3, 2)
        x    y
