@@ -32,8 +32,8 @@ def test_union():
     row21, row22 = (5, 6), (7, 8)
     df2 = pd.DataFrame([row21, row22], idx2, cols)
 
-    expected = pd.DataFrame([row11, row12, row21, row22], idx1 + idx2, cols)
-
     actual = pdk.union(df1, df2)
     assert isinstance(actual, pd.DataFrame)
+
+    expected = pd.DataFrame([row11, row12, row21, row22], idx1 + idx2, cols)
     pd.testing.assert_frame_equal(actual, expected)
