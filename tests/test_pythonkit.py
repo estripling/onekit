@@ -9,7 +9,11 @@ from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
+    Any,
+    Callable,
+    List,
     Optional,
+    Set,
     Tuple,
     Union,
 )
@@ -22,7 +26,7 @@ import onekit.pythonkit as pk
 
 
 @pytest.mark.parametrize("kind", ["zip", "gztar"])
-def test_archive_files(kind):
+def test_archive_files(kind: str):
     with TemporaryDirectory() as tmpdir:
         path = Path(tmpdir).joinpath("test_file_for_archive_files.txt")
         glue_strings = functools.partial(pk.concat_strings, "")
@@ -60,7 +64,7 @@ def test_archive_files(kind):
         (13, any, False),
     ],
 )
-def test_are_predicates_true(x, func, expected):
+def test_are_predicates_true(x: int, func: Callable, expected: bool):
     predicates = [
         lambda x: x % 3 == 0,
         lambda x: x % 5 == 0,
@@ -80,7 +84,7 @@ def test_check_random_state(seed):
 
 
 @pytest.mark.parametrize("bias", [0.25, 0.5, 0.75, -0.1, 1.1, 11])
-def test_coinflip(bias):
+def test_coinflip(bias: float):
     if 0 <= bias <= 1:
         actual = {pk.coinflip(bias) for _ in range(30)}
         expected = {True, False}
@@ -104,7 +108,7 @@ def test_coinflip(bias):
         (12, (12, 6, 3, 10, 5, 16, 8, 4, 2, 1)),
     ],
 )
-def test_collatz(n, expected):
+def test_collatz(n: int, expected: Tuple[int]):
     if n > 0:
         actual = tuple(pk.collatz(n))
         assert actual == expected
@@ -179,7 +183,7 @@ def test_contrast_sets():
         (["hdfs://", "path", "to", "file"], "hdfs://path/to/file"),
     ],
 )
-def test_create_path(strings, expected):
+def test_create_path(strings: List[str], expected: str):
     expected = expected.replace("/", os.sep)
 
     actual = pk.create_path(strings)
@@ -196,7 +200,7 @@ def test_create_path(strings, expected):
         (dt.date(2022, 1, 31), "2022-01-31"),
     ],
 )
-def test_date_to_str(d, expected):
+def test_date_to_str(d: dt.date, expected: str):
     actual = pk.date_to_str(d)
     assert actual == expected
 
@@ -269,7 +273,12 @@ def test_daycount():
         (1, 0, 0.05, (-0.05, 1.05)),
     ],
 )
-def test_extend_range(xmin, xmax, factor, expected):
+def test_extend_range(
+    xmin: float,
+    xmax: float,
+    factor: float,
+    expected: Tuple[float, float],
+):
     extend_range = functools.partial(pk.extend_range, factor=factor)
     if factor >= 0:
         actual = extend_range(xmin, xmax)
@@ -318,7 +327,7 @@ def test_fibonacci():
         (([-1], filter(lambda x: x % 2 == 0, range(1, 7))), [-1, 2, 4, 6]),
     ],
 )
-def test_flatten(items, expected):
+def test_flatten(items: Any, expected: List[Any]):
     actual = list(pk.flatten(items))
     assert actual == expected
 
@@ -404,14 +413,14 @@ def test_isdivisible(x: Union[int, float], n: int):
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
-def test_iseven(x):
+def test_iseven(x: Union[int, float]):
     actual = pk.iseven(x)
     expected = x % 2 == 0
     assert actual == expected
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
-def test_isodd(x):
+def test_isodd(x: Union[int, float]):
     actual = pk.isodd(x)
     is_even_number = x % 2 == 0
     expected = not is_even_number
@@ -509,7 +518,7 @@ def test_num_to_str(x: Union[int, float], expected: str):
         (set.symmetric_difference, {0, 1, 2, 3, 4, 8}),
     ],
 )
-def test_reduce_sets(func, expected):
+def test_reduce_sets(func: Callable, expected: Set[int]):
     x = {0, 1, 2, 3}
     y = {2, 4, 6}
     z = {2, 6, 8}
@@ -641,7 +650,7 @@ def test_relative_date(n: int, d0: dt.date, expected: dt.date):
         (14393237.76, 4, 14390000.0),
     ],
 )
-def test_signif(x, n, expected):
+def test_signif(x: Union[int, float], n: int, expected: Union[int, float]):
     f = functools.partial(pk.signif, n=n)
     if n > 0:
         actual = f(x)
@@ -686,7 +695,7 @@ class TestPromptYesNo:
         assert actual == expected
 
     @pytest.mark.parametrize("default", [1, "noo", "yeah"])
-    def test_invalid_default_value(self, default):
+    def test_invalid_default_value(self, default: Optional[str]):
         with pytest.raises(ValueError):
             pk.prompt_yes_no("Do you like onekit?", default=default)
 
