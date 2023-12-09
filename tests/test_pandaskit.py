@@ -21,6 +21,42 @@ def test_join():
     pd.testing.assert_frame_equal(actual, expected)
 
 
+def test_profile():
+    data = {
+        "a": [True, None, False, False, True, False],
+        "b": [1] * 6,
+        "c": [None] * 6,
+    }
+    df = pd.DataFrame(data)
+
+    actual = pdk.profile(df)
+    assert isinstance(actual, pd.DataFrame)
+
+    expected = pd.DataFrame(
+        {
+            "type": {"a": "object", "b": "int64", "c": "object"},
+            "count": {"a": 5, "b": 6, "c": 0},
+            "isnull": {"a": 1, "b": 0, "c": 6},
+            "isnull%": {"a": 0.16666666666666, "b": 0.0, "c": 1.0},
+            "unique": {"a": 2, "b": 1, "c": 0},
+            "unique%": {"a": 0.33333333333, "b": 0.166666666666, "c": 0.0},
+            "mean": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "std": {"a": float("nan"), "b": 0.0, "c": float("nan")},
+            "skewness": {"a": float("nan"), "b": 0.0, "c": float("nan")},
+            "kurtosis": {"a": float("nan"), "b": 0.0, "c": float("nan")},
+            "min": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "5%": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "25%": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "50%": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "75%": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "95%": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+            "max": {"a": float("nan"), "b": 1.0, "c": float("nan")},
+        }
+    )
+
+    pd.testing.assert_frame_equal(actual, expected)
+
+
 def test_union():
     cols = ("a", "b")
 

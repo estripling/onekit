@@ -12,6 +12,7 @@ import onekit.pythonkit as pk
 
 __all__ = (
     "join",
+    "profile",
     "union",
 )
 
@@ -39,6 +40,88 @@ def join(
     return functools.reduce(
         functools.partial(pd.merge, on=on, how=how, suffixes=(False, False), copy=True),
         map(pd.DataFrame, pk.flatten(dataframes)),
+    )
+
+
+def profile(df: PandasDF, /) -> PandasDF:
+    """Profile Pandas dataframe.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import onekit.pandaskit as pdk
+    >>> data = {
+    ...     "a": [True, None, False, False, True, False],
+    ...     "b": [1] * 6,
+    ...     "c": [None] * 6,
+    ... }
+    >>> pdk.profile(pd.DataFrame(data)).T
+                     a         b       c
+    type        object     int64  object
+    count            5         6       0
+    isnull           1         0       6
+    isnull%   0.166667       0.0     1.0
+    unique           2         1       0
+    unique%   0.333333  0.166667     0.0
+    mean           NaN       1.0     NaN
+    std            NaN       0.0     NaN
+    skewness       NaN       0.0     NaN
+    kurtosis       NaN       0.0     NaN
+    min            NaN       1.0     NaN
+    5%             NaN       1.0     NaN
+    25%            NaN       1.0     NaN
+    50%            NaN       1.0     NaN
+    75%            NaN       1.0     NaN
+    95%            NaN       1.0     NaN
+    max            NaN       1.0     NaN
+    """
+    columns = [
+        "type",
+        "count",
+        "isnull",
+        "isnull%",
+        "unique",
+        "unique%",
+        "mean",
+        "std",
+        "skewness",
+        "kurtosis",
+        "min",
+        "5%",
+        "25%",
+        "50%",
+        "75%",
+        "95%",
+        "max",
+    ]
+    n_rows, _ = df.shape
+    return (
+        pd.concat(
+            [
+                df.dtypes.apply(str).to_frame("type"),
+                df.count().to_frame("count"),
+                df.isnull().sum().to_frame("isnull"),
+                df.nunique().to_frame("unique"),
+                df.mean(numeric_only=True).to_frame("mean"),
+                df.std(numeric_only=True, ddof=1).to_frame("std"),
+                df.skew(numeric_only=True).to_frame("skewness"),
+                df.kurt(numeric_only=True).to_frame("kurtosis"),
+                df.min(numeric_only=True).to_frame("min"),
+                df.quantile(0.05, numeric_only=True).to_frame("5%"),
+                df.quantile(0.25, numeric_only=True).to_frame("25%"),
+                df.quantile(0.50, numeric_only=True).to_frame("50%"),
+                df.quantile(0.75, numeric_only=True).to_frame("75%"),
+                df.quantile(0.95, numeric_only=True).to_frame("95%"),
+                df.max(numeric_only=True).to_frame("max"),
+            ],
+            axis=1,
+        )
+        .assign(
+            isnull_pct=lambda df: df["isnull"] / n_rows,
+            unique_pct=lambda df: df["unique"] / n_rows,
+        )
+        .rename(columns={"isnull_pct": "isnull%", "unique_pct": "unique%"})
+        .loc[:, columns]
     )
 
 
