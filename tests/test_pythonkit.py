@@ -485,7 +485,7 @@ def test_n_days(d1: dt.date, d2: dt.date, expected: int):
 
 
 @pytest.mark.parametrize(
-    "n, expected",
+    "x, expected",
     [
         (1, "1"),
         (10, "10"),
@@ -495,8 +495,8 @@ def test_n_days(d1: dt.date, d2: dt.date, expected: int):
         (100000.0, "100_000.0"),
     ],
 )
-def test_num_to_str(n, expected):
-    actual = pk.num_to_str(n)
+def test_num_to_str(x: Union[int, float], expected: str):
+    actual = pk.num_to_str(x)
     assert actual == expected
 
 
@@ -593,9 +593,9 @@ def test_relative_date(n: int, d0: dt.date, expected: dt.date):
     assert actual == expected
 
     days = pk.daterange(d0, actual, incl_start=True, incl_end=True)
-    num_days = curried.count(days)
-    num_days_expected = abs(n) + 1
-    assert num_days == num_days_expected
+    n_days = curried.count(days)
+    n_days_expected = abs(n) + 1
+    assert n_days == n_days_expected
 
 
 @pytest.mark.parametrize(
@@ -951,8 +951,8 @@ class TestStopwatch:
         ]
         for case, total in additions:
             actual = str(total)
-            num_stopwatches = 1 if case == 1 else 2 if 2 <= case <= 4 else 3
-            expected = rf"^0\.0{num_stopwatches}(\d*)?s - total elapsed time$"
+            n_stopwatches = 1 if case == 1 else 2 if 2 <= case <= 4 else 3
+            expected = rf"^0\.0{n_stopwatches}(\d*)?s - total elapsed time$"
             assert re.search(expected, actual) is not None
 
     def test_decorator__default_call(self, slumber, regex_default_message, capsys):

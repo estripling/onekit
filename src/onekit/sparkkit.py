@@ -133,9 +133,9 @@ def peek(
             df.printSchema()
 
         if shape:
-            num_rows = pk.num_to_str(df.count())
-            num_cols = pk.num_to_str(len(df.columns))
-            print(f"shape = ({num_rows}, {num_cols})")
+            n_rows = pk.num_to_str(df.count())
+            n_cols = pk.num_to_str(len(df.columns))
+            print(f"shape = ({n_rows}, {n_cols})")
 
         if n > 0:
             pandas_df = df.limit(n).toPandas()
