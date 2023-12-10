@@ -32,6 +32,7 @@ __all__ = (
     "str_to_col",
     "union",
     "with_index",
+    "with_weekday",
 )
 
 SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
@@ -433,5 +434,46 @@ def with_index(new_col: str, /) -> SparkDFTransformFunc:
     def inner(df: SparkDF, /) -> SparkDF:
         w = Window.partitionBy(F.lit(1)).orderBy(F.monotonically_increasing_id())
         return df.withColumn(new_col, F.row_number().over(w))
+
+    return inner
+
+
+def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
+    """Add column with the name of the weekday.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [dict(day="2023-05-01"), dict(day=None), dict(day="2023-05-03")]
+    ... )
+    >>> df.transform(sk.with_weekday("day", "weekday")).show()
+    +----------+-------+
+    |       day|weekday|
+    +----------+-------+
+    |2023-05-01|    Mon|
+    |      null|   null|
+    |2023-05-03|    Wed|
+    +----------+-------+
+    <BLANKLINE>
+    """
+
+    def determine_weekday(date_column):
+        weekday_int = F.dayofweek(date_column)
+        return (
+            F.when(weekday_int == 1, "Sun")
+            .when(weekday_int == 2, "Mon")
+            .when(weekday_int == 3, "Tue")
+            .when(weekday_int == 4, "Wed")
+            .when(weekday_int == 5, "Thu")
+            .when(weekday_int == 6, "Fri")
+            .when(weekday_int == 7, "Sat")
+            .otherwise(None)
+        )
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        return df.withColumn(new_col, determine_weekday(date_col))
 
     return inner

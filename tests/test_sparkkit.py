@@ -244,6 +244,42 @@ class TestSparkKit:
         )
         self.assert_dataframe_equal(actual, expected)
 
+    def test_with_weekday(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(day="2023-05-01"),
+                Row(day="2023-05-02"),
+                Row(day="2023-05-03"),
+                Row(day="2023-05-04"),
+                Row(day="2023-05-05"),
+                Row(day="2023-05-06"),
+                Row(day="2023-05-07"),
+                Row(day=None),
+            ]
+        )
+        actual = sk.with_weekday("day", "weekday")(df)
+        expected = spark.createDataFrame(
+            [
+                Row(day="2023-05-01", weekday="Mon"),
+                Row(day="2023-05-02", weekday="Tue"),
+                Row(day="2023-05-03", weekday="Wed"),
+                Row(day="2023-05-04", weekday="Thu"),
+                Row(day="2023-05-05", weekday="Fri"),
+                Row(day="2023-05-06", weekday="Sat"),
+                Row(day="2023-05-07", weekday="Sun"),
+                Row(day=None, weekday=None),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = sk.with_weekday("day", "weekday")(
+            df.withColumn("day", F.to_date("day", "yyyy-MM-dd"))
+        )
+        self.assert_dataframe_equal(
+            actual,
+            expected.withColumn("day", F.to_date("day", "yyyy-MM-dd")),
+        )
+
     def test_spark_session(self, spark: SparkSession):
         assert isinstance(spark, SparkSession)
         assert spark.sparkContext.appName == "spark-session-for-testing"
