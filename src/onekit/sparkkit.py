@@ -26,6 +26,7 @@ __all__ = (
     "add_suffix",
     "count_nulls",
     "cvf",
+    "daterange",
     "join",
     "peek",
     "str_to_col",
@@ -189,6 +190,64 @@ def cvf(*cols: Iterable[str]) -> SparkDFTransformFunc:
         )
 
     return inner
+
+
+def daterange(
+    df: SparkDF,
+    /,
+    min_date: str,
+    max_date: str,
+    id_col: str,
+    new_col: str,
+) -> SparkDF:
+    """Generate sequence of consecutive dates between two dates for each distinct ID.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(id=1),
+    ...         dict(id=1),
+    ...         dict(id=3),
+    ...         dict(id=2),
+    ...         dict(id=2),
+    ...         dict(id=3),
+    ...     ]
+    ... )
+    >>> (
+    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "day")
+    ...     .orderBy("id", "day")
+    ...     .show()
+    ... )
+    +---+----------+
+    | id|       day|
+    +---+----------+
+    |  1|2023-05-01|
+    |  1|2023-05-02|
+    |  1|2023-05-03|
+    |  2|2023-05-01|
+    |  2|2023-05-02|
+    |  2|2023-05-03|
+    |  3|2023-05-01|
+    |  3|2023-05-02|
+    |  3|2023-05-03|
+    +---+----------+
+    <BLANKLINE>
+    """
+    return (
+        df.select(id_col)
+        .distinct()
+        .withColumn("min_date", F.to_date(F.lit(min_date), "yyyy-MM-dd"))
+        .withColumn("max_date", F.to_date(F.lit(max_date), "yyyy-MM-dd"))
+        .select(
+            id_col,
+            F.expr("sequence(min_date, max_date, interval 1 day)").alias(new_col),
+        )
+        .withColumn(new_col, F.explode(new_col))
+    )
 
 
 def join(

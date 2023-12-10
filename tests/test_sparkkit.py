@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 
 import pytest
@@ -149,6 +150,20 @@ class TestSparkKit:
         self.assert_dataframe_equal(actual, expected)
 
         actual = df.transform(sk.cvf([F.col("x"), F.col("y")]))
+        self.assert_dataframe_equal(actual, expected)
+
+    def test_daterange(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [Row(id=1), Row(id=3), Row(id=2), Row(id=2), Row(id=3)]
+        )
+        expected = spark.createDataFrame(
+            [Row(id=i, day=dt.date(2023, 5, d)) for i in [1, 2, 3] for d in range(1, 8)]
+        )
+
+        actual = sk.daterange(df, "2023-05-01", "2023-05-07", "id", "day")
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
         self.assert_dataframe_equal(actual, expected)
 
     def test_join(self, spark: SparkSession):
