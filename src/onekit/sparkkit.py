@@ -4,6 +4,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Union,
 )
 
 import toolz
@@ -24,6 +25,7 @@ import onekit.pythonkit as pk
 __all__ = (
     "count_nulls",
     "cvf",
+    "join",
     "peek",
     "str_to_col",
     "union",
@@ -118,6 +120,36 @@ def cvf(*cols: Iterable[str]) -> SparkDFTransformFunc:
         )
 
     return inner
+
+
+def join(
+    *dataframes: Iterable[SparkDF],
+    on: Union[str, List[str]],
+    how: str = "inner",
+) -> SparkDF:
+    """Join iterable of Spark dataframes.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df1 = spark.createDataFrame([dict(id=1, x="a"), dict(id=2, x="b")])
+    >>> df2 = spark.createDataFrame([dict(id=1, y="c"), dict(id=2, y="d")])
+    >>> df3 = spark.createDataFrame([dict(id=1, z="e"), dict(id=2, z="f")])
+    >>> sk.join(df1, df2, df3, on="id").show()
+    +---+---+---+---+
+    | id|  x|  y|  z|
+    +---+---+---+---+
+    |  1|  a|  c|  e|
+    |  2|  b|  d|  f|
+    +---+---+---+---+
+    <BLANKLINE>
+    """
+    return functools.reduce(
+        functools.partial(SparkDF.join, on=on, how=how),
+        pk.flatten(dataframes),
+    )
 
 
 def peek(

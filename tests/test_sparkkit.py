@@ -103,6 +103,15 @@ class TestSparkKit:
         actual = df.transform(sk.cvf([F.col("x"), F.col("y")]))
         self.assert_dataframe_equal(actual, expected)
 
+    def test_join(self, spark: SparkSession):
+        df1 = spark.createDataFrame([dict(id=1, x="a"), dict(id=2, x="b")])
+        df2 = spark.createDataFrame([dict(id=1, y="c"), dict(id=2, y="d")])
+        df3 = spark.createDataFrame([dict(id=1, z="e"), dict(id=2, z="f")])
+
+        actual = sk.join(df1, df2, df3, on="id")
+        expected = df1.join(df2, "id").join(df3, "id")
+        self.assert_dataframe_equal(actual, expected)
+
     def test_peek(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
