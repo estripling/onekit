@@ -401,7 +401,7 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
 
 
-def with_index(new_col: str) -> SparkDFTransformFunc:
+def with_index(new_col: str, /) -> SparkDFTransformFunc:
     """Add an index column with consecutive positive integers.
 
     Examples
