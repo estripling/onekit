@@ -66,7 +66,7 @@ def add_prefix(
 
 
 @toolz.curry
-def count_nulls(df: SparkDF, /, subset: Optional[List[str]] = None) -> SparkDF:
+def count_nulls(df: SparkDF, /, *, subset: Optional[List[str]] = None) -> SparkDF:
     """Count null values in Spark dataframe.
 
     Examples
