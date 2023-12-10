@@ -38,8 +38,7 @@ SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
 SparkDFTransformFunc = Callable[[SparkDF], SparkDF]
 
 
-@toolz.curry
-def add_prefix(prefix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
+def add_prefix(prefix: str, /, *, subset=None) -> SparkDFTransformFunc:
     """Add prefix to column names.
 
     Examples
@@ -48,7 +47,7 @@ def add_prefix(prefix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> sk.add_prefix("pfx_", df).show()
+    >>> df.transform(sk.add_prefix("pfx_")).show()
     +-----+-----+
     |pfx_x|pfx_y|
     +-----+-----+
@@ -56,8 +55,9 @@ def add_prefix(prefix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     +-----+-----+
     <BLANKLINE>
 
-    >>> # function is curried
     >>> add_prefix__pfx = sk.add_prefix("pfx_")
+    >>> type(add_prefix__pfx)
+    <class 'function'>
     >>> add_prefix__pfx(df).show()
     +-----+-----+
     |pfx_x|pfx_y|
@@ -66,14 +66,17 @@ def add_prefix(prefix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     +-----+-----+
     <BLANKLINE>
     """
-    cols = subset or df.columns
-    for col in cols:
-        df = df.withColumnRenamed(col, f"{prefix}{col}")
-    return df
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        cols = subset or df.columns
+        for col in cols:
+            df = df.withColumnRenamed(col, f"{prefix}{col}")
+        return df
+
+    return inner
 
 
-@toolz.curry
-def add_suffix(suffix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
+def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
     """Add suffix to column names.
 
     Examples
@@ -82,7 +85,7 @@ def add_suffix(suffix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> sk.add_suffix("_sfx", df).show()
+    >>> df.transform(sk.add_suffix("_sfx")).show()
     +-----+-----+
     |x_sfx|y_sfx|
     +-----+-----+
@@ -90,8 +93,9 @@ def add_suffix(suffix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     +-----+-----+
     <BLANKLINE>
 
-    >>> # function is curried
     >>> add_suffix__sfx = sk.add_suffix("_sfx")
+    >>> type(add_suffix__sfx)
+    <class 'function'>
     >>> add_suffix__sfx(df).show()
     +-----+-----+
     |x_sfx|y_sfx|
@@ -100,10 +104,14 @@ def add_suffix(suffix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     +-----+-----+
     <BLANKLINE>
     """
-    cols = subset or df.columns
-    for col in cols:
-        df = df.withColumnRenamed(col, f"{col}{suffix}")
-    return df
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        cols = subset or df.columns
+        for col in cols:
+            df = df.withColumnRenamed(col, f"{col}{suffix}")
+        return df
+
+    return inner
 
 
 @toolz.curry

@@ -20,12 +20,12 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_prefix("pfx_", df)
+        actual = sk.add_prefix("pfx_")(df)
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_prefix("pfx_", df, subset=["a"])
+        actual = sk.add_prefix("pfx_", subset=["a"])(df)
         expected = spark.createDataFrame([Row(pfx_a=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -35,8 +35,8 @@ class TestSparkKit:
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function with column selection
-        add_prefix__pfx = sk.add_prefix("pfx_")
-        actual = df.transform(add_prefix__pfx(subset=["b"]))
+        add_prefix__pfx = sk.add_prefix("pfx_", subset=["b"])
+        actual = df.transform(add_prefix__pfx)
         expected = spark.createDataFrame([Row(a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -44,12 +44,12 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_suffix("_sfx", df)
+        actual = sk.add_suffix("_sfx")(df)
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_suffix("_sfx", df, subset=["a"])
+        actual = sk.add_suffix("_sfx", subset=["a"])(df)
         expected = spark.createDataFrame([Row(a_sfx=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -59,8 +59,8 @@ class TestSparkKit:
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function with column selection
-        add_suffix__sfx = sk.add_suffix("_sfx")
-        actual = df.transform(add_suffix__sfx(subset=["b"]))
+        add_suffix__sfx = sk.add_suffix("_sfx", subset=["b"])
+        actual = df.transform(add_suffix__sfx)
         expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
