@@ -31,6 +31,7 @@ __all__ = (
     "peek",
     "str_to_col",
     "union",
+    "with_index",
 )
 
 SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
@@ -398,3 +399,31 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     <BLANKLINE>
     """
     return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
+
+
+def with_index(new_col: str) -> SparkDFTransformFunc:
+    """Add an index column with consecutive positive integers.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x="a"), dict(x="b"), dict(x="c"), dict(x="d")])
+    >>> df.transform(sk.with_index("idx")).show()
+    +---+---+
+    |  x|idx|
+    +---+---+
+    |  a|  1|
+    |  b|  2|
+    |  c|  3|
+    |  d|  4|
+    +---+---+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        w = Window.partitionBy(F.lit(1)).orderBy(F.monotonically_increasing_id())
+        return df.withColumn(new_col, F.row_number().over(w))
+
+    return inner

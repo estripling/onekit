@@ -9,6 +9,7 @@ from pyspark.sql import (
     SparkSession,
 )
 from pyspark.sql import functions as F
+from pyspark.sql import types as T
 
 import onekit.sparkkit as sk
 
@@ -205,6 +206,42 @@ class TestSparkKit:
 
         actual = sk.union(df1, df2, df3)
         expected = df1.unionByName(df2).unionByName(df3)
+        self.assert_dataframe_equal(actual, expected)
+
+    def test_with_index(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(x="a"),
+                Row(x="b"),
+                Row(x="c"),
+                Row(x="d"),
+                Row(x="e"),
+                Row(x="f"),
+                Row(x="g"),
+                Row(x="h"),
+            ],
+            schema=T.StructType([T.StructField("x", T.StringType(), True)]),
+        )
+
+        actual = df.transform(sk.with_index("idx"))
+        expected = spark.createDataFrame(
+            [
+                Row(x="a", idx=1),
+                Row(x="b", idx=2),
+                Row(x="c", idx=3),
+                Row(x="d", idx=4),
+                Row(x="e", idx=5),
+                Row(x="f", idx=6),
+                Row(x="g", idx=7),
+                Row(x="h", idx=8),
+            ],
+            schema=T.StructType(
+                [
+                    T.StructField("x", T.StringType(), True),
+                    T.StructField("idx", T.IntegerType(), True),
+                ]
+            ),
+        )
         self.assert_dataframe_equal(actual, expected)
 
     def test_spark_session(self, spark: SparkSession):
