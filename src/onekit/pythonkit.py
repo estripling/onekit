@@ -535,7 +535,7 @@ def daterange(
     return itertools.takewhile(lambda d: d <= end, daycount(start, forward=True))
 
 
-def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
+def daycount(d0: dt.date, /, *, forward: bool = True) -> Generator:
     """Generate sequence of consecutive dates.
 
     Examples
@@ -543,12 +543,12 @@ def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
     >>> import datetime as dt
     >>> from toolz import curried
     >>> import onekit.pythonkit as pk
-    >>> start = dt.date(2022, 1, 1)
-    >>> curried.pipe(pk.daycount(start), curried.take(3), list)
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> curried.pipe(pk.daycount(d0), curried.take(3), list)
     [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
 
     >>> curried.pipe(
-    ...     pk.daycount(start, forward=False),
+    ...     pk.daycount(d0, forward=False),
     ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
@@ -556,7 +556,7 @@ def daycount(start: dt.date, /, *, forward: bool = True) -> Generator:
     ['2022-01-01', '2021-12-31', '2021-12-30']
     """
     successor = operator.add if forward else operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), start)
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:

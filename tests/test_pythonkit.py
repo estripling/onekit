@@ -248,13 +248,13 @@ def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
 
 
 def test_daycount():
-    start = dt.date(2022, 1, 1)
+    d0 = dt.date(2022, 1, 1)
 
-    actual = toolz.pipe(pk.daycount(start, forward=True), curried.take(3), list)
+    actual = toolz.pipe(pk.daycount(d0, forward=True), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
     assert actual == expected
 
-    actual = toolz.pipe(pk.daycount(start, forward=False), curried.take(3), list)
+    actual = toolz.pipe(pk.daycount(d0, forward=False), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
