@@ -237,13 +237,13 @@ def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
     actual = tuple(pk.daterange(start, end))
     assert actual == expected
 
-    actual = tuple(pk.daterange(start, end, incl_start=False))
+    actual = tuple(pk.daterange(start, end, incl_min=False))
     assert actual == expected[1:]
 
-    actual = tuple(pk.daterange(start, end, incl_end=False))
+    actual = tuple(pk.daterange(start, end, incl_max=False))
     assert actual == expected[:-1]
 
-    actual = tuple(pk.daterange(start, end, incl_start=False, incl_end=False))
+    actual = tuple(pk.daterange(start, end, incl_min=False, incl_max=False))
     assert actual == expected[1:-1]
 
 
@@ -601,7 +601,7 @@ def test_relative_date(n: int, d0: dt.date, expected: dt.date):
     actual = pk.relative_date(d0, n)
     assert actual == expected
 
-    days = pk.daterange(d0, actual, incl_start=True, incl_end=True)
+    days = pk.daterange(d0, actual, incl_min=True, incl_max=True)
     n_days = curried.count(days)
     n_days_expected = abs(n) + 1
     assert n_days == n_days_expected

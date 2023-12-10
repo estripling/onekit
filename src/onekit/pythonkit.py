@@ -478,12 +478,12 @@ def date_to_str(d: dt.date, /) -> str:
 
 
 def daterange(
-    start: dt.date,
-    end: dt.date,
+    min_date: dt.date,
+    max_date: dt.date,
     /,
     *,
-    incl_start: bool = True,
-    incl_end: bool = True,
+    incl_min: bool = True,
+    incl_max: bool = True,
 ) -> Generator:
     """Generate sequence of consecutive dates between two dates.
 
@@ -499,21 +499,21 @@ def daterange(
     ['2022-01-01', '2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_start=False, incl_end=True),
+    ...     pk.daterange(d1, d2, incl_min=False, incl_max=True),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_start=True, incl_end=False),
+    ...     pk.daterange(d1, d2, incl_min=True, incl_max=False),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-01', '2022-01-02']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_start=False, incl_end=False),
+    ...     pk.daterange(d1, d2, incl_min=False, incl_max=False),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
@@ -522,17 +522,17 @@ def daterange(
     >>> list(pk.daterange(d1, dt.date(2022, 1, 1)))
     [datetime.date(2022, 1, 1)]
 
-    >>> list(pk.daterange(d1, dt.date(2022, 1, 1), incl_start=False))
+    >>> list(pk.daterange(d1, dt.date(2022, 1, 1), incl_min=False))
     []
 
     >>> # function makes sure: start <= end
     >>> curried.pipe(pk.daterange(d2, d1), curried.map(pk.date_to_str), list)
     ['2022-01-01', '2022-01-02', '2022-01-03']
     """
-    start, end = sorted([start, end])
-    start = start if incl_start else start + dt.timedelta(1)
-    end = end if incl_end else end - dt.timedelta(1)
-    return itertools.takewhile(lambda d: d <= end, daycount(start, forward=True))
+    d1, d2 = sorted([min_date, max_date])
+    d1 = d1 if incl_min else d1 + dt.timedelta(1)
+    d2 = d2 if incl_max else d2 - dt.timedelta(1)
+    return itertools.takewhile(lambda d: d <= d2, daycount(d1, forward=True))
 
 
 def daycount(d0: dt.date, /, *, forward: bool = True) -> Generator:
