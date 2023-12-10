@@ -1,3 +1,4 @@
+import functools
 import os
 
 import pytest
@@ -14,6 +15,24 @@ import onekit.sparkkit as sk
 
 @pytest.mark.slow
 class TestSparkKit:
+    def test_add_prefix(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(a=1, b=2)])
+
+        # all columns
+        actual = sk.add_prefix(df, prefix="pfx_")
+        expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # with column selection
+        actual = sk.add_prefix(df, prefix="pfx_", subset=["a"])
+        expected = spark.createDataFrame([Row(pfx_a=1, b=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # used as transformation function
+        actual = df.transform(functools.partial(sk.add_prefix, prefix="pfx_"))
+        expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
+        self.assert_dataframe_equal(actual, expected)
+
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
