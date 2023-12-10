@@ -3,7 +3,6 @@ from typing import (
     Callable,
     Iterable,
     List,
-    Optional,
     Union,
 )
 
@@ -37,13 +36,8 @@ SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
 SparkDFTransformFunc = Callable[[SparkDF], SparkDF]
 
 
-def add_prefix(
-    df: SparkDF,
-    /,
-    *,
-    prefix: str,
-    subset: Optional[List[str]] = None,
-) -> SparkDF:
+@toolz.curry
+def add_prefix(prefix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     """Add prefix to column names.
 
     Examples
@@ -52,7 +46,17 @@ def add_prefix(
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> sk.add_prefix(df, prefix="pfx_").show()
+    >>> sk.add_prefix("pfx_", df).show()
+    +-----+-----+
+    |pfx_x|pfx_y|
+    +-----+-----+
+    |    1|    2|
+    +-----+-----+
+    <BLANKLINE>
+
+    >>> # function is curried
+    >>> add_prefix__pfx = sk.add_prefix("pfx_")
+    >>> add_prefix__pfx(df).show()
     +-----+-----+
     |pfx_x|pfx_y|
     +-----+-----+
@@ -66,13 +70,8 @@ def add_prefix(
     return df
 
 
-def add_suffix(
-    df: SparkDF,
-    /,
-    *,
-    suffix: str,
-    subset: Optional[List[str]] = None,
-) -> SparkDF:
+@toolz.curry
+def add_suffix(suffix: str, df: SparkDF, /, *, subset=None) -> SparkDF:
     """Add suffix to column names.
 
     Examples
@@ -81,7 +80,17 @@ def add_suffix(
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> sk.add_suffix(df, suffix="_sfx").show()
+    >>> sk.add_suffix("_sfx", df).show()
+    +-----+-----+
+    |x_sfx|y_sfx|
+    +-----+-----+
+    |    1|    2|
+    +-----+-----+
+    <BLANKLINE>
+
+    >>> # function is curried
+    >>> add_suffix__sfx = sk.add_suffix("_sfx")
+    >>> add_suffix__sfx(df).show()
     +-----+-----+
     |x_sfx|y_sfx|
     +-----+-----+
@@ -96,7 +105,7 @@ def add_suffix(
 
 
 @toolz.curry
-def count_nulls(df: SparkDF, /, *, subset: Optional[List[str]] = None) -> SparkDF:
+def count_nulls(df: SparkDF, /, *, subset=None) -> SparkDF:
     """Count null values in Spark dataframe.
 
     Examples

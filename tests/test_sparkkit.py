@@ -1,4 +1,3 @@
-import functools
 import os
 
 import pytest
@@ -19,36 +18,48 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_prefix(df, prefix="pfx_")
+        actual = sk.add_prefix("pfx_", df)
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_prefix(df, prefix="pfx_", subset=["a"])
+        actual = sk.add_prefix("pfx_", df, subset=["a"])
         expected = spark.createDataFrame([Row(pfx_a=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function
-        actual = df.transform(functools.partial(sk.add_prefix, prefix="pfx_"))
+        actual = df.transform(sk.add_prefix("pfx_"))
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # used as transformation function with column selection
+        add_prefix__pfx = sk.add_prefix("pfx_")
+        actual = df.transform(add_prefix__pfx(subset=["b"]))
+        expected = spark.createDataFrame([Row(a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
     def test_add_suffix(self, spark: SparkSession):
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_suffix(df, suffix="_sfx")
+        actual = sk.add_suffix("_sfx", df)
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_suffix(df, suffix="_sfx", subset=["a"])
+        actual = sk.add_suffix("_sfx", df, subset=["a"])
         expected = spark.createDataFrame([Row(a_sfx=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function
-        actual = df.transform(functools.partial(sk.add_suffix, suffix="_sfx"))
+        actual = df.transform(sk.add_suffix("_sfx"))
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # used as transformation function with column selection
+        add_suffix__sfx = sk.add_suffix("_sfx")
+        actual = df.transform(add_suffix__sfx(subset=["b"]))
+        expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
     def test_count_nulls(self, spark: SparkSession):
