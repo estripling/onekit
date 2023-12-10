@@ -14,6 +14,30 @@ import onekit.sparkkit as sk
 
 @pytest.mark.slow
 class TestSparkKit:
+    def test_count_nulls(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(x=1, y=2, z=None),
+                Row(x=4, y=None, z=6),
+                Row(x=7, y=8, z=None),
+                Row(x=10, y=None, z=None),
+            ]
+        )
+
+        actual = sk.count_nulls(df)
+        expected = spark.createDataFrame([Row(x=0, y=2, z=3)])
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.count_nulls)
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = sk.count_nulls(df, subset=["x", "z"])
+        expected = spark.createDataFrame([Row(x=0, z=3)])
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.count_nulls(subset=["x", "z"]))
+        self.assert_dataframe_equal(actual, expected)
+
     def test_cvf(self, spark: SparkSession):
         # single column
         counts = {"a": 3, "b": 1, "c": 1, "g": 2, "h": 1}

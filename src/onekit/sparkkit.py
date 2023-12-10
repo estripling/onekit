@@ -2,6 +2,8 @@ import functools
 from typing import (
     Callable,
     Iterable,
+    List,
+    Optional,
 )
 
 import toolz
@@ -14,11 +16,13 @@ from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql import types as T
 from toolz import curried
 
 import onekit.pythonkit as pk
 
 __all__ = (
+    "count_nulls",
     "cvf",
     "peek",
     "str_to_col",
@@ -27,6 +31,43 @@ __all__ = (
 
 SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
 SparkDFTransformFunc = Callable[[SparkDF], SparkDF]
+
+
+@toolz.curry
+def count_nulls(df: SparkDF, /, subset: Optional[List[str]] = None) -> SparkDF:
+    """Count null values in Spark dataframe.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=1, y=2, z=None),
+    ...         dict(x=4, y=None, z=6),
+    ...         dict(x=10, y=None, z=None),
+    ...     ]
+    ... )
+    >>> sk.count_nulls(df).show()
+    +---+---+---+
+    |  x|  y|  z|
+    +---+---+---+
+    |  0|  2|  2|
+    +---+---+---+
+    <BLANKLINE>
+
+    >>> # function is curried
+    >>> df.transform(sk.count_nulls(subset=["x", "z"])).show()
+    +---+---+
+    |  x|  z|
+    +---+---+
+    |  0|  2|
+    +---+---+
+    <BLANKLINE>
+    """
+    cols = subset or df.columns
+    return df.agg(*[F.sum(F.isnull(c).cast(T.LongType())).alias(c) for c in cols])
 
 
 def cvf(*cols: Iterable[str]) -> SparkDFTransformFunc:
