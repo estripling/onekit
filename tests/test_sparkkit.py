@@ -33,6 +33,24 @@ class TestSparkKit:
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
+    def test_add_suffix(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(a=1, b=2)])
+
+        # all columns
+        actual = sk.add_suffix(df, suffix="_sfx")
+        expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # with column selection
+        actual = sk.add_suffix(df, suffix="_sfx", subset=["a"])
+        expected = spark.createDataFrame([Row(a_sfx=1, b=2)])
+        self.assert_dataframe_equal(actual, expected)
+
+        # used as transformation function
+        actual = df.transform(functools.partial(sk.add_suffix, suffix="_sfx"))
+        expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
+        self.assert_dataframe_equal(actual, expected)
+
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
             [

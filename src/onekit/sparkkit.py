@@ -24,6 +24,7 @@ import onekit.pythonkit as pk
 
 __all__ = (
     "add_prefix",
+    "add_suffix",
     "count_nulls",
     "cvf",
     "join",
@@ -62,6 +63,35 @@ def add_prefix(
     cols = subset or df.columns
     for col in cols:
         df = df.withColumnRenamed(col, f"{prefix}{col}")
+    return df
+
+
+def add_suffix(
+    df: SparkDF,
+    /,
+    *,
+    suffix: str,
+    subset: Optional[List[str]] = None,
+) -> SparkDF:
+    """Add suffix to column names.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x=1, y=2)])
+    >>> sk.add_suffix(df, suffix="_sfx").show()
+    +-----+-----+
+    |x_sfx|y_sfx|
+    +-----+-----+
+    |    1|    2|
+    +-----+-----+
+    <BLANKLINE>
+    """
+    cols = subset or df.columns
+    for col in cols:
+        df = df.withColumnRenamed(col, f"{col}{suffix}")
     return df
 
 
