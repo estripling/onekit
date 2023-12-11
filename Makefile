@@ -7,6 +7,8 @@ POETRY := poetry
 	check \
 	run-precommit \
 	run-tests \
+	run-slow-tests \
+	run-slow-doctests \
 	clear-cache \
 	create-docs \
 	remove-docs \
@@ -27,7 +29,9 @@ help:
 	@echo 'commands:'
 	@echo ' - check                             ;; run pre-commit and tests consecutively'
 	@echo ' - run-precommit                     ;; run pre-commit'
-	@echo ' - run-tests                         ;; run pytest with coverage report'
+	@echo ' - run-tests                         ;; run tests with coverage report'
+	@echo ' - run-slow-tests                    ;; run slow tests with coverage report'
+	@echo ' - run-slow-doctests                 ;; run slow doctests'
 	@echo ' - clear-cache                       ;; clear cache files and directories'
 	@echo ' - create-docs                       ;; create local documentation files'
 	@echo ' - remove-docs                       ;; remove local documentation files'
@@ -54,6 +58,16 @@ run-precommit:
 
 run-tests:
 	$(PYTHON) -m pytest --doctest-modules --ignore-glob="src/onekit/sparkkit.py" src/ --cov-report term-missing --cov=src/ tests/
+	@echo
+
+
+run-slow-tests:
+	$(PYTHON) -m pytest --slow --doctest-modules --ignore-glob="src/onekit/sparkkit.py" src/ --cov-report term-missing --cov=src/ tests/
+	@echo
+
+
+run-slow-doctests:
+	$(PYTHON) -m pytest --doctest-modules src/
 	@echo
 
 
