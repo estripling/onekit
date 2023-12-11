@@ -31,6 +31,7 @@ __all__ = (
     "peek",
     "str_to_col",
     "union",
+    "with_endofweek_date",
     "with_index",
     "with_weekday",
 )
@@ -408,6 +409,68 @@ def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
     <BLANKLINE>
     """
     return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
+
+
+def with_endofweek_date(
+    date_col: str,
+    new_col: str,
+    last_weekday: str = "Sun",
+) -> SparkDFTransformFunc:
+    """Add column with the end of the week date.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(day="2023-05-01"),
+    ...         dict(day=None),
+    ...         dict(day="2023-05-03"),
+    ...         dict(day="2023-05-08"),
+    ...         dict(day="2023-05-21"),
+    ...     ],
+    ... )
+    >>> df.transform(sk.with_endofweek_date("day", "endofweek")).show()
+    +----------+----------+
+    |       day| endofweek|
+    +----------+----------+
+    |2023-05-01|2023-05-07|
+    |      null|      null|
+    |2023-05-03|2023-05-07|
+    |2023-05-08|2023-05-14|
+    |2023-05-21|2023-05-21|
+    +----------+----------+
+    <BLANKLINE>
+
+    >>> df.transform(sk.with_endofweek_date("day", "endofweek", "Sat")).show()
+    +----------+----------+
+    |       day| endofweek|
+    +----------+----------+
+    |2023-05-01|2023-05-06|
+    |      null|      null|
+    |2023-05-03|2023-05-06|
+    |2023-05-08|2023-05-13|
+    |2023-05-21|2023-05-27|
+    +----------+----------+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        tmp_col = "_weekday_"
+        return (
+            df.transform(with_weekday(date_col, tmp_col))
+            .withColumn(
+                new_col,
+                F.when(F.col(tmp_col).isNull(), None)
+                .when(F.col(tmp_col) == last_weekday, F.col(date_col))
+                .otherwise(F.next_day(F.col(date_col), last_weekday)),
+            )
+            .drop(tmp_col)
+        )
+
+    return inner
 
 
 def with_index(new_col: str, /) -> SparkDFTransformFunc:
