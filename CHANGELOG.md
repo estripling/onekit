@@ -2,6 +2,71 @@
 
 
 
+## v0.11.0 (2023-12-11)
+
+### Feature
+
+* feat: add spark functions (#41)
+
+* feat(sparkkit): add count_nulls
+
+* feat(sparkkit): add join
+
+* feat(sparkkit): add add_prefix
+
+* refactor(count_nulls): add asterisk in signature
+
+* feat(sparkkit): add add_suffix
+
+* refactor: curry functions
+
+* feat(sparkkit): add daterange
+
+* refactor(daycount): rename start to d0
+
+* refactor(daterange): rename parameters
+
+* feat(sparkkit): add with_index
+
+* style(with_index): positional parameter
+
+* refactor: use spark transform func
+
+* feat(sparkkit): add with_weekday
+
+* feat(sparkkit): add with_endofweek_date
+
+* style(with_index): rephrase docstring header
+
+* feat(sparkkit): add with_startofweek_date
+
+* refactor: use transform pattern
+
+* build(Makefile): add commands for running slow tests
+
+* feat(sparkkit): add validation functions
+
+* feat(sparkkit): add evaluation functions ([`d421ac4`](https://github.com/estripling/onekit/commit/d421ac40170bf0c2d9222d1cc7cab618a73d7678))
+
+* feat: add pandaskit (#39)
+
+* feat(pandaskit): add union
+
+* feat(pandaskit): add join
+
+* test: refactor pandas test_union
+
+* feat(pandaskit): add profile ([`60e9a09`](https://github.com/estripling/onekit/commit/60e9a094cc38e05566609ed31d6d87934bf27663))
+
+### Refactor
+
+* refactor: rename num variables + type hints (#40)
+
+* refactor: int values as n
+
+* test: add type hints ([`6269e3a`](https://github.com/estripling/onekit/commit/6269e3a38ab07b9cb685cec769b65e3bdb8036fa))
+
+
 ## v0.10.1 (2023-11-22)
 
 ### Documentation
