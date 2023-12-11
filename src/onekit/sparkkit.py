@@ -57,17 +57,6 @@ def add_prefix(prefix: str, /, *, subset=None) -> SparkDFTransformFunc:
     |    1|    2|
     +-----+-----+
     <BLANKLINE>
-
-    >>> add_prefix__pfx = sk.add_prefix("pfx_")
-    >>> type(add_prefix__pfx)
-    <class 'function'>
-    >>> add_prefix__pfx(df).show()
-    +-----+-----+
-    |pfx_x|pfx_y|
-    +-----+-----+
-    |    1|    2|
-    +-----+-----+
-    <BLANKLINE>
     """
 
     def inner(df: SparkDF, /) -> SparkDF:
@@ -89,17 +78,6 @@ def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([dict(x=1, y=2)])
     >>> df.transform(sk.add_suffix("_sfx")).show()
-    +-----+-----+
-    |x_sfx|y_sfx|
-    +-----+-----+
-    |    1|    2|
-    +-----+-----+
-    <BLANKLINE>
-
-    >>> add_suffix__sfx = sk.add_suffix("_sfx")
-    >>> type(add_suffix__sfx)
-    <class 'function'>
-    >>> add_suffix__sfx(df).show()
     +-----+-----+
     |x_sfx|y_sfx|
     +-----+-----+

@@ -20,12 +20,12 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_prefix("pfx_")(df)
+        actual = df.transform(sk.add_prefix("pfx_"))
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_prefix("pfx_", subset=["a"])(df)
+        actual = df.transform(sk.add_prefix("pfx_", subset=["a"]))
         expected = spark.createDataFrame([Row(pfx_a=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -44,12 +44,12 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = sk.add_suffix("_sfx")(df)
+        actual = df.transform(sk.add_suffix("_sfx"))
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = sk.add_suffix("_sfx", subset=["a"])(df)
+        actual = df.transform(sk.add_suffix("_sfx", subset=["a"]))
         expected = spark.createDataFrame([Row(a_sfx=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -107,10 +107,6 @@ class TestSparkKit:
         for cols in ["x", ["x"], F.col("x")]:
             actual = df.transform(sk.cvf(cols))
             self.assert_dataframe_equal(actual, expected)
-
-        # use as function directly
-        actual = sk.cvf("x")(df)
-        self.assert_dataframe_equal(actual, expected)
 
         # multiple columns
         df = spark.createDataFrame(
@@ -417,7 +413,7 @@ class TestSparkKit:
                 Row(day=None),
             ]
         )
-        actual = sk.with_weekday("day", "weekday")(df)
+        actual = df.transform(sk.with_weekday("day", "weekday"))
         expected = spark.createDataFrame(
             [
                 Row(day="2023-05-01", weekday="Mon"),
@@ -432,8 +428,8 @@ class TestSparkKit:
         )
         self.assert_dataframe_equal(actual, expected)
 
-        actual = sk.with_weekday("day", "weekday")(
-            df.withColumn("day", F.to_date("day", "yyyy-MM-dd"))
+        actual = df.withColumn("day", F.to_date("day", "yyyy-MM-dd")).transform(
+            sk.with_weekday("day", "weekday")
         )
         self.assert_dataframe_equal(
             actual,
