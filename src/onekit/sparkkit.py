@@ -32,6 +32,10 @@ __all__ = (
     "count_nulls",
     "cvf",
     "daterange",
+    "is_dataframe_equal",
+    "is_row_count_equal",
+    "is_row_equal",
+    "is_schema_equal",
     "join",
     "peek",
     "str_to_col",
@@ -481,6 +485,136 @@ def daterange(
         )
         .withColumn(new_col, F.explode(new_col))
     )
+
+
+def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
+    """Evaluate if both dataframes are equal.
+
+    See Also
+    --------
+    is_schema_equal : Evaluate schemas.
+    is_row_count_equal : Evaluate row counts.
+    is_row_equal : Evaluate rows.
+
+    Examples
+    --------
+    >>> from pyspark.sql import Row, SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> sk.is_dataframe_equal(lft_df, rgt_df)
+    True
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(z=1, y="a", x=9), Row(z=3, y="b", x=8)])
+    >>> sk.is_dataframe_equal(lft_df, rgt_df)
+    False
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2)])
+    >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6)])
+    >>> sk.is_dataframe_equal(lft_df, rgt_df)
+    False
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4), Row(x=5, y=6)])
+    >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=9), Row(x=7, y=8)])
+    >>> sk.is_dataframe_equal(lft_df, rgt_df)
+    False
+    """
+    try:
+        check_schema_equal(lft_df, rgt_df)
+        check_row_count_equal(lft_df, rgt_df)
+        check_row_equal(lft_df, rgt_df)
+        return True
+    except SparkkitError:
+        return False
+
+
+def is_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
+    """Evaluate if row counts of both dataframes are equal.
+
+    See Also
+    --------
+    is_dataframe_equal : Evaluate dataframes.
+
+    Examples
+    --------
+    >>> from pyspark.sql import Row, SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> sk.is_row_count_equal(lft_df, rgt_df)
+    True
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1)])
+    >>> sk.is_row_count_equal(lft_df, rgt_df)
+    False
+    """
+    try:
+        check_row_count_equal(lft_df, rgt_df)
+        return True
+    except RowCountMismatchError:
+        return False
+
+
+def is_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
+    """Evaluate if rows of both dataframes are equal.
+
+    See Also
+    --------
+    is_dataframe_equal : Evaluate dataframes.
+
+    Examples
+    --------
+    >>> from pyspark.sql import Row, SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> sk.is_row_equal(lft_df, rgt_df)
+    True
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6), Row(x=7, y=8)])
+    >>> sk.is_row_equal(lft_df, rgt_df)
+    False
+    """
+    try:
+        check_row_equal(lft_df, rgt_df)
+        return True
+    except RowMismatchError:
+        return False
+
+
+def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
+    """Evaluate if schemas of both dataframes are equal.
+
+    See Also
+    --------
+    is_dataframe_equal : Evaluate dataframes.
+
+    Examples
+    --------
+    >>> from pyspark.sql import Row, SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> sk.is_schema_equal(lft_df, rgt_df)
+    True
+
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1), Row(x=3)])
+    >>> sk.is_schema_equal(lft_df, rgt_df)
+    False
+    """
+    try:
+        check_schema_equal(lft_df, rgt_df)
+        return True
+    except SchemaMismatchError:
+        return False
 
 
 def join(

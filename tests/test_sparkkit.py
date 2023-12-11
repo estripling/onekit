@@ -208,6 +208,46 @@ class TestSparkKit:
         actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
         self.assert_dataframe_equal(actual, expected)
 
+    def test_is_dataframe_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df__different = spark.createDataFrame([Row(x=1)])
+
+        assert sk.is_dataframe_equal(lft_df, rgt_df__equal)
+        assert not sk.is_dataframe_equal(lft_df, rgt_df__different)
+
+    def test_is_row_count_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1), Row(x=3)])
+        rgt_df__different = spark.createDataFrame([Row(x=1)])
+
+        assert sk.is_row_count_equal(lft_df, rgt_df__equal)
+        assert not sk.is_row_count_equal(lft_df, rgt_df__different)
+
+    def test_is_row_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df__different = spark.createDataFrame([Row(x=1, y=7), Row(x=3, y=9)])
+
+        assert sk.is_row_equal(lft_df, rgt_df__equal)
+        assert not sk.is_row_equal(lft_df, rgt_df__different)
+
+    def test_is_schema_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df__different_type = spark.createDataFrame(
+            [Row(x=1, y="2"), Row(x=3, y="4")]
+        )
+        rgt_df__different_size = spark.createDataFrame([Row(x=1), Row(x=3)])
+
+        assert sk.is_schema_equal(lft_df, rgt_df__equal)
+        assert not sk.is_schema_equal(lft_df, rgt_df__different_type)
+        assert not sk.is_schema_equal(lft_df, rgt_df__different_size)
+
     def test_join(self, spark: SparkSession):
         df1 = spark.createDataFrame([dict(id=1, x="a"), dict(id=2, x="b")])
         df2 = spark.createDataFrame([dict(id=1, y="c"), dict(id=2, y="d")])
