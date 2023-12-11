@@ -64,6 +64,51 @@ class TestSparkKit:
         expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
+    def test_check_dataframe_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        assert sk.check_dataframe_equal(lft_df, rgt_df) is None
+
+    def test_check_row_count_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1), Row(x=3)])
+        rgt_df__different = spark.createDataFrame([Row(x=1)])
+
+        assert sk.check_row_count_equal(lft_df, rgt_df__equal) is None
+
+        with pytest.raises(sk.RowCountMismatchError):
+            sk.check_row_count_equal(lft_df, rgt_df__different)
+
+    def test_check_row_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df__different = spark.createDataFrame([Row(x=1, y=7), Row(x=3, y=9)])
+
+        assert sk.check_row_equal(lft_df, rgt_df__equal) is None
+
+        with pytest.raises(sk.RowMismatchError):
+            sk.check_row_equal(lft_df, rgt_df__different)
+
+    def test_check_schema_equal(self, spark: SparkSession):
+        lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+
+        rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        rgt_df__different_type = spark.createDataFrame(
+            [Row(x=1, y="2"), Row(x=3, y="4")]
+        )
+        rgt_df__different_size = spark.createDataFrame([Row(x=1), Row(x=3)])
+
+        assert sk.check_schema_equal(lft_df, rgt_df__equal) is None
+
+        with pytest.raises(sk.SchemaMismatchError):
+            sk.check_schema_equal(lft_df, rgt_df__different_type)
+
+        with pytest.raises(sk.SchemaMismatchError):
+            sk.check_schema_equal(lft_df, rgt_df__different_size)
+
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
