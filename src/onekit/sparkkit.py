@@ -474,7 +474,7 @@ def with_endofweek_date(
 
 
 def with_index(new_col: str, /) -> SparkDFTransformFunc:
-    """Add an index column with consecutive positive integers.
+    """Add column with an index of consecutive positive integers.
 
     Examples
     --------
