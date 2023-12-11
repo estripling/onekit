@@ -33,6 +33,7 @@ __all__ = (
     "union",
     "with_endofweek_date",
     "with_index",
+    "with_startofweek_date",
     "with_weekday",
 )
 
@@ -497,6 +498,63 @@ def with_index(new_col: str, /) -> SparkDFTransformFunc:
     def inner(df: SparkDF, /) -> SparkDF:
         w = Window.partitionBy(F.lit(1)).orderBy(F.monotonically_increasing_id())
         return df.withColumn(new_col, F.row_number().over(w))
+
+    return inner
+
+
+def with_startofweek_date(
+    date_col: str,
+    new_col: str,
+    last_weekday: str = "Sun",
+) -> SparkDFTransformFunc:
+    """Add column with the start of the week date.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(day="2023-05-01"),
+    ...         dict(day=None),
+    ...         dict(day="2023-05-03"),
+    ...         dict(day="2023-05-08"),
+    ...         dict(day="2023-05-21"),
+    ...     ],
+    ... )
+    >>> df.transform(sk.with_startofweek_date("day", "startofweek")).show()
+    +----------+-----------+
+    |       day|startofweek|
+    +----------+-----------+
+    |2023-05-01| 2023-05-01|
+    |      null|       null|
+    |2023-05-03| 2023-05-01|
+    |2023-05-08| 2023-05-08|
+    |2023-05-21| 2023-05-15|
+    +----------+-----------+
+    <BLANKLINE>
+
+    >>> df.transform(sk.with_startofweek_date("day", "startofweek", "Sat")).show()
+    +----------+-----------+
+    |       day|startofweek|
+    +----------+-----------+
+    |2023-05-01| 2023-04-30|
+    |      null|       null|
+    |2023-05-03| 2023-04-30|
+    |2023-05-08| 2023-05-07|
+    |2023-05-21| 2023-05-21|
+    +----------+-----------+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        tmp_col = "_endofweek_"
+        return (
+            df.transform(with_endofweek_date(date_col, tmp_col, last_weekday))
+            .withColumn(new_col, F.date_sub(tmp_col, 6))
+            .drop(tmp_col)
+        )
 
     return inner
 

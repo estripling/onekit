@@ -324,6 +324,86 @@ class TestSparkKit:
         )
         self.assert_dataframe_equal(actual, expected)
 
+    def test_with_startofweek_date(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(day="2023-04-30"),
+                Row(day="2023-05-01"),
+                Row(day="2023-05-02"),
+                Row(day="2023-05-03"),
+                Row(day="2023-05-04"),
+                Row(day="2023-05-05"),
+                Row(day="2023-05-06"),
+                Row(day="2023-05-07"),
+                Row(day="2023-05-08"),
+                Row(day=None),
+            ]
+        )
+        actual = df.transform(sk.with_startofweek_date("day", "startofweek"))
+        expected = spark.createDataFrame(
+            [
+                Row(day="2023-04-30", startofweek=dt.date(2023, 4, 24)),
+                Row(day="2023-05-01", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-02", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-03", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-04", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-05", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-06", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-07", startofweek=dt.date(2023, 5, 1)),
+                Row(day="2023-05-08", startofweek=dt.date(2023, 5, 8)),
+                Row(day=None, startofweek=None),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.with_startofweek_date("day", "startofweek", "Sat"))
+        expected = spark.createDataFrame(
+            [
+                Row(day="2023-04-30", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-01", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-02", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-03", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-04", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-05", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-06", startofweek=dt.date(2023, 4, 30)),
+                Row(day="2023-05-07", startofweek=dt.date(2023, 5, 7)),
+                Row(day="2023-05-08", startofweek=dt.date(2023, 5, 7)),
+                Row(day=None, startofweek=None),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        df = spark.createDataFrame(
+            [
+                Row(day=dt.date(2023, 4, 30)),
+                Row(day=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 2)),
+                Row(day=dt.date(2023, 5, 3)),
+                Row(day=dt.date(2023, 5, 4)),
+                Row(day=dt.date(2023, 5, 5)),
+                Row(day=dt.date(2023, 5, 6)),
+                Row(day=dt.date(2023, 5, 7)),
+                Row(day=dt.date(2023, 5, 8)),
+                Row(day=None),
+            ]
+        )
+        actual = df.transform(sk.with_startofweek_date("day", "startofweek"))
+        expected = spark.createDataFrame(
+            [
+                Row(day=dt.date(2023, 4, 30), startofweek=dt.date(2023, 4, 24)),
+                Row(day=dt.date(2023, 5, 1), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 2), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 3), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 4), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 5), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 6), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 7), startofweek=dt.date(2023, 5, 1)),
+                Row(day=dt.date(2023, 5, 8), startofweek=dt.date(2023, 5, 8)),
+                Row(day=None, startofweek=None),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
     def test_with_weekday(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
