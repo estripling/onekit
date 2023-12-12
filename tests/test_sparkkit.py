@@ -529,15 +529,7 @@ class TestSparkKit:
     @staticmethod
     def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:
         """Assert that the left and right data frames are equal."""
-        lft_schema = lft_df.schema.simpleString()
-        rgt_schema = rgt_df.schema.simpleString()
-        assert lft_schema == rgt_schema, "schema mismatch"
-
-        assert lft_df.count() == rgt_df.count(), "row count mismatch"
-
-        lft_rows = lft_df.subtract(rgt_df)
-        rgt_rows = rgt_df.subtract(lft_df)
-        assert (lft_rows.count() == 0) and (rgt_rows.count() == 0), "row mismatch"
+        sk.check_dataframe_equal(lft_df, rgt_df)
 
     @pytest.fixture(scope="class")
     def spark(self) -> SparkSession:
