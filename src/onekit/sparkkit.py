@@ -58,17 +58,11 @@ class RowCountMismatchError(SparkkitError):
     """Exception if row counts mismatch."""
 
     def __init__(self, n_lft: int, n_rgt: int):
+        n_diff = abs(n_lft - n_rgt)
         self.n_lft = n_lft
         self.n_rgt = n_rgt
-        self.difference = n_lft - n_rgt
-        self.ratio = n_lft / n_rgt
-        self.message = pk.concat_strings(
-            os.linesep,
-            f"{n_lft=:,}",
-            f"{n_rgt=:,}",
-            f"{n_lft - n_rgt=:,}",
-            f"{n_lft / n_rgt=:g}",
-        )
+        self.n_diff = n_diff
+        self.message = f"{n_lft=:_}, {n_rgt=:_}, {n_diff=:_}"
         super().__init__(self.message)
 
 
@@ -80,7 +74,7 @@ class RowMismatchError(SparkkitError):
         self.rgt_rows = rgt_rows
         self.n_lft = n_lft
         self.n_rgt = n_rgt
-        self.message = f"{n_lft=:,} {n_rgt=:,}"
+        self.message = f"{n_lft=:_}, {n_rgt=:_}"
         super().__init__(self.message)
 
 
@@ -91,8 +85,8 @@ class SchemaMismatchError(SparkkitError):
         self.lft_schema = lft_schema
         self.rgt_schema = rgt_schema
         msg = pk.highlight_string_differences(lft_schema, rgt_schema)
-        n_differences = sum(c == "|" for c in msg.splitlines()[1])
-        self.message = pk.concat_strings(os.linesep, f"{n_differences=}", msg)
+        n_diff = sum(c == "|" for c in msg.splitlines()[1])
+        self.message = pk.concat_strings(os.linesep, f"{n_diff=}", msg)
         super().__init__(self.message)
 
 
@@ -185,7 +179,7 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.SchemaMismatchError as error:
     ...     print(error)
     ...
-    n_differences=15
+    n_diff=15
     struct<x:bigint,y:bigint>
            |          |||  |||||||||||
     struct<z:bigint,y:string,x:bigint>
@@ -197,10 +191,7 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.RowCountMismatchError as error:
     ...     print(error)
     ...
-    n_lft=1
-    n_rgt=2
-    n_lft - n_rgt=-1
-    n_lft / n_rgt=0.5
+    n_lft=1, n_rgt=2, n_diff=1
 
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4), Row(x=5, y=6)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=9), Row(x=7, y=8)])
@@ -209,7 +200,7 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.RowMismatchError as error:
     ...     print(error)
     ...
-    n_lft=2 n_rgt=2
+    n_lft=2, n_rgt=2
     """
     check_schema_equal(lft_df, rgt_df)
     check_row_count_equal(lft_df, rgt_df)
@@ -245,10 +236,7 @@ def check_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.RowCountMismatchError as error:
     ...     print(error)
     ...
-    n_lft=2
-    n_rgt=1
-    n_lft - n_rgt=1
-    n_lft / n_rgt=2
+    n_lft=2, n_rgt=1, n_diff=1
     """
     n_lft = lft_df.count()
     n_rgt = rgt_df.count()
@@ -286,7 +274,7 @@ def check_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.RowMismatchError as error:
     ...     print(error)
     ...
-    n_lft=1 n_rgt=2
+    n_lft=1, n_rgt=2
     """
     lft_rows = lft_df.subtract(rgt_df)
     rgt_rows = rgt_df.subtract(lft_df)
@@ -329,7 +317,7 @@ def check_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ... except sk.SchemaMismatchError as error:
     ...     print(error)
     ...
-    n_differences=10
+    n_diff=10
     struct<x:bigint,y:bigint>
                    ||||||||||
     struct<x:bigint>
