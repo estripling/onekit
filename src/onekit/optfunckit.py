@@ -252,6 +252,17 @@ def negate(fx: float) -> float:
     >>> import onekit.optfunckit as ofk
     >>> ofk.negate(1.0)
     -1.0
+
+    >>> # transform into a maximization problem
+    >>> import toolz
+    >>> import onekit.optfunckit as ofk
+    >>> problem = toolz.compose_left(ofk.ackley, ofk.negate)
+    >>> round(problem([0, 0]), 4)
+    0.0
+    >>> round(problem([1, 2]), 4)
+    -5.4221
+    >>> round(problem([1, 2, 3]), 4)
+    -7.0165
     """
     return 0.0 if np.isclose(fx, 0) else -float(fx)
 
