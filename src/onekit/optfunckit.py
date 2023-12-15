@@ -93,10 +93,10 @@ def beale(x: Vector, /) -> float:
 
     .. math::
 
-       f(\\mathbf{x}) =
-       \\left( 1.5 - x_{1} + x_{1} x_{2} \\right)^{2}
-       + \\left( 2.25 - x_{1} + x_{1} x_{2}^{2} \\right)^{2}
-       + \\left( 2.625 - x_{1} + x_{1} x_{2}^{3}\\right)^{2}
+        f(\\mathbf{x}) =
+        \\left( 1.5 - x_{1} + x_{1} x_{2} \\right)^{2}
+        + \\left( 2.25 - x_{1} + x_{1} x_{2}^{2} \\right)^{2}
+        + \\left( 2.625 - x_{1} + x_{1} x_{2}^{3}\\right)^{2}
 
     References
     ----------
@@ -429,7 +429,7 @@ def sphere(x: Vector, /) -> float:
 
     .. math::
 
-       f(\\mathbf{x}) = \\sum_{i=1}^{n} x_i^2
+        f(\\mathbf{x}) = \\sum_{i=1}^{n} x_i^2
 
     Examples
     --------
