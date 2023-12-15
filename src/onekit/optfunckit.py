@@ -19,6 +19,7 @@ import toolz
 __all__ = (
     "ackley",
     "beale",
+    "bump",
     "check_vector",
     "fetch_minima",
     "negate",
@@ -124,6 +125,44 @@ def beale(x: Vector, /) -> float:
     return float(f1 + f2 + f3)
 
 
+def bump(x: Vector, /) -> float:
+    """Bump function.
+
+    A function :math:`f\\colon \\mathbb{R}^{n} \\rightarrow \\mathbb{R}`
+    that takes an :math:`n`-vector as input and returns a scalar value.
+    [bump]_
+
+    .. math::
+
+        f(\\mathbf{x}) =
+        \\begin{cases}
+            -\\exp\\left(-\\frac{1}{1 - r^{2}}\\right)
+              & \\text{ if } r = ||\\mathbf{x}|| < 1 \\\\
+            0 & \\text{ otherwise }
+        \\end{cases}
+
+    References
+    ----------
+    .. [bump] "Bump function", Wikipedia,
+        `<https://en.wikipedia.org/wiki/Bump_function>`_
+
+    Examples
+    --------
+    >>> import onekit.optfunckit as ofk
+    >>> round(ofk.bump([0, 0]), 4)
+    -0.3679
+
+    >>> round(ofk.bump([0.5, 0.5]), 4)
+    -0.1353
+
+    >>> ofk.bump([1, 1])
+    0.0
+    """
+    x = check_vector(x)
+    r = np.sqrt((x**2).sum())
+    return negate(np.exp(-1 / (1 - r**2)) if r < 1 else 0)
+
+
 def check_vector(x: np.array, /, *, n_min: int = 1, n_max: int = np.inf) -> Vector:
     """Validate :math:`n`-vector.
 
@@ -179,6 +218,7 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
     minima = {
         ackley: [Minimum(check_vector([0] * n), 0)],
         beale: [Minimum(check_vector([3, 0.5]), 0)],
+        bump: [Minimum(check_vector([0] * n), -0.36787944117144233)],
         peaks: [
             Minimum(
                 check_vector([0.228279999979237, -1.625531071954464]),

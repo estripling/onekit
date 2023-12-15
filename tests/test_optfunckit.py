@@ -35,6 +35,25 @@ def test_beale(x: ofk.Vector, expected: float):
     assert round(actual, 4) == expected
 
 
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        ([0], -0.3679),
+        ([0, 0], -0.3679),
+        ([0, 0, 0], -0.3679),
+        ([0.5], -0.2636),
+        ([0.5, 0.5], -0.1353),
+        ([0.5, 0.5, 0.5], -0.0183),
+        ([1], 0.0),
+        ([1, 1], 0.0),
+        ([1, 1, 1], 0.0),
+    ],
+)
+def test_bump(x: ofk.Vector, expected: float):
+    actual = ofk.bump(x)
+    assert round(actual, 4) == expected
+
+
 def test_check_vector():
     x = [1, 2, 3]
     actual = ofk.check_vector(x)
