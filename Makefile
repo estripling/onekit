@@ -22,7 +22,8 @@ POETRY := poetry
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
 	install-dependencies-pandaskit \
-	install-dependencies-sparkkit
+	install-dependencies-sparkkit \
+	install-dependencies-vizkit
 
 
 help:
@@ -46,6 +47,7 @@ help:
 	@echo ' - install-dependencies-pythonkit    ;; auxiliary command to install dependencies with poetry for pythonkit'
 	@echo ' - install-dependencies-pandaskit    ;; auxiliary command to install dependencies with poetry for pandaskit'
 	@echo ' - install-dependencies-sparkkit     ;; auxiliary command to install dependencies with poetry for sparkkit'
+	@echo ' - install-dependencies-vizkit       ;; auxiliary command to install dependencies with poetry for vizkit'
 
 
 check: run-precommit run-tests
@@ -96,13 +98,15 @@ publish-package:
 	$(POETRY) publish
 
 
+# install as root
 install-dependencies: install-dependencies-precommit \
 	install-dependencies-testing \
 	install-dependencies-docs \
 	install-dependencies-packaging \
 	install-dependencies-pythonkit \
 	install-dependencies-pandaskit \
-	install-dependencies-sparkkit
+	install-dependencies-sparkkit \
+	install-dependencies-vizkit
 
 
 install-dependencies-precommit:
@@ -151,3 +155,8 @@ install-dependencies-pandaskit:
 install-dependencies-sparkkit:
 	$(POETRY) add --group sparkkit \
 	pyspark==3.1.1
+
+
+install-dependencies-vizkit:
+	$(POETRY) add --group vizkit \
+	"matplotlib>=3.7.1"
