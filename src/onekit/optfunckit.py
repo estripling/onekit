@@ -21,6 +21,7 @@ __all__ = (
     "beale",
     "check_vector",
     "fetch_minima",
+    "negate",
     "peaks",
     "rastrigin",
     "rosenbrock",
@@ -200,6 +201,28 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
         sphere: [Minimum(check_vector([0] * n), 0)],
     }
     return minima.get(func, None)
+
+
+def negate(fx: float) -> float:
+    """Change sign of real number.
+
+    By convention, the standard form for an optimization problem defines
+    a minimization problem. A maximization problem can be treated by negating
+    the objective function.
+    [opt]_
+
+    References
+    ----------
+    .. [opt] "Optimization problem", Wikipedia,
+        `<https://en.wikipedia.org/wiki/Optimization_problem>`_
+
+    Examples
+    --------
+    >>> import onekit.optfunckit as ofk
+    >>> ofk.negate(1.0)
+    -1.0
+    """
+    return 0.0 if np.isclose(fx, 0) else -float(fx)
 
 
 def peaks(x: Vector, /) -> float:

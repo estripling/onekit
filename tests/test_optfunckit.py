@@ -86,6 +86,20 @@ def test_fetch_minima(
 
 
 @pytest.mark.parametrize(
+    "fx, expected",
+    [
+        (-0.0, 0.0),
+        (0.0, 0.0),
+        (-1.0, 1.0),
+        (1.0, -1.0),
+    ],
+)
+def test_negate(fx: float, expected: float):
+    actual = ofk.negate(fx)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
     "x, expected",
     [
         ([0, 0], 0.9810),
