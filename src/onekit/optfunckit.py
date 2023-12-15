@@ -228,16 +228,7 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
         rastrigin: [Minimum(check_vector([0] * n), 0)],
         rosenbrock: [Minimum(check_vector([1] * n), 0)],
         schwefel: [Minimum(check_vector([420.9687] * n), 0)],
-        sinc: [
-            Minimum(
-                check_vector([-4.493409471849579]),
-                -0.217233628211222,
-            ),
-            Minimum(
-                check_vector([4.493409471849579]),
-                -0.217233628211222,
-            ),
-        ],
+        sinc: [Minimum(check_vector([0]), -1.0)],
         sphere: [Minimum(check_vector([0] * n), 0)],
     }
     return minima.get(func, None)
@@ -408,8 +399,8 @@ def sinc(x: Vector, /) -> float:
 
         f(\\mathbf{x}) =
         \\begin{cases}
-            \\frac{\\sin(x)}{x} & \\text{ if } x \\neq 0 \\\\
-            1 & \\text{ if } x = 0
+            -\\frac{\\sin(x)}{x} & \\text{ if } x \\neq 0 \\\\
+            -1 & \\text{ if } x = 0
         \\end{cases}
 
     References
@@ -421,13 +412,13 @@ def sinc(x: Vector, /) -> float:
     --------
     >>> import onekit.optfunckit as ofk
     >>> ofk.sinc([0])
-    1.0
+    -1.0
 
     >>> round(ofk.sinc([1]), 4)
-    0.8415
+    -0.8415
     """
     x = check_vector(x, n_min=1, n_max=1)[0]
-    return float(1 if x == 0 else np.sin(x) / x)
+    return negate(1 if x == 0 else np.sin(x) / x)
 
 
 def sphere(x: Vector, /) -> float:

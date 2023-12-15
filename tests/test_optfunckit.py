@@ -86,6 +86,7 @@ def test_check_vector():
         (ofk.ackley, 5, 0, np.zeros(5), 0),
         (ofk.rastrigin, 5, 0, np.zeros(5), 0),
         (ofk.rosenbrock, 5, 0, np.ones(5), 0),
+        (ofk.sinc, 1, 0, np.zeros(1), -1.0),
         (ofk.sphere, 5, 0, np.zeros(5), 0),
     ],
 )
@@ -192,8 +193,8 @@ def test_schwefel(x: ofk.Vector, expected: float):
 @pytest.mark.parametrize(
     "x, expected",
     [
-        ([0], 1.0),
-        ([1], 0.8415),
+        ([0], -1.0),
+        ([1], -0.8415),
     ],
 )
 def test_sinc(x: ofk.Vector, expected: float):
