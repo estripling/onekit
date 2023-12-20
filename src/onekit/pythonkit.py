@@ -58,6 +58,7 @@ __all__ = (
     "map_regex",
     "n_days",
     "num_to_str",
+    "op",
     "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
@@ -972,6 +973,31 @@ def num_to_str(x: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{x:_}"
+
+
+@toolz.curry
+def op(func: Callable, a: Any, x: Any, /) -> Any:
+    """Leverage operator functions.
+
+    Use ``op`` to create functions of ``x`` with fixed ``a``.
+
+    Examples
+    --------
+    >>> import operator
+    >>> import onekit.pythonkit as pk
+    >>> pk.op(operator.add, 1, 1)
+    2
+
+    >>> # function is curried
+    >>> inc = pk.op(operator.add, 1)
+    >>> inc(1)
+    2
+
+    >>> dec = pk.op(operator.sub, 1)
+    >>> dec(1)
+    0
+    """
+    return func(x, a)
 
 
 def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
