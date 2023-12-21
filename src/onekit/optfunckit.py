@@ -7,6 +7,7 @@ References
 """
 from typing import (
     Callable,
+    Dict,
     List,
     NamedTuple,
     Optional,
@@ -16,12 +17,16 @@ import numpy as np
 import numpy.typing as npt
 import toolz
 
+import onekit.vizkit as vk
+
 __all__ = (
     "ackley",
     "beale",
     "bump",
     "check_vector",
     "fetch_minima",
+    "get_plotters__func1n",
+    "get_plotters__func2n",
     "negate",
     "peaks",
     "rastrigin",
@@ -31,6 +36,7 @@ __all__ = (
     "sphere",
 )
 
+ArrayLike = npt.ArrayLike
 Vector = npt.NDArray[np.float64]
 
 
@@ -163,7 +169,7 @@ def bump(x: Vector, /) -> float:
     return negate(np.exp(-1 / (1 - r**2)) if r < 1 else 0)
 
 
-def check_vector(x: np.array, /, *, n_min: int = 1, n_max: int = np.inf) -> Vector:
+def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vector:
     """Validate :math:`n`-vector.
 
     Parameters
@@ -232,6 +238,109 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
         sphere: [Minimum(check_vector([0] * n), 0)],
     }
     return minima.get(func, None)
+
+
+def get_plotters__func1n() -> Dict[str, vk.FunctionPlotter]:
+    """Get FunctionPlotter instances for functions with 1-vector input."""
+    return {
+        "ackley": vk.FunctionPlotter(
+            func=ackley,
+            bounds=[(-5, 5)],
+            n_xvalues=1001,
+            points=[vk.Point(opt.x[0], opt.fx) for opt in fetch_minima(ackley, 1)],
+        ),
+        "peaks | x2=0": vk.FunctionPlotter(
+            func=lambda x: peaks([x[0], 0]),
+            bounds=[(-5, 5)],
+            n_xvalues=1001,
+            points=[vk.Point(-1.38744014, -2.8605256281989595)],
+        ),
+        "rastrigin": vk.FunctionPlotter(
+            func=rastrigin,
+            bounds=[(-5, 5)],
+            n_xvalues=1001,
+            points=[vk.Point(opt.x[0], opt.fx) for opt in fetch_minima(rastrigin, 1)],
+        ),
+        "sinc": vk.FunctionPlotter(
+            func=sinc,
+            bounds=[(-100, 100)],
+            n_xvalues=1001,
+            points=[vk.Point(opt.x[0], opt.fx) for opt in fetch_minima(sinc, 1)],
+        ),
+    }
+
+
+def get_plotters__func2n() -> Dict[str, vk.FunctionPlotter]:
+    """Get FunctionPlotter instances for functions with 2-vector input."""
+    return {
+        "ackley": vk.FunctionPlotter(
+            func=ackley,
+            bounds=[(-5, 5), (-5, 5)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx) for opt in fetch_minima(ackley, 2)
+            ],
+        ),
+        "beale": vk.FunctionPlotter(
+            func=beale,
+            bounds=[(-4.5, 4.5), (-4.5, 4.5)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx) for opt in fetch_minima(beale, 2)
+            ],
+        ),
+        "log1p(beale)": vk.FunctionPlotter(
+            func=toolz.compose_left(beale, np.log1p),
+            bounds=[(-4.5, 4.5), (-4.5, 4.5)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx) for opt in fetch_minima(beale, 2)
+            ],
+        ),
+        "peaks": vk.FunctionPlotter(
+            func=peaks,
+            bounds=[(-4, 4), (-4, 4)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx) for opt in fetch_minima(peaks, 2)
+            ],
+        ),
+        "rastrigin": vk.FunctionPlotter(
+            func=rastrigin,
+            bounds=[(-5.12, 5.12), (-5.12, 5.12)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx)
+                for opt in fetch_minima(rastrigin, 2)
+            ],
+        ),
+        "rosenbrock": vk.FunctionPlotter(
+            func=rosenbrock,
+            bounds=[(-2, 2), (-2, 2)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx)
+                for opt in fetch_minima(rosenbrock, 2)
+            ],
+        ),
+        "log1p(rosenbrock)": vk.FunctionPlotter(
+            func=toolz.compose_left(rosenbrock, np.log1p),
+            bounds=[(-2, 2), (-2, 2)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx)
+                for opt in fetch_minima(rosenbrock, 2)
+            ],
+        ),
+        "schwefel": vk.FunctionPlotter(
+            func=schwefel,
+            bounds=[(-500, 500), (-500, 500)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx)
+                for opt in fetch_minima(schwefel, 2)
+            ],
+        ),
+        "sphere": vk.FunctionPlotter(
+            func=sphere,
+            bounds=[(-2, 2), (-2, 2)],
+            points=[
+                vk.Point(opt.x[0], opt.x[1], opt.fx) for opt in fetch_minima(sphere, 2)
+            ],
+        ),
+    }
 
 
 def negate(fx: float) -> float:
