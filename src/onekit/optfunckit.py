@@ -1,7 +1,9 @@
-"""Single-objective test functions for minimization. [wiki]_
+"""Single-objective test functions for minimization. [ai-roomi]_ [wiki]_
 
 References
 ----------
+.. [ai-roomi] "Unconstrained Single-Objective Benchmark Functions Repository", AI-Roomi,
+    `<https://al-roomi.org/benchmarks/unconstrained>`_
 .. [wiki] "Test functions for optimization", Wikipedia,
     `<https://en.wikipedia.org/wiki/Test_functions_for_optimization>`_
 """
