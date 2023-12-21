@@ -1,6 +1,7 @@
 import datetime as dt
 import functools
 import math
+import operator
 import os
 import random
 import re
@@ -667,6 +668,32 @@ def test_source_code():
     actual = pk.source_code(greet)
     expected = '    def greet():\n        return "Hello, World!"\n'
     assert actual == expected
+
+
+class TestOp:
+    @pytest.mark.parametrize("x, expected", [(0, 1), (1, 2), (10, 11), (21, 22)])
+    def test_add(self, x: Any, expected: Any):
+        inc = pk.op(operator.add, 1)
+        actual = inc(x)
+        assert actual == expected
+
+    @pytest.mark.parametrize("x, expected", [(0, -1), (1, 0), (10, 9), (21, 20)])
+    def test_sub(self, x: Any, expected: Any):
+        dec = pk.op(operator.sub, 1)
+        actual = dec(x)
+        assert actual == expected
+
+    @pytest.mark.parametrize("x, expected", [(0, 0), (1, 2), (10, 20), (21, 42)])
+    def test_mul(self, x: Any, expected: Any):
+        mul2 = pk.op(operator.mul, 2)
+        actual = mul2(x)
+        assert actual == expected
+
+    @pytest.mark.parametrize("x, expected", [(0, 0), (1, 0.5), (10, 5), (21, 10.5)])
+    def test_truediv(self, x: Any, expected: Any):
+        div2 = pk.op(operator.truediv, 2)
+        actual = div2(x)
+        assert actual == expected
 
 
 class TestPromptYesNo:

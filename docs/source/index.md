@@ -15,6 +15,8 @@
 :hidden:
 
 examples.ipynb
+optfunckit.ipynb
+vizkit.ipynb
 changelog.md
 developers.md
 conduct.md

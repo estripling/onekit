@@ -5,6 +5,7 @@ import numpy.testing as npt
 import pytest
 
 import onekit.optfunckit as ofk
+import onekit.vizkit as vk
 
 
 @pytest.mark.parametrize(
@@ -103,6 +104,22 @@ def test_fetch_minima(
     npt.assert_array_almost_equal(opt.x, expected_x)
     assert opt.fx == expected_fx
     assert opt.n == n
+
+
+def test_get_plotters__func1n():
+    func1n_plotters = ofk.get_plotters__func1n()
+    for name, plotter in func1n_plotters.items():
+        assert isinstance(name, str)
+        assert isinstance(plotter, vk.FunctionPlotter)
+        assert isinstance(plotter.func, Callable)
+
+
+def test_get_plotters__func2n():
+    func2n_plotters = ofk.get_plotters__func2n()
+    for name, plotter in func2n_plotters.items():
+        assert isinstance(name, str)
+        assert isinstance(plotter, vk.FunctionPlotter)
+        assert isinstance(plotter.func, Callable)
 
 
 @pytest.mark.parametrize(

@@ -52,6 +52,9 @@ pandas = ">=0.23.2"
 [tool.poetry.group.sparkkit.dependencies]
 pyspark = "3.1.1"
 
+[tool.poetry.group.vizkit.dependencies]
+matplotlib = ">=3.7.1"
+
 [tool.black]
 line-length = 88
 target-version = ["py38"]
