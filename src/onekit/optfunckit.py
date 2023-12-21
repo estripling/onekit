@@ -1,7 +1,9 @@
-"""Single-objective test functions for minimization. [wiki]_
+"""Single-objective test functions for minimization. [ai-roomi]_ [wiki]_
 
 References
 ----------
+.. [ai-roomi] "Unconstrained Single-Objective Benchmark Functions Repository", AI-Roomi,
+    `<https://al-roomi.org/benchmarks/unconstrained>`_
 .. [wiki] "Test functions for optimization", Wikipedia,
     `<https://en.wikipedia.org/wiki/Test_functions_for_optimization>`_
 """
@@ -381,7 +383,7 @@ def peaks(x: Vector, /) -> float:
 
     A function :math:`f\\colon \\mathbb{R}^{2} \\rightarrow \\mathbb{R}`
     that takes a :math:`2`-vector as input and returns a scalar value.
-    [price2006]_
+    [peaks]_ [price2006]_
 
     .. math::
 
@@ -395,6 +397,8 @@ def peaks(x: Vector, /) -> float:
 
     References
     ----------
+    .. [peaks] "Peaks Function", AI-Roomi,
+        `<https://al-roomi.org/benchmarks/unconstrained/2-dimensions/63-peaks-function>`_
     .. [price2006] Price, K., Storn, R.M. & Lampinen, J.A., 2006.
         Differential Evolution: A Practical Approach to Global Optimization,
         Springer Berlin Heidelberg.

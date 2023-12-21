@@ -336,6 +336,11 @@ def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
     'Hello + World'
     >>> plus_concat(["Hello", "World"])
     'Hello + World'
+
+    >>> # map onto list of lists of strings
+    >>> ws_concat = partial(pk.concat_strings, " ")
+    >>> list(map(ws_concat, [["Hello", "World"], ["Hi", "there"]]))
+    ['Hello World', 'Hi there']
     """
     return sep.join(toolz.pipe(strings, flatten, curried.map(str)))
 

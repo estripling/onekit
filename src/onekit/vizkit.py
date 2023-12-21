@@ -164,9 +164,9 @@ class XyPoints(NamedTuple):
 class XyzPoints(NamedTuple):
     """(x, y, z) coordinate points."""
 
-    x: Matrix
-    y: Matrix
-    z: Matrix
+    x: Union[Vector, Matrix]
+    y: Union[Vector, Matrix]
+    z: Union[Vector, Matrix]
 
 
 class FunctionPlotter:
