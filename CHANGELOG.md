@@ -2,6 +2,39 @@
 
 
 
+## v0.12.0 (2023-12-21)
+
+### Feature
+
+* feat: add vizkit (#44)
+
+* build: add matplotlib dependency
+
+* feat(pythonkit): add op
+
+* feat: add vizkit ([`5f5e824`](https://github.com/estripling/onekit/commit/5f5e82466d69673c21c3e436787f0005de21bc3b))
+
+* feat: add fbench functions (#43)
+
+* feat: add test functions for minimization
+
+* feat(optfunckit): add negate
+
+* feat(optfunckit): add bump
+
+* refactor(sinc): negate
+
+* style(optfunckit): correct indentation
+
+* docs(peaks): add reference in docstring
+
+* docs(negate): add maximization example ([`173052f`](https://github.com/estripling/onekit/commit/173052f102696f8cb2f0652c7e8e19875f43556e))
+
+### Refactor
+
+* refactor: error messages (#42) ([`e7e353e`](https://github.com/estripling/onekit/commit/e7e353e234b8ebd32ce2b036e51122033e5c8837))
+
+
 ## v0.11.0 (2023-12-11)
 
 ### Feature
