@@ -19,13 +19,13 @@ import numpy as np
 import numpy.typing as npt
 import toolz
 
+import onekit.numpykit as npk
 import onekit.vizkit as vk
 
 __all__ = (
     "ackley",
     "beale",
     "bump",
-    "check_vector",
     "fetch_minima",
     "get_plotters__func1n",
     "get_plotters__func2n",
@@ -38,7 +38,6 @@ __all__ = (
     "sphere",
 )
 
-ArrayLike = npt.ArrayLike
 Vector = npt.NDArray[np.float64]
 
 
@@ -83,7 +82,7 @@ def ackley(x: Vector, /) -> float:
     >>> round(ofk.ackley([1, 2, 3]), 4)
     7.0165
     """
-    x = check_vector(x)
+    x = npk.check_vector(x)
     return float(
         -20 * np.exp(-0.2 * np.sqrt((x**2).mean()))
         - np.exp((np.cos(2 * np.pi * x)).sum() / len(x))
@@ -126,7 +125,7 @@ def beale(x: Vector, /) -> float:
     >>> round(ofk.beale([2, 2]), 4)
     356.7031
     """
-    x1, x2 = check_vector(x, n_min=2, n_max=2)
+    x1, x2 = npk.check_vector(x, n_min=2, n_max=2)
     f1 = (1.5 - x1 + x1 * x2) ** 2
     f2 = (2.25 - x1 + x1 * x2**2) ** 2
     f3 = (2.625 - x1 + x1 * x2**3) ** 2
@@ -166,47 +165,9 @@ def bump(x: Vector, /) -> float:
     >>> ofk.bump([1, 1])
     0.0
     """
-    x = check_vector(x)
+    x = npk.check_vector(x)
     r = np.sqrt((x**2).sum())
     return negate(np.exp(-1 / (1 - r**2)) if r < 1 else 0)
-
-
-def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vector:
-    """Validate :math:`n`-vector.
-
-    Parameters
-    ----------
-    x : array_like
-        The input object to be validated to represent an :math:`n`-vector.
-    n_min : int, default=1
-        Specify the minimum number of :math:`n`.
-    n_max : int, default=inf
-        Specify the maximum number of :math:`n`.
-
-    Raises
-    ------
-    TypeError
-        - If ``x`` is not vector-like.
-        - If ``n`` is not between ``n_min`` and ``n_max``.
-
-    Examples
-    --------
-    >>> import onekit.optfunckit as ofk
-    >>> ofk.check_vector([0, 0])
-    array([0, 0])
-    """
-    n_max = n_max or np.inf
-    x = np.atleast_1d(x)
-
-    if len(x.shape) != 1:
-        raise TypeError(f"input must be a vector-like object - it has shape={x.shape}")
-
-    if not (n_min <= len(x) <= n_max):
-        domain = f"[{n_min}, {n_max}"
-        domain = f"{domain}]" if np.isfinite(n_max) else f"{domain})"
-        raise TypeError(f"x with n={len(x)} - n must be an integer in {domain}")
-
-    return x
 
 
 @toolz.curry
@@ -224,20 +185,20 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
     5
     """
     minima = {
-        ackley: [Minimum(check_vector([0] * n), 0)],
-        beale: [Minimum(check_vector([3, 0.5]), 0)],
-        bump: [Minimum(check_vector([0] * n), -0.36787944117144233)],
+        ackley: [Minimum(npk.check_vector([0] * n), 0)],
+        beale: [Minimum(npk.check_vector([3, 0.5]), 0)],
+        bump: [Minimum(npk.check_vector([0] * n), -0.36787944117144233)],
         peaks: [
             Minimum(
-                check_vector([0.228279999979237, -1.625531071954464]),
+                npk.check_vector([0.228279999979237, -1.625531071954464]),
                 -6.551133332622496,
             )
         ],
-        rastrigin: [Minimum(check_vector([0] * n), 0)],
-        rosenbrock: [Minimum(check_vector([1] * n), 0)],
-        schwefel: [Minimum(check_vector([420.9687] * n), 0)],
-        sinc: [Minimum(check_vector([0]), -1.0)],
-        sphere: [Minimum(check_vector([0] * n), 0)],
+        rastrigin: [Minimum(npk.check_vector([0] * n), 0)],
+        rosenbrock: [Minimum(npk.check_vector([1] * n), 0)],
+        schwefel: [Minimum(npk.check_vector([420.9687] * n), 0)],
+        sinc: [Minimum(npk.check_vector([0]), -1.0)],
+        sphere: [Minimum(npk.check_vector([0] * n), 0)],
     }
     return minima.get(func, None)
 
@@ -409,7 +370,7 @@ def peaks(x: Vector, /) -> float:
     >>> round(ofk.peaks([0, 0]), 4)
     0.981
     """
-    x1, x2 = check_vector(x, n_min=2, n_max=2)
+    x1, x2 = npk.check_vector(x, n_min=2, n_max=2)
     f1 = 3 * (1 - x1) ** 2 * np.exp(-(x1**2) - (x2 + 1) ** 2)
     f2 = 10 * (x1 / 5 - x1**3 - x2**5) * np.exp(-(x1**2) - x2**2)
     f3 = 1 / 3 * np.exp(-((x1 + 1) ** 2) - x2**2)
@@ -443,7 +404,7 @@ def rastrigin(x: Vector, /) -> float:
     >>> round(ofk.rastrigin([1, 2, 3]), 4)
     14.0
     """
-    x = check_vector(x)
+    x = npk.check_vector(x)
     return float(10 * len(x) + (x**2 - 10 * np.cos(2 * np.pi * x)).sum())
 
 
@@ -479,7 +440,7 @@ def rosenbrock(x: Vector, /) -> float:
     >>> round(ofk.rosenbrock([3, 3]), 4)
     3604.0
     """
-    x = check_vector(x, n_min=2)
+    x = npk.check_vector(x, n_min=2)
     return float((100 * (x[1:] - x[:-1] ** 2) ** 2 + (1 - x[:-1]) ** 2).sum())
 
 
@@ -515,7 +476,7 @@ def schwefel(x: Vector, /) -> float:
     >>> round(ofk.schwefel([1, 2, 3]), 4)
     1251.1706
     """
-    x = check_vector(x)
+    x = npk.check_vector(x)
     n = len(x)
     return float(418.9829 * n - sum(x * np.sin(np.sqrt(np.abs(x)))))
 
@@ -549,7 +510,7 @@ def sinc(x: Vector, /) -> float:
     >>> round(ofk.sinc([1]), 4)
     -0.8415
     """
-    x = check_vector(x, n_min=1, n_max=1)[0]
+    x = npk.check_vector(x, n_min=1, n_max=1)[0]
     return negate(1 if x == 0 else np.sin(x) / x)
 
 
@@ -575,5 +536,5 @@ def sphere(x: Vector, /) -> float:
     >>> ofk.sphere([1, 2, 3])
     14.0
     """
-    x = check_vector(x)
+    x = npk.check_vector(x)
     return float((x**2).sum())
