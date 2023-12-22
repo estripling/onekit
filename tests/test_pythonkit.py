@@ -266,12 +266,6 @@ def test_extend_range(
             extend_range(xmin, xmax)
 
 
-def test_fibonacci():
-    actual = tuple(toolz.take(16, pk.fibonacci()))
-    expected = (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
-    assert actual == expected
-
-
 @pytest.mark.parametrize(
     "items, expected",
     [

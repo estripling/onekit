@@ -42,7 +42,6 @@ __all__ = (
     "daterange",
     "daycount",
     "extend_range",
-    "fibonacci",
     "flatten",
     "filter_regex",
     "func_name",
@@ -521,50 +520,6 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     new_xmax = xmax + factor * value_range
 
     return new_xmin, new_xmax
-
-
-def fibonacci() -> Generator:
-    """Generate the Fibonacci sequence.
-
-    For :math:`n > 1`, Fibonacci numbers may be defined by [f1]_ [f2]_:
-
-    .. math::
-
-        F(n) = F(n-1) + F(n-2) \\text{ with } F(0) = 0 \\text{ and } F(1) = 1.
-
-    As such, the sequence starts as follows:
-
-    .. math::
-
-        0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, \\dots
-
-    Yields
-    ------
-    int
-        A generator of consecutive Fibonacci numbers.
-
-    References
-    ----------
-    .. [f1] "Fibonacci numbers", The On-Line Encyclopedia of Integer Sequences®,
-            https://oeis.org/A000045
-    .. [f2] "Fibonacci number", Wikipedia,
-            https://en.wikipedia.org/wiki/Fibonacci_number
-
-    Examples
-    --------
-    >>> import toolz
-    >>> import onekit.pythonkit as pk
-    >>> list(toolz.take(13, pk.fibonacci()))
-    [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
-    """
-    lag2, lag1 = 0, 1
-    yield lag2
-    yield lag1
-
-    while True:
-        lag0 = lag2 + lag1
-        yield lag0
-        lag2, lag1 = lag1, lag0
 
 
 def filter_regex(

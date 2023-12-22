@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pytest
+import toolz
 
 import onekit.mathkit as mk
 
@@ -26,3 +27,9 @@ def test_collatz(n: int, expected: Tuple[int]):
     else:
         with pytest.raises(ValueError):
             tuple(mk.collatz(n))
+
+
+def test_fibonacci():
+    actual = tuple(toolz.take(16, mk.fibonacci()))
+    expected = (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
+    assert actual == expected
