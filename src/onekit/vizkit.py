@@ -17,7 +17,7 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-import onekit.optfunckit as ofk
+import onekit.numpykit as npk
 
 __all__ = (
     "Config",
@@ -332,15 +332,15 @@ class FunctionPlotter:
         return fig, ax, ax3d
 
     def _add_points(self, ax, ax3d):
-        x = ofk.check_vector([p.x for p in self._points])
-        y = ofk.check_vector([p.y for p in self._points])
+        x = npk.check_vector([p.x for p in self._points])
+        y = npk.check_vector([p.y for p in self._points])
 
         if ax is not None:
             xy_pts = XyPoints(x, y)
             ax = plot_xy_points(xy_pts, kws_scatter=self._kws_scatter, ax=ax)
 
         if ax3d is not None:
-            z = ofk.check_vector([p.z for p in self._points])
+            z = npk.check_vector([p.z for p in self._points])
             xyz_pts = XyzPoints(x, y, z)
             ax3d = plot_xyz_points(xyz_pts, kws_scatter=self._kws_scatter, ax=ax3d)
 
@@ -378,7 +378,7 @@ def create_xy_points(func: Func1n, x_values: ArrayLike, /) -> XyPoints:
     >>> vk.create_xy_points(ofk.sphere, [-2, -1, 0, 1, 2])
     XyPoints(x=array([-2, -1,  0,  1,  2]), y=array([4., 1., 0., 1., 4.]))
     """
-    x = ofk.check_vector(x_values, n_min=2)
+    x = npk.check_vector(x_values, n_min=2)
     y = np.apply_along_axis(func1d=func, axis=1, arr=np.c_[x.ravel()])
     return XyPoints(x, y)
 
@@ -404,8 +404,8 @@ def create_xyz_points(
            [1., 0., 1.],
            [2., 1., 2.]]))
     """
-    x_values = ofk.check_vector(x_values, n_min=2)
-    y_values = x_values if y_values is None else ofk.check_vector(y_values, n_min=2)
+    x_values = npk.check_vector(x_values, n_min=2)
+    y_values = x_values if y_values is None else npk.check_vector(y_values, n_min=2)
     x, y = np.meshgrid(x_values, y_values)
     z = np.apply_along_axis(func1d=func, axis=1, arr=np.c_[x.ravel(), y.ravel()])
     return XyzPoints(x, y, z.reshape(x.shape))

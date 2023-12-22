@@ -55,30 +55,6 @@ def test_bump(x: ofk.Vector, expected: float):
     assert round(actual, 4) == expected
 
 
-def test_check_vector():
-    x = [1, 2, 3]
-    actual = ofk.check_vector(x)
-    npt.assert_array_equal(actual, np.array(x))
-
-    with pytest.raises(
-        TypeError,
-        match=r"input must be a vector-like object - it has shape=\(1, 2\)",
-    ):
-        ofk.check_vector([[1, 2]])
-
-    with pytest.raises(
-        TypeError,
-        match=r"x with n=2 - n must be an integer in \[3, inf\)",
-    ):
-        ofk.check_vector([1, 2], n_min=3)
-
-    with pytest.raises(
-        TypeError,
-        match=r"x with n=1 - n must be an integer in \[2, 2\]",
-    ):
-        ofk.check_vector([1], n_min=2, n_max=2)
-
-
 @pytest.mark.parametrize(
     "func, n, idx, expected_x, expected_fx",
     [
