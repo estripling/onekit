@@ -2,6 +2,37 @@
 
 
 
+## v0.13.0 (2023-12-22)
+
+### Feature
+
+* feat: add numpykit (#47)
+
+* refactor(check_vector): move optfunckit -&gt; numpykit
+
+* feat(numpykit): add stderr ([`d580b8f`](https://github.com/estripling/onekit/commit/d580b8f3167731c028dc65c62b7b76f46e7d259e))
+
+### Refactor
+
+* refactor: move math functions to mathkit (#46)
+
+* refactor(collatz): move pythonkit -&gt; mathkit
+
+* refactor(fibonacci): move pythonkit -&gt; mathkit
+
+* refactor: move isdivisible iseven isodd to mathkit ([`c4a5bd8`](https://github.com/estripling/onekit/commit/c4a5bd8c83986b626d6c7d2b01d6ee920b746263))
+
+* refactor: small updates (#45)
+
+* refactor(XyzPoints): adjust type hints
+
+* docs(peaks): add reference
+
+* docs(optfunckit): add ai-roomi reference
+
+* docs(concat_strings): add docstring example ([`c6f02d7`](https://github.com/estripling/onekit/commit/c6f02d701965b6c34ae50392f5b2fdd5a573d654))
+
+
 ## v0.12.0 (2023-12-21)
 
 ### Feature
