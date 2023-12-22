@@ -48,9 +48,6 @@ __all__ = (
     "headline",
     "highlight_string_differences",
     "humantime",
-    "isdivisible",
-    "iseven",
-    "isodd",
     "last_date_of_month",
     "lazy_read_lines",
     "map_regex",
@@ -144,6 +141,7 @@ def are_predicates_true(
 
     Examples
     --------
+    >>> import onekit.mathkit as mk
     >>> import onekit.pythonkit as pk
     >>> pk.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
     True
@@ -159,8 +157,8 @@ def are_predicates_true(
 
     >>> is_x_divisible_by_3_and_5 = pk.are_predicates_true(
     ...     all,
-    ...     pk.isdivisible(n=3),
-    ...     pk.isdivisible(n=5),
+    ...     mk.isdivisible(n=3),
+    ...     mk.isdivisible(n=5),
     ... )
     >>> type(is_x_divisible_by_3_and_5)
     <class 'function'>
@@ -171,8 +169,8 @@ def are_predicates_true(
 
     >>> is_x_divisible_by_3_or_5 = pk.are_predicates_true(
     ...     any,
-    ...     pk.isdivisible(n=3),
-    ...     pk.isdivisible(n=5),
+    ...     mk.isdivisible(n=3),
+    ...     mk.isdivisible(n=5),
     ... )
     >>> type(is_x_divisible_by_3_or_5)
     <class 'function'>
@@ -692,67 +690,6 @@ def humantime(seconds: Union[int, float], /) -> str:
         output.append(f"{seconds}s")
 
     return " ".join(output)
-
-
-@toolz.curry
-def isdivisible(x: Union[int, float], /, n: int) -> bool:
-    """Evaluate if :math:`x` is evenly divisible by :math:`n`.
-
-    Examples
-    --------
-    >>> import onekit.pythonkit as pk
-    >>> pk.isdivisible(49, 7)
-    True
-
-    >>> # function is curried
-    >>> pk.isdivisible(10)(5)
-    True
-    >>> is_10_divisible_by = pk.isdivisible(10)
-    >>> is_10_divisible_by(5)
-    True
-    >>> is_x_divisible_by_5 = pk.isdivisible(n=5)
-    >>> is_x_divisible_by_5(10)
-    True
-    >>> is_x_divisible_by_5(11.0)
-    False
-    """
-    return x % n == 0
-
-
-def iseven(x: Union[int, float], /) -> bool:
-    """Evaluate if :math:`x` is even.
-
-    Examples
-    --------
-    >>> import onekit.pythonkit as pk
-    >>> pk.iseven(0)
-    True
-
-    >>> pk.iseven(1)
-    False
-
-    >>> pk.iseven(2)
-    True
-    """
-    return isdivisible(x, n=2)
-
-
-def isodd(x: Union[int, float], /) -> bool:
-    """Evaluate if :math:`x` is odd.
-
-    Examples
-    --------
-    >>> import onekit.pythonkit as pk
-    >>> pk.isodd(0)
-    False
-
-    >>> pk.isodd(1)
-    True
-
-    >>> pk.isodd(2)
-    False
-    """
-    return toolz.complement(iseven)(x)
 
 
 def last_date_of_month(year: int, month: int, /) -> dt.date:

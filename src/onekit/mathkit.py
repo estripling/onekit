@@ -1,10 +1,16 @@
-from typing import Generator
+from typing import (
+    Generator,
+    Union,
+)
 
-import onekit.pythonkit as pk
+import toolz
 
 __all__ = (
     "collatz",
     "fibonacci",
+    "isdivisible",
+    "iseven",
+    "isodd",
 )
 
 
@@ -70,7 +76,7 @@ def collatz(n: int, /) -> Generator:
             break
 
         # update
-        n = n // 2 if pk.iseven(n) else 3 * n + 1
+        n = n // 2 if iseven(n) else 3 * n + 1
 
 
 def fibonacci() -> Generator:
@@ -115,3 +121,64 @@ def fibonacci() -> Generator:
         lag0 = lag2 + lag1
         yield lag0
         lag2, lag1 = lag1, lag0
+
+
+@toolz.curry
+def isdivisible(x: Union[int, float], /, n: int) -> bool:
+    """Evaluate if :math:`x` is evenly divisible by :math:`n`.
+
+    Examples
+    --------
+    >>> import onekit.mathkit as mk
+    >>> mk.isdivisible(49, 7)
+    True
+
+    >>> # function is curried
+    >>> mk.isdivisible(10)(5)
+    True
+    >>> is_10_divisible_by = mk.isdivisible(10)
+    >>> is_10_divisible_by(5)
+    True
+    >>> is_x_divisible_by_5 = mk.isdivisible(n=5)
+    >>> is_x_divisible_by_5(10)
+    True
+    >>> is_x_divisible_by_5(11.0)
+    False
+    """
+    return x % n == 0
+
+
+def iseven(x: Union[int, float], /) -> bool:
+    """Evaluate if :math:`x` is even.
+
+    Examples
+    --------
+    >>> import onekit.mathkit as mk
+    >>> mk.iseven(0)
+    True
+
+    >>> mk.iseven(1)
+    False
+
+    >>> mk.iseven(2)
+    True
+    """
+    return isdivisible(x, n=2)
+
+
+def isodd(x: Union[int, float], /) -> bool:
+    """Evaluate if :math:`x` is odd.
+
+    Examples
+    --------
+    >>> import onekit.mathkit as mk
+    >>> mk.isodd(0)
+    False
+
+    >>> mk.isodd(1)
+    True
+
+    >>> mk.isodd(2)
+    False
+    """
+    return toolz.complement(iseven)(x)
