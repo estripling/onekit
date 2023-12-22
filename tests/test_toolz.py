@@ -11,7 +11,7 @@ from toolz import (
     itertoolz,
 )
 
-import onekit.pythonkit as pk
+import onekit.mathkit as mk
 
 
 class TestToolzAPI:
@@ -105,7 +105,7 @@ class TestToolzAPI:
 
     def test_filter(self, n10: Tuple[int]):
         """Filter even numbers."""
-        actual = tuple(filter(pk.iseven, n10))
+        actual = tuple(filter(mk.iseven, n10))
         expected = (2, 4, 6, 8, 10)
         assert actual == expected
 
@@ -138,7 +138,7 @@ class TestToolzAPI:
 
     def test_groupby(self, n10: Tuple[int]):
         """Group an iterable by a key function."""
-        actual = curried.groupby(pk.iseven, n10)
+        actual = curried.groupby(mk.iseven, n10)
         expected = {False: [1, 3, 5, 7, 9], True: [2, 4, 6, 8, 10]}
         assert actual == expected
 
@@ -229,13 +229,13 @@ class TestToolzAPI:
 
     def test_reduceby(self):
         """Perform a simultaneous groupby and reduction."""
-        actual = curried.reduceby(pk.iseven, operator.add, [1, 2, 3, 4, 5])
+        actual = curried.reduceby(mk.iseven, operator.add, [1, 2, 3, 4, 5])
         expected = {False: 9, True: 6}
         assert actual == expected
 
     def test_remove(self):
         """Remove those elements of sequence for which predicate(item) is True."""
-        actual = tuple(curried.remove(pk.iseven, [1, 2, 3, 4]))
+        actual = tuple(curried.remove(mk.iseven, [1, 2, 3, 4]))
         expected = (1, 3)
         assert actual == expected
 
@@ -307,7 +307,7 @@ class TestToolzAPI:
         actual = functoolz.pipe(
             itertools.count(1),
             curried.take(11),
-            curried.countby(pk.iseven),
+            curried.countby(mk.iseven),
         )
         expected = {True: 5, False: 6}
         assert actual == expected
@@ -405,7 +405,7 @@ class TestToolzAPI:
     def test_keyfilter(self):
         """Filter items in dictionary by key."""
         d = {1: "a", 2: "b", 3: "c", 4: "d"}
-        actual = curried.keyfilter(pk.iseven, d)
+        actual = curried.keyfilter(mk.iseven, d)
         expected = {2: "b", 4: "d"}
         assert actual == expected
 
@@ -443,7 +443,7 @@ class TestToolzAPI:
     def test_valfilter(self):
         """Filter items in dictionary by value."""
         d = {"a": 2, "b": 3, "c": 4, "d": 5}
-        actual = curried.valfilter(pk.iseven, d)
+        actual = curried.valfilter(mk.iseven, d)
         expected = {"a": 2, "c": 4}
         assert actual == expected
 
