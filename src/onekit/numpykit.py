@@ -1,7 +1,10 @@
 import numpy as np
 import numpy.typing as npt
 
-__all__ = ("check_vector",)
+__all__ = (
+    "check_vector",
+    "stderr",
+)
 
 
 ArrayLike = npt.ArrayLike
@@ -44,3 +47,18 @@ def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vec
         raise TypeError(f"x with n={len(x)} - n must be an integer in {domain}")
 
     return x
+
+
+def stderr(x: ArrayLike, /) -> float:
+    """Compute standard error of the mean.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import onekit.numpykit as npk
+    >>> round(npk.stderr([98, 127, 82, 67, 121, np.nan, 119, 92, 110, 113, 107]), 4)
+    5.9632
+    """
+    x = check_vector([v for v in x if np.isfinite(v)], n_min=0)
+    n = len(x)
+    return x.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
