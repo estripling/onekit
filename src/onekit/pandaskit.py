@@ -2,6 +2,8 @@ import functools
 from typing import (
     Iterable,
     List,
+    Optional,
+    Sequence,
     Union,
 )
 
@@ -43,7 +45,7 @@ def join(
     )
 
 
-def profile(df: PandasDF, /) -> PandasDF:
+def profile(df: PandasDF, /, *, q: Optional[Sequence[int]] = None) -> PandasDF:
     """Profile Pandas dataframe.
 
     Examples
@@ -87,14 +89,15 @@ def profile(df: PandasDF, /) -> PandasDF:
         "skewness",
         "kurtosis",
         "min",
-        "q5",
-        "q25",
-        "q50",
-        "q75",
-        "q95",
-        "max",
     ]
     n_rows, _ = df.shape
+
+    quantiles = q or (5, 25, 50, 75, 95)
+    columns.extend(f"q{q}" for q in quantiles)
+    columns.append("max")
+
+    qdf = (df.quantile(q / 100, numeric_only=True).to_frame(f"q{q}") for q in quantiles)
+
     return (
         pd.concat(
             [
@@ -107,11 +110,7 @@ def profile(df: PandasDF, /) -> PandasDF:
                 df.skew(numeric_only=True).to_frame("skewness"),
                 df.kurt(numeric_only=True).to_frame("kurtosis"),
                 df.min(numeric_only=True).to_frame("min"),
-                df.quantile(0.05, numeric_only=True).to_frame("q5"),
-                df.quantile(0.25, numeric_only=True).to_frame("q25"),
-                df.quantile(0.50, numeric_only=True).to_frame("q50"),
-                df.quantile(0.75, numeric_only=True).to_frame("q75"),
-                df.quantile(0.95, numeric_only=True).to_frame("q95"),
+                *qdf,
                 df.max(numeric_only=True).to_frame("max"),
             ],
             axis=1,
