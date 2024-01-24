@@ -65,6 +65,7 @@ def profile(df: PandasDF, /, *, q: Optional[Sequence[int]] = None) -> PandasDF:
     isnull_pct  16.666667        0.0   100.0
     unique              2          1       0
     unique_pct  33.333333  16.666667     0.0
+    sum               NaN        6.0     NaN
     mean              NaN        1.0     NaN
     std               NaN        0.0     NaN
     skewness          NaN        0.0     NaN
@@ -102,6 +103,7 @@ def profile(df: PandasDF, /, *, q: Optional[Sequence[int]] = None) -> PandasDF:
     return pd.concat(
         [
             basic_info_df,
+            df.sum(numeric_only=True).to_frame("sum"),
             df.mean(numeric_only=True).to_frame("mean"),
             df.std(numeric_only=True, ddof=1).to_frame("std"),
             df.skew(numeric_only=True).to_frame("skewness"),
