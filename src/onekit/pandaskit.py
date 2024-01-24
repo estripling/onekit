@@ -77,49 +77,43 @@ def profile(df: PandasDF, /, *, q: Optional[Sequence[int]] = None) -> PandasDF:
     q95               NaN        1.0     NaN
     max               NaN        1.0     NaN
     """
-    columns = [
-        "type",
-        "count",
-        "isnull",
-        "isnull_pct",
-        "unique",
-        "unique_pct",
-        "mean",
-        "std",
-        "skewness",
-        "kurtosis",
-        "min",
-    ]
     n_rows, _ = df.shape
-
     quantiles = q or (5, 25, 50, 75, 95)
-    columns.extend(f"q{q}" for q in quantiles)
-    columns.append("max")
 
-    qdf = (df.quantile(q / 100, numeric_only=True).to_frame(f"q{q}") for q in quantiles)
+    basic_info_df = pd.concat(
+        [
+            df.dtypes.apply(str).to_frame("type"),
+            df.count().to_frame("count"),
+            (
+                df.isnull()
+                .sum()
+                .to_frame("isnull")
+                .assign(isnull_pct=lambda df: 100 * df["isnull"] / n_rows)
+            ),
+            (
+                df.nunique()
+                .to_frame("unique")
+                .assign(unique_pct=lambda df: 100 * df["unique"] / n_rows)
+            ),
+        ],
+        axis=1,
+    )
 
-    return (
-        pd.concat(
-            [
-                df.dtypes.apply(str).to_frame("type"),
-                df.count().to_frame("count"),
-                df.isnull().sum().to_frame("isnull"),
-                df.nunique().to_frame("unique"),
-                df.mean(numeric_only=True).to_frame("mean"),
-                df.std(numeric_only=True, ddof=1).to_frame("std"),
-                df.skew(numeric_only=True).to_frame("skewness"),
-                df.kurt(numeric_only=True).to_frame("kurtosis"),
-                df.min(numeric_only=True).to_frame("min"),
-                *qdf,
-                df.max(numeric_only=True).to_frame("max"),
+    return pd.concat(
+        [
+            basic_info_df,
+            df.mean(numeric_only=True).to_frame("mean"),
+            df.std(numeric_only=True, ddof=1).to_frame("std"),
+            df.skew(numeric_only=True).to_frame("skewness"),
+            df.kurt(numeric_only=True).to_frame("kurtosis"),
+            df.min(numeric_only=True).to_frame("min"),
+            *[
+                df.quantile(q / 100, numeric_only=True).to_frame(f"q{q}")
+                for q in quantiles
             ],
-            axis=1,
-        )
-        .assign(
-            isnull_pct=lambda df: 100 * df["isnull"] / n_rows,
-            unique_pct=lambda df: 100 * df["unique"] / n_rows,
-        )
-        .loc[:, columns]
+            df.max(numeric_only=True).to_frame("max"),
+        ],
+        axis=1,
     )
 
 
