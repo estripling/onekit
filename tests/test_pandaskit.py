@@ -55,6 +55,14 @@ def test_profile():
     )
 
     pd.testing.assert_frame_equal(actual, expected)
+    pd.testing.assert_frame_equal(
+        actual.query("mean.notnull()"),
+        expected.loc[["b"], :],
+    )
+    pd.testing.assert_frame_equal(
+        actual.query("mean.isnull()"),
+        expected.loc[["a", "c"], :],
+    )
 
 
 def test_union():
