@@ -56,42 +56,42 @@ def profile(df: PandasDF, /) -> PandasDF:
     ...     "c": [None] * 6,
     ... }
     >>> pdk.profile(pd.DataFrame(data)).T
-                     a         b       c
-    type        object     int64  object
-    count            5         6       0
-    isnull           1         0       6
-    isnull%   0.166667       0.0     1.0
-    unique           2         1       0
-    unique%   0.333333  0.166667     0.0
-    mean           NaN       1.0     NaN
-    std            NaN       0.0     NaN
-    skewness       NaN       0.0     NaN
-    kurtosis       NaN       0.0     NaN
-    min            NaN       1.0     NaN
-    5%             NaN       1.0     NaN
-    25%            NaN       1.0     NaN
-    50%            NaN       1.0     NaN
-    75%            NaN       1.0     NaN
-    95%            NaN       1.0     NaN
-    max            NaN       1.0     NaN
+                        a          b       c
+    type           object      int64  object
+    count               5          6       0
+    isnull              1          0       6
+    isnull_pct  16.666667        0.0   100.0
+    unique              2          1       0
+    unique_pct  33.333333  16.666667     0.0
+    mean              NaN        1.0     NaN
+    std               NaN        0.0     NaN
+    skewness          NaN        0.0     NaN
+    kurtosis          NaN        0.0     NaN
+    min               NaN        1.0     NaN
+    q5                NaN        1.0     NaN
+    q25               NaN        1.0     NaN
+    q50               NaN        1.0     NaN
+    q75               NaN        1.0     NaN
+    q95               NaN        1.0     NaN
+    max               NaN        1.0     NaN
     """
     columns = [
         "type",
         "count",
         "isnull",
-        "isnull%",
+        "isnull_pct",
         "unique",
-        "unique%",
+        "unique_pct",
         "mean",
         "std",
         "skewness",
         "kurtosis",
         "min",
-        "5%",
-        "25%",
-        "50%",
-        "75%",
-        "95%",
+        "q5",
+        "q25",
+        "q50",
+        "q75",
+        "q95",
         "max",
     ]
     n_rows, _ = df.shape
@@ -107,20 +107,19 @@ def profile(df: PandasDF, /) -> PandasDF:
                 df.skew(numeric_only=True).to_frame("skewness"),
                 df.kurt(numeric_only=True).to_frame("kurtosis"),
                 df.min(numeric_only=True).to_frame("min"),
-                df.quantile(0.05, numeric_only=True).to_frame("5%"),
-                df.quantile(0.25, numeric_only=True).to_frame("25%"),
-                df.quantile(0.50, numeric_only=True).to_frame("50%"),
-                df.quantile(0.75, numeric_only=True).to_frame("75%"),
-                df.quantile(0.95, numeric_only=True).to_frame("95%"),
+                df.quantile(0.05, numeric_only=True).to_frame("q5"),
+                df.quantile(0.25, numeric_only=True).to_frame("q25"),
+                df.quantile(0.50, numeric_only=True).to_frame("q50"),
+                df.quantile(0.75, numeric_only=True).to_frame("q75"),
+                df.quantile(0.95, numeric_only=True).to_frame("q95"),
                 df.max(numeric_only=True).to_frame("max"),
             ],
             axis=1,
         )
         .assign(
-            isnull_pct=lambda df: df["isnull"] / n_rows,
-            unique_pct=lambda df: df["unique"] / n_rows,
+            isnull_pct=lambda df: 100 * df["isnull"] / n_rows,
+            unique_pct=lambda df: 100 * df["unique"] / n_rows,
         )
-        .rename(columns={"isnull_pct": "isnull%", "unique_pct": "unique%"})
         .loc[:, columns]
     )
 
