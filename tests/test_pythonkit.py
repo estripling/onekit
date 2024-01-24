@@ -658,7 +658,7 @@ class TestPromptYesNo:
             ("no", "\n", False),
         ],
     )
-    def test_normal_usage(
+    def test_default_call(
         self,
         monkeypatch,
         default: Optional[str],
