@@ -2,6 +2,25 @@
 
 
 
+## v0.14.0 (2024-01-24)
+
+### Feature
+
+* feat: improve pandaskit.profile (#48)
+
+* refactor(pandaskit.profile): no special characters
+
+* test(pandaskit.profile): add isnull and notull query
+
+* feat(numpykit): add quantile argument
+
+* test: rename function
+
+* refactor(pandaskit.profile): use basic_info_df variable
+
+* feat(pandaskit.profile): add sum ([`f10bf9a`](https://github.com/estripling/onekit/commit/f10bf9a0acf4c981dcd1e5263a2a2afbee28de81))
+
+
 ## v0.13.0 (2023-12-22)
 
 ### Feature
