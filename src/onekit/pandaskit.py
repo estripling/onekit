@@ -1,5 +1,6 @@
 import functools
 from typing import (
+    Callable,
     Iterable,
     List,
     Optional,
@@ -8,15 +9,60 @@ from typing import (
 )
 
 import pandas as pd
+import toolz
 from pandas import DataFrame as PandasDF
 
 import onekit.pythonkit as pk
 
 __all__ = (
+    "cvf",
     "join",
     "profile",
     "union",
 )
+
+PandasDFPipeFunc = Callable[[PandasDF], PandasDF]
+
+
+def cvf(*cols: Iterable[str]) -> PandasDFPipeFunc:
+    """Count value frequency.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import onekit.pandaskit as pdk
+    >>> df = pd.DataFrame({"x": ["a", "c", "b", "g", "h", "a", "g", "a"]})
+    >>> df.pipe(pdk.cvf("x"))
+       x  count  percent  cumul_count  cumul_percent
+    0  a      3     37.5            3           37.5
+    1  g      2     25.0            5           62.5
+    2  b      1     12.5            6           75.0
+    3  c      1     12.5            7           87.5
+    4  h      1     12.5            8          100.0
+    """
+
+    def inner(df: PandasDF, /) -> PandasDF:
+        columns = toolz.pipe(cols, pk.flatten, list)
+        col_order = [False] + [True] * len(columns)
+
+        counts = df.value_counts(subset=columns, dropna=False, sort=False)
+        percents = 100 * counts / counts.sum()
+
+        return (
+            join(
+                counts.to_frame("count").reset_index(),
+                percents.to_frame("percent").reset_index(),
+                on=columns,
+            )
+            .sort_values(["count"] + columns, ascending=col_order)
+            .assign(
+                cumul_count=lambda df: df["count"].cumsum(),
+                cumul_percent=lambda df: df["percent"].cumsum(),
+            )
+            .reset_index(drop=True)
+        )
+
+    return inner
 
 
 def join(
