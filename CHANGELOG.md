@@ -2,6 +2,13 @@
 
 
 
+## v0.15.0 (2024-01-29)
+
+### Feature
+
+* feat(pandaskit): add cvf (#49) ([`a8c9cb6`](https://github.com/estripling/onekit/commit/a8c9cb66e87f1ff3ef968a6604be96c110f23151))
+
+
 ## v0.14.0 (2024-01-24)
 
 ### Feature
