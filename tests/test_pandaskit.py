@@ -5,6 +5,57 @@ from pandas import DataFrame as PandasDF
 import onekit.pandaskit as pdk
 
 
+def test_cvf():
+    # single column
+    counts = {"a": 3, "b": 1, "c": 1, "g": 2, "h": 1}
+    df = pd.DataFrame([dict(x=v) for v, c in counts.items() for _ in range(c)])
+
+    expected_rows = [
+        dict(x="a", count=3, percent=37.5, cumul_count=3, cumul_percent=37.5),
+        dict(x="g", count=2, percent=25.0, cumul_count=5, cumul_percent=62.5),
+        dict(x="b", count=1, percent=12.5, cumul_count=6, cumul_percent=75.0),
+        dict(x="c", count=1, percent=12.5, cumul_count=7, cumul_percent=87.5),
+        dict(x="h", count=1, percent=12.5, cumul_count=8, cumul_percent=100.0),
+    ]
+    expected = pd.DataFrame(expected_rows)
+
+    for cols in ["x", ["x"]]:
+        actual = df.pipe(pdk.cvf(cols))
+        pd.testing.assert_frame_equal(actual, expected)
+
+    # multiple columns
+    df = pd.DataFrame(
+        [
+            dict(x="a", y=1),
+            dict(x="c", y=1),
+            dict(x="b", y=1),
+            dict(x="g", y=2),
+            dict(x="h", y=1),
+            dict(x="a", y=1),
+            dict(x="g", y=2),
+            dict(x="a", y=2),
+        ]
+    )
+    actual = df.pipe(pdk.cvf("x"))  # check single column check first
+    pd.testing.assert_frame_equal(actual, expected)
+
+    actual = df.pipe(pdk.cvf("x", "y"))
+
+    expected_rows = [
+        dict(x="a", y=1, count=2, percent=25.0, cumul_count=2, cumul_percent=25.0),
+        dict(x="g", y=2, count=2, percent=25.0, cumul_count=4, cumul_percent=50.0),
+        dict(x="a", y=2, count=1, percent=12.5, cumul_count=5, cumul_percent=62.5),
+        dict(x="b", y=1, count=1, percent=12.5, cumul_count=6, cumul_percent=75.0),
+        dict(x="c", y=1, count=1, percent=12.5, cumul_count=7, cumul_percent=87.5),
+        dict(x="h", y=1, count=1, percent=12.5, cumul_count=8, cumul_percent=100.0),
+    ]
+    expected = pd.DataFrame(expected_rows)
+    pd.testing.assert_frame_equal(actual, expected)
+
+    actual = df.pipe(pdk.cvf(["x", "y"]))
+    pd.testing.assert_frame_equal(actual, expected)
+
+
 def test_join():
     idx = (0, 1)
 
