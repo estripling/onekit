@@ -25,7 +25,7 @@ import onekit.pythonkit as pk
 __all__ = (
     "add_prefix",
     "add_suffix",
-    "check_dataframe_equal",
+    "assert_dataframe_equal",
     "check_row_count_equal",
     "check_row_equal",
     "check_schema_equal",
@@ -144,7 +144,7 @@ def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
     return inner
 
 
-def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
+def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     """Validate both dataframes are equal.
 
     Raises
@@ -169,13 +169,13 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
-    >>> sk.check_dataframe_equal(lft_df, rgt_df) is None
+    >>> sk.assert_dataframe_equal(lft_df, rgt_df) is None
     True
 
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(z=1, y="a", x=9), Row(z=3, y="b", x=8)])
     >>> try:
-    ...     sk.check_dataframe_equal(lft_df, rgt_df)
+    ...     sk.assert_dataframe_equal(lft_df, rgt_df)
     ... except sk.SchemaMismatchError as error:
     ...     print(error)
     ...
@@ -187,7 +187,7 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6)])
     >>> try:
-    ...     sk.check_dataframe_equal(lft_df, rgt_df)
+    ...     sk.assert_dataframe_equal(lft_df, rgt_df)
     ... except sk.RowCountMismatchError as error:
     ...     print(error)
     ...
@@ -196,7 +196,7 @@ def check_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4), Row(x=5, y=6)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=9), Row(x=7, y=8)])
     >>> try:
-    ...     sk.check_dataframe_equal(lft_df, rgt_df)
+    ...     sk.assert_dataframe_equal(lft_df, rgt_df)
     ... except sk.RowMismatchError as error:
     ...     print(error)
     ...
@@ -217,7 +217,7 @@ def check_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     See Also
     --------
-    check_dataframe_equal : Validate dataframes.
+    assert_dataframe_equal : Validate dataframes.
 
     Examples
     --------
@@ -255,7 +255,7 @@ def check_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     See Also
     --------
-    check_dataframe_equal : Validate dataframes.
+    assert_dataframe_equal : Validate dataframes.
 
     Examples
     --------
@@ -298,7 +298,7 @@ def check_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     See Also
     --------
-    check_dataframe_equal : Validate dataframes.
+    assert_dataframe_equal : Validate dataframes.
 
     Examples
     --------

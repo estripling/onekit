@@ -64,11 +64,11 @@ class TestSparkKit:
         expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
-    def test_check_dataframe_equal(self, spark: SparkSession):
+    def test_assert_dataframe_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
-        assert sk.check_dataframe_equal(lft_df, rgt_df) is None
+        assert sk.assert_dataframe_equal(lft_df, rgt_df) is None
 
     def test_check_row_count_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -529,7 +529,7 @@ class TestSparkKit:
     @staticmethod
     def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:
         """Assert that the left and right data frames are equal."""
-        sk.check_dataframe_equal(lft_df, rgt_df)
+        sk.assert_dataframe_equal(lft_df, rgt_df)
 
     @pytest.fixture(scope="class")
     def spark(self) -> SparkSession:
