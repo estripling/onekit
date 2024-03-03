@@ -109,6 +109,20 @@ class TestSparkKit:
         with pytest.raises(sk.SchemaMismatchError):
             sk.assert_schema_equal(lft_df, rgt_df__different_size)
 
+    def test_check_column_present(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(x=1, y=2)])
+        actual = df.transform(sk.check_column_present("x"))
+        assert actual is df
+
+        actual = df.transform(sk.check_column_present("x", "y"))
+        assert actual is df
+
+        with pytest.raises(sk.ColumnNotFoundError):
+            df.transform(sk.check_column_present("z"))
+
+        with pytest.raises(sk.ColumnNotFoundError):
+            df.transform(sk.check_column_present("x", "y", "z"))
+
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
