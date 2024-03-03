@@ -34,6 +34,7 @@ __all__ = (
     "count_nulls",
     "cvf",
     "daterange",
+    "has_column",
     "is_dataframe_equal",
     "is_row_count_equal",
     "is_row_equal",
@@ -527,6 +528,29 @@ def daterange(
         )
         .withColumn(new_col, F.explode(new_col))
     )
+
+
+@toolz.curry
+def has_column(df: SparkDF, /, *, cols: Iterable[str]) -> bool:
+    """Evaluate if all columns are present in dataframe.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x=1), dict(x=2), dict(x=3)])
+    >>> sk.has_column(df, cols=["x"])
+    True
+
+    >>> sk.has_column(df, cols=["y"])
+    False
+    """
+    try:
+        df.transform(check_column_present(cols))
+        return True
+    except ColumnNotFoundError:
+        return False
 
 
 def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:

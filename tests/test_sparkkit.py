@@ -222,6 +222,14 @@ class TestSparkKit:
         actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
         self.assert_dataframe_equal(actual, expected)
 
+    def test_has_column(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(x=1, y=2)])
+        assert sk.has_column(df, cols=["x"])
+        assert sk.has_column(df, cols=["x", "y"])
+        assert not sk.has_column(df, cols=["x", "y", "z"])
+        assert not sk.has_column(df, cols=["z"])
+        assert not sk.has_column(df, cols=["x", "z"])
+
     def test_is_dataframe_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
