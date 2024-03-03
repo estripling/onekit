@@ -2,6 +2,33 @@
 
 
 
+## v0.16.0 (2024-03-03)
+
+### Feature
+
+* feat: add check column functionality (#51)
+
+* feat: add check_column_present
+
+* feat: add has_column ([`639f379`](https://github.com/estripling/onekit/commit/639f379429ac0cfaeaea821190649ac7782aa8ce))
+
+### Refactor
+
+* refactor: rename check functions (#50)
+
+* refactor: rename check_dataframe_equal -&gt; assert_dataframe_equal
+
+* refactor: rename check_row_count_equal -&gt; assert_row_count_equal
+
+* refactor: rename check_row_equal -&gt; assert_row_equal
+
+* refactor: rename check_schema_equal -&gt; assert_schema_equal
+
+* refactor(example.ipynb): update notebook
+
+* build: add pre-commit hook ([`0bd7103`](https://github.com/estripling/onekit/commit/0bd7103ff176e5c3645a8f3596ffebaa779d1831))
+
+
 ## v0.15.0 (2024-01-29)
 
 ### Feature
@@ -203,13 +230,7 @@
 
 ## v0.9.0 (2023-11-20)
 
-### Feature
-
-* feat(sparkkit): add peek (#35) ([`69b08e9`](https://github.com/estripling/onekit/commit/69b08e90e6399639bf013414a0b6d45d1c008393))
-
-### Refactor
-
-* refactor(signif): curry function (#34) ([`6880f9c`](https://github.com/estripling/onekit/commit/6880f9c297f1e178612b72187528a289ffafc25a))
+### Breaking
 
 * refactor: rename modules (#33)
 
@@ -222,6 +243,14 @@
 * refactor: pdtlz -&gt; pandaskit
 
 BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.com/estripling/onekit/commit/5dfd157ae6c4ae7e89afe58e121f7dde4d2f719e))
+
+### Feature
+
+* feat(sparkkit): add peek (#35) ([`69b08e9`](https://github.com/estripling/onekit/commit/69b08e90e6399639bf013414a0b6d45d1c008393))
+
+### Refactor
+
+* refactor(signif): curry function (#34) ([`6880f9c`](https://github.com/estripling/onekit/commit/6880f9c297f1e178612b72187528a289ffafc25a))
 
 
 ## v0.8.0 (2023-11-17)
