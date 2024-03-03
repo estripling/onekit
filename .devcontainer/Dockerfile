@@ -40,3 +40,6 @@ WORKDIR /workspaces/onekit
 COPY . .
 RUN poetry install \
     && rm -rf ~/.cache/pypoetry/{cache,artifacts}
+
+# install pre-commit
+RUN pre-commit install
