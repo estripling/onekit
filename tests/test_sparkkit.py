@@ -92,7 +92,7 @@ class TestSparkKit:
         with pytest.raises(sk.RowMismatchError):
             sk.assert_row_equal(lft_df, rgt_df__different)
 
-    def test_check_schema_equal(self, spark: SparkSession):
+    def test_assert_schema_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
         rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -101,13 +101,13 @@ class TestSparkKit:
         )
         rgt_df__different_size = spark.createDataFrame([Row(x=1), Row(x=3)])
 
-        assert sk.check_schema_equal(lft_df, rgt_df__equal) is None
+        assert sk.assert_schema_equal(lft_df, rgt_df__equal) is None
 
         with pytest.raises(sk.SchemaMismatchError):
-            sk.check_schema_equal(lft_df, rgt_df__different_type)
+            sk.assert_schema_equal(lft_df, rgt_df__different_type)
 
         with pytest.raises(sk.SchemaMismatchError):
-            sk.check_schema_equal(lft_df, rgt_df__different_size)
+            sk.assert_schema_equal(lft_df, rgt_df__different_size)
 
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(

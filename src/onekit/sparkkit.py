@@ -28,7 +28,7 @@ __all__ = (
     "assert_dataframe_equal",
     "assert_row_count_equal",
     "assert_row_equal",
-    "check_schema_equal",
+    "assert_schema_equal",
     "count_nulls",
     "cvf",
     "daterange",
@@ -158,7 +158,7 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     See Also
     --------
-    check_schema_equal : Validate schemas.
+    assert_schema_equal : Validate schemas.
     assert_row_count_equal : Validate row counts.
     assert_row_equal : Validate rows.
 
@@ -202,7 +202,7 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     ...
     n_lft=2, n_rgt=2
     """
-    check_schema_equal(lft_df, rgt_df)
+    assert_schema_equal(lft_df, rgt_df)
     assert_row_count_equal(lft_df, rgt_df)
     assert_row_equal(lft_df, rgt_df)
 
@@ -288,7 +288,7 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         raise RowMismatchError(lft_rows, rgt_rows, n_lft, n_rgt)
 
 
-def check_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
+def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     """Validate schemas of both dataframes are equal.
 
     Raises
@@ -307,13 +307,13 @@ def check_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> sk.check_schema_equal(lft_df, rgt_df) is None
+    >>> sk.assert_schema_equal(lft_df, rgt_df) is None
     True
 
     >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([dict(x=1), dict(x=3)])
     >>> try:
-    ...     sk.check_schema_equal(lft_df, rgt_df)
+    ...     sk.assert_schema_equal(lft_df, rgt_df)
     ... except sk.SchemaMismatchError as error:
     ...     print(error)
     ...
@@ -510,7 +510,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     False
     """
     try:
-        check_schema_equal(lft_df, rgt_df)
+        assert_schema_equal(lft_df, rgt_df)
         assert_row_count_equal(lft_df, rgt_df)
         assert_row_equal(lft_df, rgt_df)
         return True
@@ -599,7 +599,7 @@ def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     False
     """
     try:
-        check_schema_equal(lft_df, rgt_df)
+        assert_schema_equal(lft_df, rgt_df)
         return True
     except SchemaMismatchError:
         return False
