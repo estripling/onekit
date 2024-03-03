@@ -81,16 +81,16 @@ class TestSparkKit:
         with pytest.raises(sk.RowCountMismatchError):
             sk.assert_row_count_equal(lft_df, rgt_df__different)
 
-    def test_check_row_equal(self, spark: SparkSession):
+    def test_assert_row_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
         rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df__different = spark.createDataFrame([Row(x=1, y=7), Row(x=3, y=9)])
 
-        assert sk.check_row_equal(lft_df, rgt_df__equal) is None
+        assert sk.assert_row_equal(lft_df, rgt_df__equal) is None
 
         with pytest.raises(sk.RowMismatchError):
-            sk.check_row_equal(lft_df, rgt_df__different)
+            sk.assert_row_equal(lft_df, rgt_df__different)
 
     def test_check_schema_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
