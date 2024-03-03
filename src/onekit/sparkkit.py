@@ -4,6 +4,7 @@ from typing import (
     Callable,
     Iterable,
     List,
+    Sequence,
     Union,
 )
 
@@ -29,9 +30,11 @@ __all__ = (
     "assert_row_count_equal",
     "assert_row_equal",
     "assert_schema_equal",
+    "check_column_present",
     "count_nulls",
     "cvf",
     "daterange",
+    "has_column",
     "is_dataframe_equal",
     "is_row_count_equal",
     "is_row_equal",
@@ -52,6 +55,15 @@ SparkDFTransformFunc = Callable[[SparkDF], SparkDF]
 
 class SparkkitError(Exception):
     """A base class for sparkkit exceptions."""
+
+
+class ColumnNotFoundError(SparkkitError):
+    """Exception if columns are not found in dataframe."""
+
+    def __init__(self, missing_cols: Sequence[str]):
+        self.missing_cols = missing_cols
+        self.message = f"following columns not found: {missing_cols}"
+        super().__init__(self.message)
 
 
 class RowCountMismatchError(SparkkitError):
@@ -330,6 +342,49 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         raise SchemaMismatchError(lft_schema, rgt_schema)
 
 
+def check_column_present(*cols: Iterable[str]) -> SparkDFTransformFunc:
+    """Check if columns are present in dataframe.
+
+    Raises
+    ------
+    sk.ColumnNotFoundError
+        If columns are not found in dataframe.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x=1), dict(x=2), dict(x=3)])
+    >>> df.transform(sk.check_column_present("x")).show()
+    +---+
+    |  x|
+    +---+
+    |  1|
+    |  2|
+    |  3|
+    +---+
+    <BLANKLINE>
+
+    >>> try:
+    ...     df.transform(sk.check_column_present("y")).show()
+    ... except sk.ColumnNotFoundError as error:
+    ...     print(error)
+    ...
+    following columns not found: ['y']
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        missing_cols = [col for col in pk.flatten(cols) if col not in df.columns]
+
+        if len(missing_cols) > 0:
+            raise ColumnNotFoundError(missing_cols)
+
+        return df
+
+    return inner
+
+
 @toolz.curry
 def count_nulls(df: SparkDF, /, *, subset=None) -> SparkDF:
     """Count null values in Spark dataframe.
@@ -473,6 +528,29 @@ def daterange(
         )
         .withColumn(new_col, F.explode(new_col))
     )
+
+
+@toolz.curry
+def has_column(df: SparkDF, /, *, cols: Iterable[str]) -> bool:
+    """Evaluate if all columns are present in dataframe.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x=1), dict(x=2), dict(x=3)])
+    >>> sk.has_column(df, cols=["x"])
+    True
+
+    >>> sk.has_column(df, cols=["y"])
+    False
+    """
+    try:
+        df.transform(check_column_present(cols))
+        return True
+    except ColumnNotFoundError:
+        return False
 
 
 def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:

@@ -109,6 +109,20 @@ class TestSparkKit:
         with pytest.raises(sk.SchemaMismatchError):
             sk.assert_schema_equal(lft_df, rgt_df__different_size)
 
+    def test_check_column_present(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(x=1, y=2)])
+        actual = df.transform(sk.check_column_present("x"))
+        assert actual is df
+
+        actual = df.transform(sk.check_column_present("x", "y"))
+        assert actual is df
+
+        with pytest.raises(sk.ColumnNotFoundError):
+            df.transform(sk.check_column_present("z"))
+
+        with pytest.raises(sk.ColumnNotFoundError):
+            df.transform(sk.check_column_present("x", "y", "z"))
+
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
@@ -207,6 +221,14 @@ class TestSparkKit:
 
         actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
         self.assert_dataframe_equal(actual, expected)
+
+    def test_has_column(self, spark: SparkSession):
+        df = spark.createDataFrame([Row(x=1, y=2)])
+        assert sk.has_column(df, cols=["x"])
+        assert sk.has_column(df, cols=["x", "y"])
+        assert not sk.has_column(df, cols=["x", "y", "z"])
+        assert not sk.has_column(df, cols=["z"])
+        assert not sk.has_column(df, cols=["x", "z"])
 
     def test_is_dataframe_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
