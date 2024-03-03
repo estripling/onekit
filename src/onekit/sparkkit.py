@@ -26,7 +26,7 @@ __all__ = (
     "add_prefix",
     "add_suffix",
     "assert_dataframe_equal",
-    "check_row_count_equal",
+    "assert_row_count_equal",
     "check_row_equal",
     "check_schema_equal",
     "count_nulls",
@@ -159,7 +159,7 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     See Also
     --------
     check_schema_equal : Validate schemas.
-    check_row_count_equal : Validate row counts.
+    assert_row_count_equal : Validate row counts.
     check_row_equal : Validate rows.
 
     Examples
@@ -203,11 +203,11 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     n_lft=2, n_rgt=2
     """
     check_schema_equal(lft_df, rgt_df)
-    check_row_count_equal(lft_df, rgt_df)
+    assert_row_count_equal(lft_df, rgt_df)
     check_row_equal(lft_df, rgt_df)
 
 
-def check_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
+def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     """Validate row counts of both dataframes are equal.
 
     Raises
@@ -226,13 +226,13 @@ def check_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> sk.check_row_count_equal(lft_df, rgt_df) is None
+    >>> sk.assert_row_count_equal(lft_df, rgt_df) is None
     True
 
     >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([dict(x=1)])
     >>> try:
-    ...     sk.check_row_count_equal(lft_df, rgt_df)
+    ...     sk.assert_row_count_equal(lft_df, rgt_df)
     ... except sk.RowCountMismatchError as error:
     ...     print(error)
     ...
@@ -511,7 +511,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     """
     try:
         check_schema_equal(lft_df, rgt_df)
-        check_row_count_equal(lft_df, rgt_df)
+        assert_row_count_equal(lft_df, rgt_df)
         check_row_equal(lft_df, rgt_df)
         return True
     except SparkkitError:
@@ -541,7 +541,7 @@ def is_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     False
     """
     try:
-        check_row_count_equal(lft_df, rgt_df)
+        assert_row_count_equal(lft_df, rgt_df)
         return True
     except RowCountMismatchError:
         return False

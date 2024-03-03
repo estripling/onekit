@@ -70,16 +70,16 @@ class TestSparkKit:
 
         assert sk.assert_dataframe_equal(lft_df, rgt_df) is None
 
-    def test_check_row_count_equal(self, spark: SparkSession):
+    def test_assert_row_count_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
         rgt_df__equal = spark.createDataFrame([Row(x=1), Row(x=3)])
         rgt_df__different = spark.createDataFrame([Row(x=1)])
 
-        assert sk.check_row_count_equal(lft_df, rgt_df__equal) is None
+        assert sk.assert_row_count_equal(lft_df, rgt_df__equal) is None
 
         with pytest.raises(sk.RowCountMismatchError):
-            sk.check_row_count_equal(lft_df, rgt_df__different)
+            sk.assert_row_count_equal(lft_df, rgt_df__different)
 
     def test_check_row_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
