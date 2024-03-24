@@ -1,7 +1,6 @@
 import functools
 from typing import (
     Callable,
-    Iterable,
     List,
     Optional,
     Sequence,
@@ -24,7 +23,7 @@ __all__ = (
 PandasDFPipeFunc = Callable[[PandasDF], PandasDF]
 
 
-def cvf(*cols: Iterable[str]) -> PandasDFPipeFunc:
+def cvf(*cols: str) -> PandasDFPipeFunc:
     """Count value frequency.
 
     Examples
@@ -66,7 +65,7 @@ def cvf(*cols: Iterable[str]) -> PandasDFPipeFunc:
 
 
 def join(
-    *dataframes: Iterable[PandasDF],
+    *dataframes: PandasDF,
     on: Union[str, List[str]],
     how: str = "inner",
 ) -> PandasDF:
@@ -165,7 +164,7 @@ def profile(df: PandasDF, /, *, q: Optional[Sequence[int]] = None) -> PandasDF:
     )
 
 
-def union(*dataframes: Iterable[PandasDF]) -> PandasDF:
+def union(*dataframes: PandasDF) -> PandasDF:
     """Union iterable of Pandas dataframes by name with index reset.
 
     Examples
