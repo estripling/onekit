@@ -2,7 +2,6 @@ import functools
 import os
 from typing import (
     Callable,
-    Iterable,
     List,
     Sequence,
     Union,
@@ -430,7 +429,7 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         raise SchemaMismatchError(lft_schema, rgt_schema)
 
 
-def check_column_present(*cols: Iterable[str]) -> SparkDFTransformFunc:
+def check_column_present(*cols: str) -> SparkDFTransformFunc:
     """Check if columns are present in dataframe.
 
     Raises
@@ -510,7 +509,7 @@ def count_nulls(df: SparkDF, /, *, subset=None) -> SparkDF:
     return df.agg(*[F.sum(F.isnull(c).cast(T.LongType())).alias(c) for c in cols])
 
 
-def cvf(*cols: Iterable[str]) -> SparkDFTransformFunc:
+def cvf(*cols: str) -> SparkDFTransformFunc:
     """Count value frequency.
 
     Examples
@@ -619,7 +618,7 @@ def daterange(
 
 
 @toolz.curry
-def has_column(df: SparkDF, /, *, cols: Iterable[str]) -> bool:
+def has_column(df: SparkDF, /, *, cols: Sequence[str]) -> bool:
     """Evaluate if all columns are present in dataframe.
 
     Examples
@@ -772,7 +771,7 @@ def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
 
 
 def join(
-    *dataframes: Iterable[SparkDF],
+    *dataframes: SparkDF,
     on: Union[str, List[str]],
     how: str = "inner",
 ) -> SparkDF:
@@ -894,7 +893,7 @@ def str_to_col(x: str, /) -> SparkCol:
     return F.col(x) if isinstance(x, str) else x
 
 
-def union(*dataframes: Iterable[SparkDF]) -> SparkDF:
+def union(*dataframes: SparkDF) -> SparkDF:
     """Union iterable of Spark dataframes by name.
 
     Examples

@@ -18,7 +18,6 @@ from typing import (
     Any,
     Callable,
     Generator,
-    Iterable,
     Iterator,
     List,
     Optional,
@@ -133,7 +132,7 @@ def archive_files(
 def are_predicates_true(
     func: Callable[..., bool],
     /,
-    *predicates: Iterable[Predicate],
+    *predicates: Predicate,
 ) -> Predicate:
     """Evaluate if predicates are true.
 
@@ -250,7 +249,7 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     return rng.random() < bias
 
 
-def concat_strings(sep: str, /, *strings: Iterable[str]) -> str:
+def concat_strings(sep: str, /, *strings: str) -> str:
     """Concatenate strings.
 
     Examples
@@ -386,7 +385,7 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     return output
 
 
-def create_path(*strings: Iterable[str]) -> str:
+def create_path(*strings: str) -> str:
     """Create path by concatenating strings.
 
     Examples
@@ -520,12 +519,7 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     return new_xmin, new_xmax
 
 
-def filter_regex(
-    pattern: str,
-    /,
-    *strings: Iterable[str],
-    flags=re.IGNORECASE,
-) -> Generator:
+def filter_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
     """Filter iterable of strings with regex.
 
     Examples
@@ -551,7 +545,7 @@ def filter_regex(
     return filter(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
-def flatten(*items: Iterable[Any]) -> Generator:
+def flatten(*items: Any) -> Generator:
     """Flatten iterable of items.
 
     Examples
@@ -739,12 +733,7 @@ def lazy_read_lines(
             yield line
 
 
-def map_regex(
-    pattern: str,
-    /,
-    *strings: Iterable[str],
-    flags=re.IGNORECASE,
-) -> Generator:
+def map_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
     """Match regex to iterable of strings.
 
     Examples
@@ -881,7 +870,7 @@ def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
 
 
 @toolz.curry
-def reduce_sets(func: Callable[[set, set], set], /, *sets: Iterable[set]) -> set:
+def reduce_sets(func: Callable[[set, set], set], /, *sets: set) -> set:
     """Apply function of two set arguments to reduce iterable of sets.
 
     Examples
