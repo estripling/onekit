@@ -27,6 +27,7 @@ __all__ = (
     "add_prefix",
     "add_suffix",
     "all_col",
+    "any_col",
     "assert_dataframe_equal",
     "assert_row_count_equal",
     "assert_row_equal",
@@ -192,6 +193,49 @@ def all_col(*cols: str) -> SparkCol:
     """
     return functools.reduce(
         SparkCol.__and__,
+        toolz.pipe(
+            cols,
+            pk.flatten,
+            curried.map(lambda col: F.coalesce(str_to_col(col), F.lit(False))),
+        ),
+    )
+
+
+def any_col(*cols: str) -> SparkCol:
+    """Evaluate if any column is true.
+
+    Notes
+    -----
+    A null value is considered false.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=True, y=True),
+    ...         dict(x=True, y=False),
+    ...         dict(x=True, y=None),
+    ...         dict(x=None, y=False),
+    ...         dict(x=None, y=None),
+    ...     ]
+    ... )
+    >>> df.withColumn("any_col_true", sk.any_col("x", "y")).show()
+    +----+-----+------------+
+    |   x|    y|any_col_true|
+    +----+-----+------------+
+    |true| true|        true|
+    |true|false|        true|
+    |true| null|        true|
+    |null|false|       false|
+    |null| null|       false|
+    +----+-----+------------+
+    <BLANKLINE>
+    """
+    return functools.reduce(
+        SparkCol.__or__,
         toolz.pipe(
             cols,
             pk.flatten,
