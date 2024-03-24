@@ -26,6 +26,8 @@ import onekit.pythonkit as pk
 __all__ = (
     "add_prefix",
     "add_suffix",
+    "all_col",
+    "any_col",
     "assert_dataframe_equal",
     "assert_row_count_equal",
     "assert_row_equal",
@@ -154,6 +156,92 @@ def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
         return df
 
     return inner
+
+
+def all_col(*cols: str) -> SparkCol:
+    """Evaluate if all columns are true.
+
+    Notes
+    -----
+    A null value is considered false.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=True, y=True),
+    ...         dict(x=True, y=False),
+    ...         dict(x=True, y=None),
+    ...         dict(x=None, y=False),
+    ...         dict(x=None, y=None),
+    ...     ]
+    ... )
+    >>> df.withColumn("all_cols_true", sk.all_col("x", "y")).show()
+    +----+-----+-------------+
+    |   x|    y|all_cols_true|
+    +----+-----+-------------+
+    |true| true|         true|
+    |true|false|        false|
+    |true| null|        false|
+    |null|false|        false|
+    |null| null|        false|
+    +----+-----+-------------+
+    <BLANKLINE>
+    """
+    return functools.reduce(
+        SparkCol.__and__,
+        toolz.pipe(
+            cols,
+            pk.flatten,
+            curried.map(lambda col: F.coalesce(str_to_col(col), F.lit(False))),
+        ),
+    )
+
+
+def any_col(*cols: str) -> SparkCol:
+    """Evaluate if any column is true.
+
+    Notes
+    -----
+    A null value is considered false.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=True, y=True),
+    ...         dict(x=True, y=False),
+    ...         dict(x=True, y=None),
+    ...         dict(x=None, y=False),
+    ...         dict(x=None, y=None),
+    ...     ]
+    ... )
+    >>> df.withColumn("any_col_true", sk.any_col("x", "y")).show()
+    +----+-----+------------+
+    |   x|    y|any_col_true|
+    +----+-----+------------+
+    |true| true|        true|
+    |true|false|        true|
+    |true| null|        true|
+    |null|false|       false|
+    |null| null|       false|
+    +----+-----+------------+
+    <BLANKLINE>
+    """
+    return functools.reduce(
+        SparkCol.__or__,
+        toolz.pipe(
+            cols,
+            pk.flatten,
+            curried.map(lambda col: F.coalesce(str_to_col(col), F.lit(False))),
+        ),
+    )
 
 
 def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
