@@ -64,6 +64,24 @@ class TestSparkKit:
         expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
+    def test_all_col(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(i=1, a=False, b=False, expect=False),
+                Row(i=2, a=False, b=True, expect=False),
+                Row(i=3, a=True, b=False, expect=False),
+                Row(i=4, a=True, b=True, expect=True),
+                Row(i=5, a=False, b=None, expect=False),
+                Row(i=6, a=True, b=None, expect=False),
+                Row(i=7, a=None, b=False, expect=False),
+                Row(i=8, a=None, b=True, expect=False),
+                Row(i=9, a=None, b=None, expect=False),
+            ]
+        )
+        actual = df.withColumn("fx", sk.all_col("a", "b")).select("i", "fx")
+        expected = df.select("i", F.col("expect").alias("fx"))
+        self.assert_dataframe_equal(actual, expected)
+
     def test_assert_dataframe_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
