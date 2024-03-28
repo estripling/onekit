@@ -183,6 +183,18 @@ def test_date_to_str(d: dt.date, expected: str):
     assert actual == expected
 
 
+def test_datecount():
+    d0 = dt.date(2022, 1, 1)
+
+    actual = toolz.pipe(pk.datecount(d0, forward=True), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
+    assert actual == expected
+
+    actual = toolz.pipe(pk.datecount(d0, forward=False), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "start, end, expected",
     [
@@ -223,18 +235,6 @@ def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
 
     actual = tuple(pk.daterange(start, end, incl_min=False, incl_max=False))
     assert actual == expected[1:-1]
-
-
-def test_daycount():
-    d0 = dt.date(2022, 1, 1)
-
-    actual = toolz.pipe(pk.daycount(d0, forward=True), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
-    assert actual == expected
-
-    actual = toolz.pipe(pk.daycount(d0, forward=False), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
-    assert actual == expected
 
 
 @pytest.mark.parametrize(

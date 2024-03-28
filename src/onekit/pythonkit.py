@@ -38,8 +38,8 @@ __all__ = (
     "contrast_sets",
     "create_path",
     "date_to_str",
+    "datecount",
     "daterange",
-    "daycount",
     "extend_range",
     "flatten",
     "filter_regex",
@@ -413,6 +413,30 @@ def date_to_str(d: dt.date, /) -> str:
     return d.isoformat()
 
 
+def datecount(d0: dt.date, /, *, forward: bool = True) -> Generator:
+    """Generate sequence of consecutive dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> curried.pipe(pk.datecount(d0), curried.take(3), list)
+    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
+
+    >>> curried.pipe(
+    ...     pk.datecount(d0, forward=False),
+    ...     curried.map(pk.date_to_str),
+    ...     curried.take(3),
+    ...     list,
+    ... )
+    ['2022-01-01', '2021-12-31', '2021-12-30']
+    """
+    successor = operator.add if forward else operator.sub
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+
+
 def daterange(
     min_date: dt.date,
     max_date: dt.date,
@@ -468,31 +492,7 @@ def daterange(
     d1, d2 = sorted([min_date, max_date])
     d1 = d1 if incl_min else d1 + dt.timedelta(1)
     d2 = d2 if incl_max else d2 - dt.timedelta(1)
-    return itertools.takewhile(lambda d: d <= d2, daycount(d1, forward=True))
-
-
-def daycount(d0: dt.date, /, *, forward: bool = True) -> Generator:
-    """Generate sequence of consecutive dates.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-    >>> curried.pipe(pk.daycount(d0), curried.take(3), list)
-    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
-
-    >>> curried.pipe(
-    ...     pk.daycount(d0, forward=False),
-    ...     curried.map(pk.date_to_str),
-    ...     curried.take(3),
-    ...     list,
-    ... )
-    ['2022-01-01', '2021-12-31', '2021-12-30']
-    """
-    successor = operator.add if forward else operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return itertools.takewhile(lambda d: d <= d2, datecount(d1, forward=True))
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
