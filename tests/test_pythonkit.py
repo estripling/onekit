@@ -204,6 +204,38 @@ def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
 
 
 @pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (1.0, dt.date(2022, 1, 1), None),
+        (-1, dt.date(2022, 1, 1), None),
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2021, 12, 31)),
+        (2, dt.date(2022, 1, 1), dt.date(2021, 12, 30)),
+        (3, dt.date(2022, 1, 1), dt.date(2021, 12, 29)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 7, 25)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 7, 2)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 1, 5)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 1, 4)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 1, 5)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 1, 4)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 1, 3)),
+    ],
+)
+def test_date_ago(n: int, d0: dt.date, expected: dt.date):
+    if isinstance(n, int) and n >= 0:
+        actual = pk.date_ago(d0, n)
+        assert actual == expected
+
+        dates = pk.daterange(actual, d0, incl_min=True, incl_max=True)
+        n_days = curried.count(dates)
+        n_days_expected = n + 1
+        assert n_days == n_days_expected
+    else:
+        with pytest.raises(ValueError):
+            pk.date_ago(d0, n)
+
+
+@pytest.mark.parametrize(
     "d, expected",
     [
         (dt.date(2022, 1, 1), "2022-01-01"),
