@@ -1,3 +1,4 @@
+import datetime as dt
 import functools
 import os
 from typing import (
@@ -35,6 +36,7 @@ __all__ = (
     "count_nulls",
     "cvf",
     "daterange",
+    "filter_date",
     "has_column",
     "is_dataframe_equal",
     "is_row_count_equal",
@@ -615,6 +617,56 @@ def daterange(
         )
         .withColumn(new_col, F.explode(new_col))
     )
+
+
+def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransformFunc:
+    """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
+
+    Notes
+    -----
+    - :math:`d_{0}`: reference date (inclusive)
+    - :math:`d_{-n} < d_{0}`: relative date (exclusive)
+    - :math:`n > 0`: number of dates from :math:`d_{-n}` to :math:`d_{0}`
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(d="2024-01-01"),
+    ...         dict(d="2024-01-02"),
+    ...         dict(d="2024-01-03"),
+    ...         dict(d="2024-01-04"),
+    ...         dict(d="2024-01-05"),
+    ...         dict(d="2024-01-06"),
+    ...         dict(d="2024-01-07"),
+    ...         dict(d="2024-01-08"),
+    ...     ],
+    ... )
+    >>> df.transform(sk.filter_date("d", d0="2024-01-07", n=3)).show()
+    +----------+
+    |         d|
+    +----------+
+    |2024-01-05|
+    |2024-01-06|
+    |2024-01-07|
+    +----------+
+    <BLANKLINE>
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError(f"{n=} - must be a positive integer")
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        date_diff = "_date_diff_"
+        return (
+            df.withColumn(date_diff, F.datediff(F.lit(d0), date_col))
+            .where((F.col(date_diff) >= 0) & (F.col(date_diff) < n))
+            .drop(date_diff)
+        )
+
+    return inner
 
 
 @toolz.curry

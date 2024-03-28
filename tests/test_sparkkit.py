@@ -1,7 +1,9 @@
 import datetime as dt
 import os
+from typing import Callable
 
 import pytest
+import toolz
 from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import (
@@ -11,6 +13,7 @@ from pyspark.sql import (
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
+import onekit.pythonkit as pk
 import onekit.sparkkit as sk
 
 
@@ -257,6 +260,71 @@ class TestSparkKit:
 
         actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
         self.assert_dataframe_equal(actual, expected)
+
+    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    def test_filter_date(self, spark: SparkSession, func: Callable):
+        d0 = func("2024-01-01")
+        df = spark.createDataFrame(
+            [
+                Row(d=func("2023-11-30")),
+                Row(d=func("2023-12-02")),
+                Row(d=func("2023-12-03")),
+                Row(d=func("2023-12-15")),
+                Row(d=func("2023-12-20")),
+                Row(d=func("2023-12-29")),
+                Row(d=func("2023-12-30")),
+                Row(d=func("2023-12-31")),
+                Row(d=d0),
+                Row(d=func("2024-01-02")),
+                Row(d=func("2024-01-08")),
+                Row(d=func("2024-01-10")),
+            ]
+        )
+
+        actual = df.transform(sk.filter_date("d", d0=d0, n=1))
+        expected = spark.createDataFrame(
+            [
+                Row(d=d0),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.filter_date("d", d0=d0, n=2))
+        expected = spark.createDataFrame(
+            [
+                Row(d=func("2023-12-31")),
+                Row(d=d0),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.filter_date("d", d0=d0, n=3))
+        expected = spark.createDataFrame(
+            [
+                Row(d=func("2023-12-30")),
+                Row(d=func("2023-12-31")),
+                Row(d=d0),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        actual = df.transform(sk.filter_date("d", d0=d0, n=30))
+        expected = spark.createDataFrame(
+            [
+                Row(d=func("2023-12-03")),
+                Row(d=func("2023-12-15")),
+                Row(d=func("2023-12-20")),
+                Row(d=func("2023-12-29")),
+                Row(d=func("2023-12-30")),
+                Row(d=func("2023-12-31")),
+                Row(d=d0),
+            ]
+        )
+        self.assert_dataframe_equal(actual, expected)
+
+        for n in [0, -1, 1.0, 1.5]:
+            with pytest.raises(ValueError):
+                df.transform(sk.filter_date("d", d0=d0, n=n))
 
     def test_has_column(self, spark: SparkSession):
         df = spark.createDataFrame([Row(x=1, y=2)])
