@@ -550,8 +550,8 @@ def test_relative_date(n: int, d0: dt.date, expected: dt.date):
     actual = pk.relative_date(d0, n)
     assert actual == expected
 
-    days = pk.daterange(d0, actual, incl_min=True, incl_max=True)
-    n_days = curried.count(days)
+    dates = pk.daterange(d0, actual, incl_min=True, incl_max=True)
+    n_days = curried.count(dates)
     n_days_expected = abs(n) + 1
     assert n_days == n_days_expected
 
