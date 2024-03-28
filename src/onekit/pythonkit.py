@@ -37,6 +37,7 @@ __all__ = (
     "concat_strings",
     "contrast_sets",
     "create_path",
+    "date_ahead",
     "date_to_str",
     "datecount",
     "daterange",
@@ -398,6 +399,34 @@ def create_path(*strings: str) -> str:
     'hdfs://path/to/file'
     """
     return functools.reduce(os.path.join, flatten(strings))
+
+
+@toolz.curry
+def date_ahead(d0: dt.date, /, n: int) -> dt.date:
+    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ahead.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+
+    >>> # function is curried
+    >>> today_ds = pk.date_ahead(d0)
+    >>> today_ds(n=0)
+    datetime.date(2022, 1, 1)
+    >>> today_ds(1)
+    datetime.date(2022, 1, 2)
+    >>> today_ds(2)
+    datetime.date(2022, 1, 3)
+
+    >>> lead3 = pk.date_ahead(n=3)
+    >>> lead3(dt.date(2024, 1, 1))
+    datetime.date(2024, 1, 4)
+    """
+    if not isinstance(n, int) or n < 0:
+        raise ValueError(f"{n=} - must be a non-negative integer")
+    return d0 + dt.timedelta(days=n)
 
 
 def date_to_str(d: dt.date, /) -> str:

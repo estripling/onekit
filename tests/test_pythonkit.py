@@ -172,6 +172,38 @@ def test_create_path(strings: List[str], expected: str):
 
 
 @pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (1.0, dt.date(2022, 1, 1), None),
+        (-1, dt.date(2022, 1, 1), None),
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2022, 1, 2)),
+        (2, dt.date(2022, 1, 1), dt.date(2022, 1, 3)),
+        (3, dt.date(2022, 1, 1), dt.date(2022, 1, 4)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 8, 8)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 3, 1)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 2, 28)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 2, 29)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
+    ],
+)
+def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
+    if isinstance(n, int) and n >= 0:
+        actual = pk.date_ahead(d0, n)
+        assert actual == expected
+
+        dates = pk.daterange(d0, actual, incl_min=True, incl_max=True)
+        n_days = curried.count(dates)
+        n_days_expected = n + 1
+        assert n_days == n_days_expected
+    else:
+        with pytest.raises(ValueError):
+            pk.date_ahead(d0, n)
+
+
+@pytest.mark.parametrize(
     "d, expected",
     [
         (dt.date(2022, 1, 1), "2022-01-01"),
