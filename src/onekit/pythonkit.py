@@ -58,7 +58,6 @@ __all__ = (
     "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
-    "relative_date",
     "signif",
     "source_code",
     "stopwatch",
@@ -970,36 +969,6 @@ def remove_punctuation(text: str, /) -> str:
     'I think therefore I am Descartes'
     """
     return text.translate(str.maketrans("", "", string.punctuation))
-
-
-@toolz.curry
-def relative_date(d0: dt.date, /, n: int) -> dt.date:
-    """Compute date :math:`n \\in \\mathbb{Z}` days from reference date :math:`d_{0}`.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-
-    >>> # function is curried
-    >>> today_ds = pk.relative_date(d0)
-    >>> today_ds(n=0)
-    datetime.date(2022, 1, 1)
-    >>> today_ds(1)
-    datetime.date(2022, 1, 2)
-    >>> today_ds(2)
-    datetime.date(2022, 1, 3)
-
-    >>> lead3 = pk.relative_date(n=3)
-    >>> lead3(d0)
-    datetime.date(2022, 1, 4)
-
-    >>> lag3 = pk.relative_date(n=-4)
-    >>> lag3(d0)
-    datetime.date(2021, 12, 28)
-    """
-    return d0 + dt.timedelta(days=n)
 
 
 @toolz.curry
