@@ -587,12 +587,12 @@ def daterange(
     ...     ]
     ... )
     >>> (
-    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "day")
-    ...     .orderBy("id", "day")
+    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "d")
+    ...     .orderBy("id", "d")
     ...     .show()
     ... )
     +---+----------+
-    | id|       day|
+    | id|         d|
     +---+----------+
     |  1|2023-05-01|
     |  1|2023-05-02|
@@ -986,16 +986,16 @@ def with_endofweek_date(
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(day="2023-05-01"),
-    ...         dict(day=None),
-    ...         dict(day="2023-05-03"),
-    ...         dict(day="2023-05-08"),
-    ...         dict(day="2023-05-21"),
+    ...         dict(d="2023-05-01"),
+    ...         dict(d=None),
+    ...         dict(d="2023-05-03"),
+    ...         dict(d="2023-05-08"),
+    ...         dict(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_endofweek_date("day", "endofweek")).show()
+    >>> df.transform(sk.with_endofweek_date("d", "endofweek")).show()
     +----------+----------+
-    |       day| endofweek|
+    |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-07|
     |      null|      null|
@@ -1005,9 +1005,9 @@ def with_endofweek_date(
     +----------+----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_endofweek_date("day", "endofweek", "Sat")).show()
+    >>> df.transform(sk.with_endofweek_date("d", "endofweek", "Sat")).show()
     +----------+----------+
-    |       day| endofweek|
+    |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-06|
     |      null|      null|
@@ -1076,16 +1076,16 @@ def with_startofweek_date(
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(day="2023-05-01"),
-    ...         dict(day=None),
-    ...         dict(day="2023-05-03"),
-    ...         dict(day="2023-05-08"),
-    ...         dict(day="2023-05-21"),
+    ...         dict(d="2023-05-01"),
+    ...         dict(d=None),
+    ...         dict(d="2023-05-03"),
+    ...         dict(d="2023-05-08"),
+    ...         dict(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_startofweek_date("day", "startofweek")).show()
+    >>> df.transform(sk.with_startofweek_date("d", "startofweek")).show()
     +----------+-----------+
-    |       day|startofweek|
+    |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-05-01|
     |      null|       null|
@@ -1095,9 +1095,9 @@ def with_startofweek_date(
     +----------+-----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_startofweek_date("day", "startofweek", "Sat")).show()
+    >>> df.transform(sk.with_startofweek_date("d", "startofweek", "Sat")).show()
     +----------+-----------+
-    |       day|startofweek|
+    |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-04-30|
     |      null|       null|
@@ -1128,11 +1128,11 @@ def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
-    ...     [dict(day="2023-05-01"), dict(day=None), dict(day="2023-05-03")]
+    ...     [dict(d="2023-05-01"), dict(d=None), dict(d="2023-05-03")]
     ... )
-    >>> df.transform(sk.with_weekday("day", "weekday")).show()
+    >>> df.transform(sk.with_weekday("d", "weekday")).show()
     +----------+-------+
-    |       day|weekday|
+    |         d|weekday|
     +----------+-------+
     |2023-05-01|    Mon|
     |      null|   null|

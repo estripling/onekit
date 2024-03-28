@@ -252,13 +252,13 @@ class TestSparkKit:
             [Row(id=1), Row(id=3), Row(id=2), Row(id=2), Row(id=3)]
         )
         expected = spark.createDataFrame(
-            [Row(id=i, day=dt.date(2023, 5, d)) for i in [1, 2, 3] for d in range(1, 8)]
+            [Row(id=i, d=dt.date(2023, 5, d)) for i in [1, 2, 3] for d in range(1, 8)]
         )
 
-        actual = sk.daterange(df, "2023-05-01", "2023-05-07", "id", "day")
+        actual = sk.daterange(df, "2023-05-01", "2023-05-07", "id", "d")
         self.assert_dataframe_equal(actual, expected)
 
-        actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "day")
+        actual = sk.daterange(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "d")
         self.assert_dataframe_equal(actual, expected)
 
     @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
@@ -418,79 +418,79 @@ class TestSparkKit:
     def test_with_endofweek_date(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                Row(day="2023-04-30"),
-                Row(day="2023-05-01"),
-                Row(day="2023-05-02"),
-                Row(day="2023-05-03"),
-                Row(day="2023-05-04"),
-                Row(day="2023-05-05"),
-                Row(day="2023-05-06"),
-                Row(day="2023-05-07"),
-                Row(day="2023-05-08"),
-                Row(day=None),
+                Row(d="2023-04-30"),
+                Row(d="2023-05-01"),
+                Row(d="2023-05-02"),
+                Row(d="2023-05-03"),
+                Row(d="2023-05-04"),
+                Row(d="2023-05-05"),
+                Row(d="2023-05-06"),
+                Row(d="2023-05-07"),
+                Row(d="2023-05-08"),
+                Row(d=None),
             ]
         )
-        actual = df.transform(sk.with_endofweek_date("day", "endofweek"))
+        actual = df.transform(sk.with_endofweek_date("d", "endofweek"))
         expected = spark.createDataFrame(
             [
-                Row(day="2023-04-30", endofweek="2023-04-30"),
-                Row(day="2023-05-01", endofweek="2023-05-07"),
-                Row(day="2023-05-02", endofweek="2023-05-07"),
-                Row(day="2023-05-03", endofweek="2023-05-07"),
-                Row(day="2023-05-04", endofweek="2023-05-07"),
-                Row(day="2023-05-05", endofweek="2023-05-07"),
-                Row(day="2023-05-06", endofweek="2023-05-07"),
-                Row(day="2023-05-07", endofweek="2023-05-07"),
-                Row(day="2023-05-08", endofweek="2023-05-14"),
-                Row(day=None, endofweek=None),
+                Row(d="2023-04-30", endofweek="2023-04-30"),
+                Row(d="2023-05-01", endofweek="2023-05-07"),
+                Row(d="2023-05-02", endofweek="2023-05-07"),
+                Row(d="2023-05-03", endofweek="2023-05-07"),
+                Row(d="2023-05-04", endofweek="2023-05-07"),
+                Row(d="2023-05-05", endofweek="2023-05-07"),
+                Row(d="2023-05-06", endofweek="2023-05-07"),
+                Row(d="2023-05-07", endofweek="2023-05-07"),
+                Row(d="2023-05-08", endofweek="2023-05-14"),
+                Row(d=None, endofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.with_endofweek_date("day", "endofweek", "Sat"))
+        actual = df.transform(sk.with_endofweek_date("d", "endofweek", "Sat"))
         expected = spark.createDataFrame(
             [
-                Row(day="2023-04-30", endofweek="2023-05-06"),
-                Row(day="2023-05-01", endofweek="2023-05-06"),
-                Row(day="2023-05-02", endofweek="2023-05-06"),
-                Row(day="2023-05-03", endofweek="2023-05-06"),
-                Row(day="2023-05-04", endofweek="2023-05-06"),
-                Row(day="2023-05-05", endofweek="2023-05-06"),
-                Row(day="2023-05-06", endofweek="2023-05-06"),
-                Row(day="2023-05-07", endofweek="2023-05-13"),
-                Row(day="2023-05-08", endofweek="2023-05-13"),
-                Row(day=None, endofweek=None),
+                Row(d="2023-04-30", endofweek="2023-05-06"),
+                Row(d="2023-05-01", endofweek="2023-05-06"),
+                Row(d="2023-05-02", endofweek="2023-05-06"),
+                Row(d="2023-05-03", endofweek="2023-05-06"),
+                Row(d="2023-05-04", endofweek="2023-05-06"),
+                Row(d="2023-05-05", endofweek="2023-05-06"),
+                Row(d="2023-05-06", endofweek="2023-05-06"),
+                Row(d="2023-05-07", endofweek="2023-05-13"),
+                Row(d="2023-05-08", endofweek="2023-05-13"),
+                Row(d=None, endofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
 
         df = spark.createDataFrame(
             [
-                Row(day=dt.date(2023, 4, 30)),
-                Row(day=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 2)),
-                Row(day=dt.date(2023, 5, 3)),
-                Row(day=dt.date(2023, 5, 4)),
-                Row(day=dt.date(2023, 5, 5)),
-                Row(day=dt.date(2023, 5, 6)),
-                Row(day=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 8)),
-                Row(day=None),
+                Row(d=dt.date(2023, 4, 30)),
+                Row(d=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 2)),
+                Row(d=dt.date(2023, 5, 3)),
+                Row(d=dt.date(2023, 5, 4)),
+                Row(d=dt.date(2023, 5, 5)),
+                Row(d=dt.date(2023, 5, 6)),
+                Row(d=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 8)),
+                Row(d=None),
             ]
         )
-        actual = df.transform(sk.with_endofweek_date("day", "endofweek"))
+        actual = df.transform(sk.with_endofweek_date("d", "endofweek"))
         expected = spark.createDataFrame(
             [
-                Row(day=dt.date(2023, 4, 30), endofweek=dt.date(2023, 4, 30)),
-                Row(day=dt.date(2023, 5, 1), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 2), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 3), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 4), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 5), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 6), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 7), endofweek=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 8), endofweek=dt.date(2023, 5, 14)),
-                Row(day=None, endofweek=None),
+                Row(d=dt.date(2023, 4, 30), endofweek=dt.date(2023, 4, 30)),
+                Row(d=dt.date(2023, 5, 1), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 2), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 3), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 4), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 5), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 6), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 7), endofweek=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 8), endofweek=dt.date(2023, 5, 14)),
+                Row(d=None, endofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
@@ -534,79 +534,79 @@ class TestSparkKit:
     def test_with_startofweek_date(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                Row(day="2023-04-30"),
-                Row(day="2023-05-01"),
-                Row(day="2023-05-02"),
-                Row(day="2023-05-03"),
-                Row(day="2023-05-04"),
-                Row(day="2023-05-05"),
-                Row(day="2023-05-06"),
-                Row(day="2023-05-07"),
-                Row(day="2023-05-08"),
-                Row(day=None),
+                Row(d="2023-04-30"),
+                Row(d="2023-05-01"),
+                Row(d="2023-05-02"),
+                Row(d="2023-05-03"),
+                Row(d="2023-05-04"),
+                Row(d="2023-05-05"),
+                Row(d="2023-05-06"),
+                Row(d="2023-05-07"),
+                Row(d="2023-05-08"),
+                Row(d=None),
             ]
         )
-        actual = df.transform(sk.with_startofweek_date("day", "startofweek"))
+        actual = df.transform(sk.with_startofweek_date("d", "startofweek"))
         expected = spark.createDataFrame(
             [
-                Row(day="2023-04-30", startofweek=dt.date(2023, 4, 24)),
-                Row(day="2023-05-01", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-02", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-03", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-04", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-05", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-06", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-07", startofweek=dt.date(2023, 5, 1)),
-                Row(day="2023-05-08", startofweek=dt.date(2023, 5, 8)),
-                Row(day=None, startofweek=None),
+                Row(d="2023-04-30", startofweek=dt.date(2023, 4, 24)),
+                Row(d="2023-05-01", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-02", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-03", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-04", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-05", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-06", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-07", startofweek=dt.date(2023, 5, 1)),
+                Row(d="2023-05-08", startofweek=dt.date(2023, 5, 8)),
+                Row(d=None, startofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.with_startofweek_date("day", "startofweek", "Sat"))
+        actual = df.transform(sk.with_startofweek_date("d", "startofweek", "Sat"))
         expected = spark.createDataFrame(
             [
-                Row(day="2023-04-30", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-01", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-02", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-03", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-04", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-05", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-06", startofweek=dt.date(2023, 4, 30)),
-                Row(day="2023-05-07", startofweek=dt.date(2023, 5, 7)),
-                Row(day="2023-05-08", startofweek=dt.date(2023, 5, 7)),
-                Row(day=None, startofweek=None),
+                Row(d="2023-04-30", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-01", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-02", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-03", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-04", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-05", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-06", startofweek=dt.date(2023, 4, 30)),
+                Row(d="2023-05-07", startofweek=dt.date(2023, 5, 7)),
+                Row(d="2023-05-08", startofweek=dt.date(2023, 5, 7)),
+                Row(d=None, startofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
 
         df = spark.createDataFrame(
             [
-                Row(day=dt.date(2023, 4, 30)),
-                Row(day=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 2)),
-                Row(day=dt.date(2023, 5, 3)),
-                Row(day=dt.date(2023, 5, 4)),
-                Row(day=dt.date(2023, 5, 5)),
-                Row(day=dt.date(2023, 5, 6)),
-                Row(day=dt.date(2023, 5, 7)),
-                Row(day=dt.date(2023, 5, 8)),
-                Row(day=None),
+                Row(d=dt.date(2023, 4, 30)),
+                Row(d=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 2)),
+                Row(d=dt.date(2023, 5, 3)),
+                Row(d=dt.date(2023, 5, 4)),
+                Row(d=dt.date(2023, 5, 5)),
+                Row(d=dt.date(2023, 5, 6)),
+                Row(d=dt.date(2023, 5, 7)),
+                Row(d=dt.date(2023, 5, 8)),
+                Row(d=None),
             ]
         )
-        actual = df.transform(sk.with_startofweek_date("day", "startofweek"))
+        actual = df.transform(sk.with_startofweek_date("d", "startofweek"))
         expected = spark.createDataFrame(
             [
-                Row(day=dt.date(2023, 4, 30), startofweek=dt.date(2023, 4, 24)),
-                Row(day=dt.date(2023, 5, 1), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 2), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 3), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 4), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 5), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 6), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 7), startofweek=dt.date(2023, 5, 1)),
-                Row(day=dt.date(2023, 5, 8), startofweek=dt.date(2023, 5, 8)),
-                Row(day=None, startofweek=None),
+                Row(d=dt.date(2023, 4, 30), startofweek=dt.date(2023, 4, 24)),
+                Row(d=dt.date(2023, 5, 1), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 2), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 3), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 4), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 5), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 6), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 7), startofweek=dt.date(2023, 5, 1)),
+                Row(d=dt.date(2023, 5, 8), startofweek=dt.date(2023, 5, 8)),
+                Row(d=None, startofweek=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
@@ -614,37 +614,37 @@ class TestSparkKit:
     def test_with_weekday(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                Row(day="2023-05-01"),
-                Row(day="2023-05-02"),
-                Row(day="2023-05-03"),
-                Row(day="2023-05-04"),
-                Row(day="2023-05-05"),
-                Row(day="2023-05-06"),
-                Row(day="2023-05-07"),
-                Row(day=None),
+                Row(d="2023-05-01"),
+                Row(d="2023-05-02"),
+                Row(d="2023-05-03"),
+                Row(d="2023-05-04"),
+                Row(d="2023-05-05"),
+                Row(d="2023-05-06"),
+                Row(d="2023-05-07"),
+                Row(d=None),
             ]
         )
-        actual = df.transform(sk.with_weekday("day", "weekday"))
+        actual = df.transform(sk.with_weekday("d", "weekday"))
         expected = spark.createDataFrame(
             [
-                Row(day="2023-05-01", weekday="Mon"),
-                Row(day="2023-05-02", weekday="Tue"),
-                Row(day="2023-05-03", weekday="Wed"),
-                Row(day="2023-05-04", weekday="Thu"),
-                Row(day="2023-05-05", weekday="Fri"),
-                Row(day="2023-05-06", weekday="Sat"),
-                Row(day="2023-05-07", weekday="Sun"),
-                Row(day=None, weekday=None),
+                Row(d="2023-05-01", weekday="Mon"),
+                Row(d="2023-05-02", weekday="Tue"),
+                Row(d="2023-05-03", weekday="Wed"),
+                Row(d="2023-05-04", weekday="Thu"),
+                Row(d="2023-05-05", weekday="Fri"),
+                Row(d="2023-05-06", weekday="Sat"),
+                Row(d="2023-05-07", weekday="Sun"),
+                Row(d=None, weekday=None),
             ]
         )
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.withColumn("day", F.to_date("day", "yyyy-MM-dd")).transform(
-            sk.with_weekday("day", "weekday")
+        actual = df.withColumn("d", F.to_date("d", "yyyy-MM-dd")).transform(
+            sk.with_weekday("d", "weekday")
         )
         self.assert_dataframe_equal(
             actual,
-            expected.withColumn("day", F.to_date("day", "yyyy-MM-dd")),
+            expected.withColumn("d", F.to_date("d", "yyyy-MM-dd")),
         )
 
     def test_spark_session(self, spark: SparkSession):
