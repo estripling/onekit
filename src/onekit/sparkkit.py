@@ -1,3 +1,4 @@
+import datetime as dt
 import functools
 import os
 from typing import (
@@ -35,6 +36,7 @@ __all__ = (
     "count_nulls",
     "cvf",
     "daterange",
+    "filter_date",
     "has_column",
     "is_dataframe_equal",
     "is_row_count_equal",
@@ -585,12 +587,12 @@ def daterange(
     ...     ]
     ... )
     >>> (
-    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "day")
-    ...     .orderBy("id", "day")
+    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "d")
+    ...     .orderBy("id", "d")
     ...     .show()
     ... )
     +---+----------+
-    | id|       day|
+    | id|         d|
     +---+----------+
     |  1|2023-05-01|
     |  1|2023-05-02|
@@ -615,6 +617,56 @@ def daterange(
         )
         .withColumn(new_col, F.explode(new_col))
     )
+
+
+def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransformFunc:
+    """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
+
+    Notes
+    -----
+    - :math:`d_{0}`: reference date (inclusive)
+    - :math:`d_{-n} < d_{0}`: relative date (exclusive)
+    - :math:`n > 0`: number of dates from :math:`d_{-n}` to :math:`d_{0}`
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(d="2024-01-01"),
+    ...         dict(d="2024-01-02"),
+    ...         dict(d="2024-01-03"),
+    ...         dict(d="2024-01-04"),
+    ...         dict(d="2024-01-05"),
+    ...         dict(d="2024-01-06"),
+    ...         dict(d="2024-01-07"),
+    ...         dict(d="2024-01-08"),
+    ...     ],
+    ... )
+    >>> df.transform(sk.filter_date("d", d0="2024-01-07", n=3)).show()
+    +----------+
+    |         d|
+    +----------+
+    |2024-01-05|
+    |2024-01-06|
+    |2024-01-07|
+    +----------+
+    <BLANKLINE>
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError(f"{n=} - must be a positive integer")
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        date_diff = "_date_diff_"
+        return (
+            df.withColumn(date_diff, F.datediff(F.lit(d0), date_col))
+            .where((F.col(date_diff) >= 0) & (F.col(date_diff) < n))
+            .drop(date_diff)
+        )
+
+    return inner
 
 
 @toolz.curry
@@ -934,16 +986,16 @@ def with_endofweek_date(
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(day="2023-05-01"),
-    ...         dict(day=None),
-    ...         dict(day="2023-05-03"),
-    ...         dict(day="2023-05-08"),
-    ...         dict(day="2023-05-21"),
+    ...         dict(d="2023-05-01"),
+    ...         dict(d=None),
+    ...         dict(d="2023-05-03"),
+    ...         dict(d="2023-05-08"),
+    ...         dict(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_endofweek_date("day", "endofweek")).show()
+    >>> df.transform(sk.with_endofweek_date("d", "endofweek")).show()
     +----------+----------+
-    |       day| endofweek|
+    |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-07|
     |      null|      null|
@@ -953,9 +1005,9 @@ def with_endofweek_date(
     +----------+----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_endofweek_date("day", "endofweek", "Sat")).show()
+    >>> df.transform(sk.with_endofweek_date("d", "endofweek", "Sat")).show()
     +----------+----------+
-    |       day| endofweek|
+    |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-06|
     |      null|      null|
@@ -1024,16 +1076,16 @@ def with_startofweek_date(
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(day="2023-05-01"),
-    ...         dict(day=None),
-    ...         dict(day="2023-05-03"),
-    ...         dict(day="2023-05-08"),
-    ...         dict(day="2023-05-21"),
+    ...         dict(d="2023-05-01"),
+    ...         dict(d=None),
+    ...         dict(d="2023-05-03"),
+    ...         dict(d="2023-05-08"),
+    ...         dict(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_startofweek_date("day", "startofweek")).show()
+    >>> df.transform(sk.with_startofweek_date("d", "startofweek")).show()
     +----------+-----------+
-    |       day|startofweek|
+    |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-05-01|
     |      null|       null|
@@ -1043,9 +1095,9 @@ def with_startofweek_date(
     +----------+-----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_startofweek_date("day", "startofweek", "Sat")).show()
+    >>> df.transform(sk.with_startofweek_date("d", "startofweek", "Sat")).show()
     +----------+-----------+
-    |       day|startofweek|
+    |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-04-30|
     |      null|       null|
@@ -1076,11 +1128,11 @@ def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
-    ...     [dict(day="2023-05-01"), dict(day=None), dict(day="2023-05-03")]
+    ...     [dict(d="2023-05-01"), dict(d=None), dict(d="2023-05-03")]
     ... )
-    >>> df.transform(sk.with_weekday("day", "weekday")).show()
+    >>> df.transform(sk.with_weekday("d", "weekday")).show()
     +----------+-------+
-    |       day|weekday|
+    |         d|weekday|
     +----------+-------+
     |2023-05-01|    Mon|
     |      null|   null|

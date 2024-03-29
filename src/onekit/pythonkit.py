@@ -37,9 +37,11 @@ __all__ = (
     "concat_strings",
     "contrast_sets",
     "create_path",
+    "date_ago",
+    "date_ahead",
     "date_to_str",
+    "datecount",
     "daterange",
-    "daycount",
     "extend_range",
     "flatten",
     "filter_regex",
@@ -50,13 +52,12 @@ __all__ = (
     "last_date_of_month",
     "lazy_read_lines",
     "map_regex",
-    "n_days",
     "num_to_str",
+    "number_of_days",
     "op",
     "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
-    "relative_date",
     "signif",
     "source_code",
     "stopwatch",
@@ -400,6 +401,62 @@ def create_path(*strings: str) -> str:
     return functools.reduce(os.path.join, flatten(strings))
 
 
+@toolz.curry
+def date_ago(d0: dt.date, /, n: int) -> dt.date:
+    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ago.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+
+    >>> # function is curried
+    >>> today_ds = pk.date_ago(d0)
+    >>> today_ds(n=0)
+    datetime.date(2022, 1, 1)
+    >>> today_ds(1)
+    datetime.date(2021, 12, 31)
+    >>> today_ds(2)
+    datetime.date(2021, 12, 30)
+
+    >>> lag3 = pk.date_ago(n=3)
+    >>> lag3(dt.date(2024, 1, 1))
+    datetime.date(2023, 12, 29)
+    """
+    if not isinstance(n, int) or n < 0:
+        raise ValueError(f"{n=} - must be a non-negative integer")
+    return d0 - dt.timedelta(days=n)
+
+
+@toolz.curry
+def date_ahead(d0: dt.date, /, n: int) -> dt.date:
+    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ahead.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+
+    >>> # function is curried
+    >>> today_ds = pk.date_ahead(d0)
+    >>> today_ds(n=0)
+    datetime.date(2022, 1, 1)
+    >>> today_ds(1)
+    datetime.date(2022, 1, 2)
+    >>> today_ds(2)
+    datetime.date(2022, 1, 3)
+
+    >>> lead3 = pk.date_ahead(n=3)
+    >>> lead3(dt.date(2024, 1, 1))
+    datetime.date(2024, 1, 4)
+    """
+    if not isinstance(n, int) or n < 0:
+        raise ValueError(f"{n=} - must be a non-negative integer")
+    return d0 + dt.timedelta(days=n)
+
+
 def date_to_str(d: dt.date, /) -> str:
     """Cast date to string in ISO format: YYYY-MM-DD.
 
@@ -411,6 +468,30 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+def datecount(d0: dt.date, /, *, forward: bool = True) -> Generator:
+    """Generate sequence of consecutive dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> curried.pipe(pk.datecount(d0), curried.take(3), list)
+    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
+
+    >>> curried.pipe(
+    ...     pk.datecount(d0, forward=False),
+    ...     curried.map(pk.date_to_str),
+    ...     curried.take(3),
+    ...     list,
+    ... )
+    ['2022-01-01', '2021-12-31', '2021-12-30']
+    """
+    successor = operator.add if forward else operator.sub
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
 
 
 def daterange(
@@ -468,31 +549,7 @@ def daterange(
     d1, d2 = sorted([min_date, max_date])
     d1 = d1 if incl_min else d1 + dt.timedelta(1)
     d2 = d2 if incl_max else d2 - dt.timedelta(1)
-    return itertools.takewhile(lambda d: d <= d2, daycount(d1, forward=True))
-
-
-def daycount(d0: dt.date, /, *, forward: bool = True) -> Generator:
-    """Generate sequence of consecutive dates.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-    >>> curried.pipe(pk.daycount(d0), curried.take(3), list)
-    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
-
-    >>> curried.pipe(
-    ...     pk.daycount(d0, forward=False),
-    ...     curried.map(pk.date_to_str),
-    ...     curried.take(3),
-    ...     list,
-    ... )
-    ['2022-01-01', '2021-12-31', '2021-12-30']
-    """
-    successor = operator.add if forward else operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return itertools.takewhile(lambda d: d <= d2, datecount(d1, forward=True))
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
@@ -759,27 +816,6 @@ def map_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
     return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
-def n_days(d1: dt.date, d2: dt.date, /) -> int:
-    """Compute number of days between two dates.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
-    >>> pk.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
-    1
-
-    >>> pk.n_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
-    7
-
-    >>> # function makes sure: start <= end
-    >>> pk.n_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
-    7
-    """
-    start, end = sorted([d1, d2])
-    return (end - start).days + 1
-
-
 def num_to_str(x: Union[int, float], /) -> str:
     """Cast number to string with underscores as thousands separator.
 
@@ -793,6 +829,30 @@ def num_to_str(x: Union[int, float], /) -> str:
     '100_000.0'
     """
     return f"{x:_}"
+
+
+def number_of_days(d1: dt.date, d2: dt.date, /) -> int:
+    """Compute the number of days between two dates (both inclusive).
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
+    1
+
+    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 2))
+    2
+
+    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
+    7
+
+    >>> # function makes sure: start <= end
+    >>> pk.number_of_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
+    7
+    """
+    start, end = sorted([d1, d2])
+    return (end - start).days + 1
 
 
 @toolz.curry
@@ -909,36 +969,6 @@ def remove_punctuation(text: str, /) -> str:
     'I think therefore I am Descartes'
     """
     return text.translate(str.maketrans("", "", string.punctuation))
-
-
-@toolz.curry
-def relative_date(d0: dt.date, /, n: int) -> dt.date:
-    """Compute date :math:`n \\in \\mathbb{Z}` days from reference date :math:`d_{0}`.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-
-    >>> # function is curried
-    >>> today_ds = pk.relative_date(d0)
-    >>> today_ds(n=0)
-    datetime.date(2022, 1, 1)
-    >>> today_ds(1)
-    datetime.date(2022, 1, 2)
-    >>> today_ds(2)
-    datetime.date(2022, 1, 3)
-
-    >>> lead3 = pk.relative_date(n=3)
-    >>> lead3(d0)
-    datetime.date(2022, 1, 4)
-
-    >>> lag3 = pk.relative_date(n=-4)
-    >>> lag3(d0)
-    datetime.date(2021, 12, 28)
-    """
-    return d0 + dt.timedelta(days=n)
 
 
 @toolz.curry

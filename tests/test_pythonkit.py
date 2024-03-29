@@ -172,6 +172,70 @@ def test_create_path(strings: List[str], expected: str):
 
 
 @pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (1.0, dt.date(2022, 1, 1), None),
+        (-1, dt.date(2022, 1, 1), None),
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2021, 12, 31)),
+        (2, dt.date(2022, 1, 1), dt.date(2021, 12, 30)),
+        (3, dt.date(2022, 1, 1), dt.date(2021, 12, 29)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 7, 25)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 7, 2)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 1, 5)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 1, 4)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 1, 5)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 1, 4)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 1, 3)),
+    ],
+)
+def test_date_ago(n: int, d0: dt.date, expected: dt.date):
+    if isinstance(n, int) and n >= 0:
+        actual = pk.date_ago(d0, n)
+        assert actual == expected
+
+        dates = pk.daterange(actual, d0, incl_min=True, incl_max=True)
+        n_days = curried.count(dates)
+        n_days_expected = n + 1
+        assert n_days == n_days_expected
+    else:
+        with pytest.raises(ValueError):
+            pk.date_ago(d0, n)
+
+
+@pytest.mark.parametrize(
+    "n, d0, expected",
+    [
+        (1.0, dt.date(2022, 1, 1), None),
+        (-1, dt.date(2022, 1, 1), None),
+        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
+        (1, dt.date(2022, 1, 1), dt.date(2022, 1, 2)),
+        (2, dt.date(2022, 1, 1), dt.date(2022, 1, 3)),
+        (3, dt.date(2022, 1, 1), dt.date(2022, 1, 4)),
+        (7, dt.date(2022, 8, 1), dt.date(2022, 8, 8)),
+        (30, dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
+        (27, dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
+        (28, dt.date(2022, 2, 1), dt.date(2022, 3, 1)),
+        (27, dt.date(2020, 2, 1), dt.date(2020, 2, 28)),
+        (28, dt.date(2020, 2, 1), dt.date(2020, 2, 29)),
+        (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
+    ],
+)
+def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
+    if isinstance(n, int) and n >= 0:
+        actual = pk.date_ahead(d0, n)
+        assert actual == expected
+
+        dates = pk.daterange(d0, actual, incl_min=True, incl_max=True)
+        n_days = curried.count(dates)
+        n_days_expected = n + 1
+        assert n_days == n_days_expected
+    else:
+        with pytest.raises(ValueError):
+            pk.date_ahead(d0, n)
+
+
+@pytest.mark.parametrize(
     "d, expected",
     [
         (dt.date(2022, 1, 1), "2022-01-01"),
@@ -180,6 +244,18 @@ def test_create_path(strings: List[str], expected: str):
 )
 def test_date_to_str(d: dt.date, expected: str):
     actual = pk.date_to_str(d)
+    assert actual == expected
+
+
+def test_datecount():
+    d0 = dt.date(2022, 1, 1)
+
+    actual = toolz.pipe(pk.datecount(d0, forward=True), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
+    assert actual == expected
+
+    actual = toolz.pipe(pk.datecount(d0, forward=False), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
 
@@ -223,18 +299,6 @@ def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
 
     actual = tuple(pk.daterange(start, end, incl_min=False, incl_max=False))
     assert actual == expected[1:-1]
-
-
-def test_daycount():
-    d0 = dt.date(2022, 1, 1)
-
-    actual = toolz.pipe(pk.daycount(d0, forward=True), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
-    assert actual == expected
-
-    actual = toolz.pipe(pk.daycount(d0, forward=False), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
-    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -429,20 +493,6 @@ def test_lazy_read_lines():
 
 
 @pytest.mark.parametrize(
-    "d1, d2, expected",
-    [
-        (dt.date(2022, 8, 1), dt.date(2022, 8, 1), 1),
-        (dt.date(2022, 8, 1), dt.date(2022, 8, 7), 7),
-        (dt.date(2022, 8, 7), dt.date(2022, 8, 1), 7),
-        (dt.date(2014, 1, 1), dt.date(2016, 5, 6), 857),
-    ],
-)
-def test_n_days(d1: dt.date, d2: dt.date, expected: int):
-    actual = pk.n_days(d1, d2)
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
     "x, expected",
     [
         (1, "1"),
@@ -455,6 +505,20 @@ def test_n_days(d1: dt.date, d2: dt.date, expected: int):
 )
 def test_num_to_str(x: Union[int, float], expected: str):
     actual = pk.num_to_str(x)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "d1, d2, expected",
+    [
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 1), 1),
+        (dt.date(2022, 8, 1), dt.date(2022, 8, 7), 7),
+        (dt.date(2022, 8, 7), dt.date(2022, 8, 1), 7),
+        (dt.date(2014, 1, 1), dt.date(2016, 5, 6), 857),
+    ],
+)
+def test_number_of_days(d1: dt.date, d2: dt.date, expected: int):
+    actual = pk.number_of_days(d1, d2)
     assert actual == expected
 
 
@@ -524,36 +588,6 @@ def test_reduce_sets(func: Callable, expected: Set[int]):
 def test_remove_punctuation(text: str, expected: str):
     actual = pk.remove_punctuation(text)
     assert actual == expected
-
-
-@pytest.mark.parametrize(
-    "n, d0, expected",
-    [
-        (0, dt.date(2022, 1, 1), dt.date(2022, 1, 1)),
-        (1, dt.date(2022, 1, 1), dt.date(2022, 1, 2)),
-        (-1, dt.date(2022, 1, 1), dt.date(2021, 12, 31)),
-        (2, dt.date(2022, 1, 1), dt.date(2022, 1, 3)),
-        (-2, dt.date(2022, 1, 1), dt.date(2021, 12, 30)),
-        (3, dt.date(2022, 1, 1), dt.date(2022, 1, 4)),
-        (-3, dt.date(2022, 1, 1), dt.date(2021, 12, 29)),
-        (7, dt.date(2022, 8, 1), dt.date(2022, 8, 8)),
-        (-7, dt.date(2022, 8, 8), dt.date(2022, 8, 1)),
-        (30, dt.date(2022, 8, 1), dt.date(2022, 8, 31)),
-        (27, dt.date(2022, 2, 1), dt.date(2022, 2, 28)),
-        (28, dt.date(2022, 2, 1), dt.date(2022, 3, 1)),
-        (27, dt.date(2020, 2, 1), dt.date(2020, 2, 28)),
-        (28, dt.date(2020, 2, 1), dt.date(2020, 2, 29)),
-        (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
-    ],
-)
-def test_relative_date(n: int, d0: dt.date, expected: dt.date):
-    actual = pk.relative_date(d0, n)
-    assert actual == expected
-
-    days = pk.daterange(d0, actual, incl_min=True, incl_max=True)
-    n_days = curried.count(days)
-    n_days_expected = abs(n) + 1
-    assert n_days == n_days_expected
 
 
 @pytest.mark.parametrize(
