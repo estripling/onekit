@@ -930,7 +930,7 @@ def peek(
 
 
 def str_to_col(x: str, /) -> SparkCol:
-    """Cast string to Spark column else return ``x``.
+    """Cast string ``x`` to Spark column else return ``x``.
 
     Examples
     --------
