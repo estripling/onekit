@@ -17,7 +17,7 @@ import onekit.pythonkit as pk
 import onekit.sparkkit as sk
 
 
-# @pytest.mark.slow
+@pytest.mark.slow
 class TestSparkKit:
     def test_add_prefix(self, spark: SparkSession):
         df = spark.createDataFrame([Row(a=1, b=2)])
@@ -541,41 +541,23 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-    def test_with_weekday(self, spark: SparkSession):
+    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    def test_with_weekday(self, spark: SparkSession, func: Callable):
         df = spark.createDataFrame(
             [
-                Row(d="2023-05-01"),
-                Row(d="2023-05-02"),
-                Row(d="2023-05-03"),
-                Row(d="2023-05-04"),
-                Row(d="2023-05-05"),
-                Row(d="2023-05-06"),
-                Row(d="2023-05-07"),
-                Row(d=None),
+                Row(i=1, d=func("2023-05-01"), expect="Mon"),
+                Row(i=2, d=func("2023-05-02"), expect="Tue"),
+                Row(i=3, d=func("2023-05-03"), expect="Wed"),
+                Row(i=4, d=func("2023-05-04"), expect="Thu"),
+                Row(i=5, d=func("2023-05-05"), expect="Fri"),
+                Row(i=6, d=func("2023-05-06"), expect="Sat"),
+                Row(i=7, d=func("2023-05-07"), expect="Sun"),
+                Row(i=8, d=None, expect=None),
             ]
         )
-        actual = df.transform(sk.with_weekday("d", "weekday"))
-        expected = spark.createDataFrame(
-            [
-                Row(d="2023-05-01", weekday="Mon"),
-                Row(d="2023-05-02", weekday="Tue"),
-                Row(d="2023-05-03", weekday="Wed"),
-                Row(d="2023-05-04", weekday="Thu"),
-                Row(d="2023-05-05", weekday="Fri"),
-                Row(d="2023-05-06", weekday="Sat"),
-                Row(d="2023-05-07", weekday="Sun"),
-                Row(d=None, weekday=None),
-            ]
-        )
+        actual = df.transform(sk.with_weekday("d", "fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
-
-        actual = df.withColumn("d", F.to_date("d", "yyyy-MM-dd")).transform(
-            sk.with_weekday("d", "weekday")
-        )
-        self.assert_dataframe_equal(
-            actual,
-            expected.withColumn("d", F.to_date("d", "yyyy-MM-dd")),
-        )
 
     def test_spark_session(self, spark: SparkSession):
         assert isinstance(spark, SparkSession)
