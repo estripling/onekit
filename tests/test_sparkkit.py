@@ -379,9 +379,8 @@ class TestSparkKit:
         expected = df1.unionByName(df2).unionByName(df3)
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("reversed", [True, False])
     @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
-    def test_date_diff(self, spark: SparkSession, reversed: bool, func: Callable):
+    def test_with_date_diff_ago(self, spark: SparkSession, func: Callable):
         d0 = func("2024-01-01")
         df = spark.createDataFrame(
             [
@@ -396,14 +395,31 @@ class TestSparkKit:
                 Row(i=9, d=func("2024-01-08"), expect=-7),
                 Row(i=10, d=func("2024-01-10"), expect=-9),
             ]
-        ).withColumn(
-            "expect",
-            F.when(F.lit(reversed), F.col("expect")).otherwise(-1 * F.col("expect")),
         )
 
-        actual = df.transform(sk.with_date_diff("d", d0, reversed, "fx")).select(
-            "i", "fx"
+        actual = df.transform(sk.with_date_diff_ago("d", d0, "fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
+        self.assert_dataframe_equal(actual, expected)
+
+    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    def test_with_date_diff_ahead(self, spark: SparkSession, func: Callable):
+        d0 = func("2024-01-01")
+        df = spark.createDataFrame(
+            [
+                Row(i=1, d=func("2023-11-30"), expect=-32),
+                Row(i=2, d=func("2023-12-15"), expect=-17),
+                Row(i=3, d=func("2023-12-20"), expect=-12),
+                Row(i=4, d=func("2023-12-29"), expect=-3),
+                Row(i=5, d=func("2023-12-30"), expect=-2),
+                Row(i=6, d=func("2023-12-31"), expect=-1),
+                Row(i=7, d=func("2024-01-01"), expect=0),
+                Row(i=8, d=func("2024-01-02"), expect=1),
+                Row(i=9, d=func("2024-01-08"), expect=7),
+                Row(i=10, d=func("2024-01-10"), expect=9),
+            ]
         )
+
+        actual = df.transform(sk.with_date_diff_ahead("d", d0, "fx")).select("i", "fx")
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 

@@ -46,7 +46,8 @@ __all__ = (
     "peek",
     "str_to_col",
     "union",
-    "with_date_diff",
+    "with_date_diff_ago",
+    "with_date_diff_ahead",
     "with_endofweek_date",
     "with_index",
     "with_startofweek_date",
@@ -973,16 +974,13 @@ def union(*dataframes: SparkDF) -> SparkDF:
     return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
 
 
-def with_date_diff(
+def with_date_diff_ago(
     date_col: str,
     d0: Union[str, dt.date],
-    reversed: bool,
     new_col: str,
 ) -> SparkDFTransformFunc:
-    """Add column with date differences w.r.t. the reference date :math:`d_{0}`.
-
-    If ``reversed=False``, date differences of future dates are positive integers.\n
-    If ``reversed=True``, date differences of past dates are positive integers.
+    """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
+    where date differences of past dates are positive integers.
 
     Examples
     --------
@@ -1002,26 +1000,7 @@ def with_date_diff(
     ...         dict(d="2024-01-09"),
     ...     ],
     ... )
-    >>> df.transform(
-    ...     sk.with_date_diff("d", d0="2024-01-07", reversed=False, new_col="diff")
-    ... ).show()
-    +----------+----+
-    |         d|diff|
-    +----------+----+
-    |2024-01-01|  -6|
-    |2024-01-02|  -5|
-    |2024-01-03|  -4|
-    |2024-01-04|  -3|
-    |2024-01-05|  -2|
-    |2024-01-06|  -1|
-    |2024-01-07|   0|
-    |2024-01-08|   1|
-    |2024-01-09|   2|
-    +----------+----+
-    <BLANKLINE>
-    >>> df.transform(
-    ...     sk.with_date_diff("d", d0="2024-01-07", reversed=True, new_col="diff")
-    ... ).show()
+    >>> df.transform(sk.with_date_diff_ago("d", "2024-01-07", "diff")).show()
     +----------+----+
     |         d|diff|
     +----------+----+
@@ -1039,12 +1018,56 @@ def with_date_diff(
     """
 
     def inner(df: SparkDF, /) -> SparkDF:
-        return df.withColumn(
-            new_col,
-            F.datediff(F.lit(d0), str_to_col(date_col))
-            if reversed
-            else F.datediff(str_to_col(date_col), F.lit(d0)),
-        )
+        return df.withColumn(new_col, F.datediff(F.lit(d0), str_to_col(date_col)))
+
+    return inner
+
+
+def with_date_diff_ahead(
+    date_col: str,
+    d0: Union[str, dt.date],
+    new_col: str,
+) -> SparkDFTransformFunc:
+    """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
+    where date differences of future dates are positive integers.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(d="2024-01-01"),
+    ...         dict(d="2024-01-02"),
+    ...         dict(d="2024-01-03"),
+    ...         dict(d="2024-01-04"),
+    ...         dict(d="2024-01-05"),
+    ...         dict(d="2024-01-06"),
+    ...         dict(d="2024-01-07"),
+    ...         dict(d="2024-01-08"),
+    ...         dict(d="2024-01-09"),
+    ...     ],
+    ... )
+    >>> df.transform(sk.with_date_diff_ahead("d", "2024-01-07", "diff")).show()
+    +----------+----+
+    |         d|diff|
+    +----------+----+
+    |2024-01-01|  -6|
+    |2024-01-02|  -5|
+    |2024-01-03|  -4|
+    |2024-01-04|  -3|
+    |2024-01-05|  -2|
+    |2024-01-06|  -1|
+    |2024-01-07|   0|
+    |2024-01-08|   1|
+    |2024-01-09|   2|
+    +----------+----+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(d0)))
 
     return inner
 
