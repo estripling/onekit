@@ -443,84 +443,40 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-    def test_with_endofweek_date(self, spark: SparkSession):
+    @pytest.mark.parametrize("f", [toolz.identity, pk.str_to_date])
+    def test_with_endofweek_date(self, spark: SparkSession, f: Callable):
+        field_type = T.StringType() if f == toolz.identity else T.DateType()
         df = spark.createDataFrame(
             [
-                Row(d="2023-04-30"),
-                Row(d="2023-05-01"),
-                Row(d="2023-05-02"),
-                Row(d="2023-05-03"),
-                Row(d="2023-05-04"),
-                Row(d="2023-05-05"),
-                Row(d="2023-05-06"),
-                Row(d="2023-05-07"),
-                Row(d="2023-05-08"),
-                Row(d=None),
-            ]
+                Row(i=1, d=f("2023-04-30"), e1=f("2023-04-30"), e2=f("2023-05-06")),
+                Row(i=2, d=f("2023-05-01"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=3, d=f("2023-05-02"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=4, d=f("2023-05-03"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=5, d=f("2023-05-04"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=6, d=f("2023-05-05"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=7, d=f("2023-05-06"), e1=f("2023-05-07"), e2=f("2023-05-06")),
+                Row(i=8, d=f("2023-05-07"), e1=f("2023-05-07"), e2=f("2023-05-13")),
+                Row(i=9, d=f("2023-05-08"), e1=f("2023-05-14"), e2=f("2023-05-13")),
+                Row(i=10, d=None, e1=None, e2=None),
+            ],
+            schema=T.StructType(
+                [
+                    T.StructField("i", T.IntegerType(), True),
+                    T.StructField("d", field_type, True),
+                    T.StructField("expect_sun", field_type, True),
+                    T.StructField("expect_sat", field_type, True),
+                ]
+            ),
         )
-        actual = df.transform(sk.with_endofweek_date("d", "endofweek"))
-        expected = spark.createDataFrame(
-            [
-                Row(d="2023-04-30", endofweek="2023-04-30"),
-                Row(d="2023-05-01", endofweek="2023-05-07"),
-                Row(d="2023-05-02", endofweek="2023-05-07"),
-                Row(d="2023-05-03", endofweek="2023-05-07"),
-                Row(d="2023-05-04", endofweek="2023-05-07"),
-                Row(d="2023-05-05", endofweek="2023-05-07"),
-                Row(d="2023-05-06", endofweek="2023-05-07"),
-                Row(d="2023-05-07", endofweek="2023-05-07"),
-                Row(d="2023-05-08", endofweek="2023-05-14"),
-                Row(d=None, endofweek=None),
-            ]
-        )
+
+        actual = df.transform(sk.with_endofweek_date("d", "fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect_sun").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.with_endofweek_date("d", "endofweek", "Sat"))
-        expected = spark.createDataFrame(
-            [
-                Row(d="2023-04-30", endofweek="2023-05-06"),
-                Row(d="2023-05-01", endofweek="2023-05-06"),
-                Row(d="2023-05-02", endofweek="2023-05-06"),
-                Row(d="2023-05-03", endofweek="2023-05-06"),
-                Row(d="2023-05-04", endofweek="2023-05-06"),
-                Row(d="2023-05-05", endofweek="2023-05-06"),
-                Row(d="2023-05-06", endofweek="2023-05-06"),
-                Row(d="2023-05-07", endofweek="2023-05-13"),
-                Row(d="2023-05-08", endofweek="2023-05-13"),
-                Row(d=None, endofweek=None),
-            ]
+        actual = df.transform(sk.with_endofweek_date("d", "fx", "Sat")).select(
+            "i", "fx"
         )
-        self.assert_dataframe_equal(actual, expected)
-
-        df = spark.createDataFrame(
-            [
-                Row(d=dt.date(2023, 4, 30)),
-                Row(d=dt.date(2023, 5, 1)),
-                Row(d=dt.date(2023, 5, 2)),
-                Row(d=dt.date(2023, 5, 3)),
-                Row(d=dt.date(2023, 5, 4)),
-                Row(d=dt.date(2023, 5, 5)),
-                Row(d=dt.date(2023, 5, 6)),
-                Row(d=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 8)),
-                Row(d=None),
-            ]
-        )
-        actual = df.transform(sk.with_endofweek_date("d", "endofweek"))
-        expected = spark.createDataFrame(
-            [
-                Row(d=dt.date(2023, 4, 30), endofweek=dt.date(2023, 4, 30)),
-                Row(d=dt.date(2023, 5, 1), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 2), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 3), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 4), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 5), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 6), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 7), endofweek=dt.date(2023, 5, 7)),
-                Row(d=dt.date(2023, 5, 8), endofweek=dt.date(2023, 5, 14)),
-                Row(d=None, endofweek=None),
-            ]
-        )
+        expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
     def test_with_index(self, spark: SparkSession):
