@@ -32,6 +32,7 @@ __all__ = (
     "assert_row_count_equal",
     "assert_row_equal",
     "assert_schema_equal",
+    "bool_to_int",
     "check_column_present",
     "count_nulls",
     "cvf",
@@ -431,6 +432,50 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     if lft_schema != rgt_schema:
         raise SchemaMismatchError(lft_schema, rgt_schema)
+
+
+@toolz.curry
+def bool_to_int(df: SparkDF, /, *, subset=None) -> SparkDF:
+    """Cast values of Boolean columns to 0/1 integer values.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=True, y=False, z=None),
+    ...         dict(x=False, y=None, z=True),
+    ...         dict(x=True, y=None, z=None),
+    ...     ]
+    ... )
+    >>> sk.bool_to_int(df).show()
+    +---+----+----+
+    |  x|   y|   z|
+    +---+----+----+
+    |  1|   0|null|
+    |  0|null|   1|
+    |  1|null|null|
+    +---+----+----+
+    <BLANKLINE>
+
+    >>> # function is curried
+    >>> df.transform(sk.bool_to_int(subset=["y", "z"])).show()
+    +-----+----+----+
+    |    x|   y|   z|
+    +-----+----+----+
+    | true|   0|null|
+    |false|null|   1|
+    | true|null|null|
+    +-----+----+----+
+    <BLANKLINE>
+    """
+    cols = subset or df.columns
+    bool_cols = [c for c in cols if isinstance(df.schema[c].dataType, T.BooleanType)]
+    for bool_col in bool_cols:
+        df = df.withColumn(bool_col, F.col(bool_col).cast(T.IntegerType()))
+    return df
 
 
 def check_column_present(*cols: str) -> SparkDFTransformFunc:
@@ -913,7 +958,7 @@ def peek(
             print(f"shape = ({n_rows}, {n_cols})")
 
         if n > 0:
-            pandas_df = df.limit(n).toPandas()
+            pandas_df = df.limit(n).transform(bool_to_int()).toPandas()
             pandas_df.index += 1
 
             is_inside_notebook = get_ipython() is not None
