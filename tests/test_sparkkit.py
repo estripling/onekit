@@ -369,9 +369,9 @@ class TestSparkKit:
     def test_peek(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                dict(x=1, y="a"),
-                dict(x=3, y=None),
-                dict(x=None, y="c"),
+                dict(x=1, y="a", z=True),
+                dict(x=3, y=None, z=False),
+                dict(x=None, y="c", z=True),
             ]
         )
         actual = (

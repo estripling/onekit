@@ -958,7 +958,7 @@ def peek(
             print(f"shape = ({n_rows}, {n_cols})")
 
         if n > 0:
-            pandas_df = df.limit(n).toPandas()
+            pandas_df = df.limit(n).transform(bool_to_int()).toPandas()
             pandas_df.index += 1
 
             is_inside_notebook = get_ipython() is not None
