@@ -266,61 +266,25 @@ class TestSparkKit:
         d0 = func("2024-01-01")
         df = spark.createDataFrame(
             [
-                Row(d=func("2023-11-30")),
-                Row(d=func("2023-12-02")),
-                Row(d=func("2023-12-03")),
-                Row(d=func("2023-12-15")),
-                Row(d=func("2023-12-20")),
-                Row(d=func("2023-12-29")),
-                Row(d=func("2023-12-30")),
-                Row(d=func("2023-12-31")),
-                Row(d=d0),
-                Row(d=func("2024-01-02")),
-                Row(d=func("2024-01-08")),
-                Row(d=func("2024-01-10")),
+                Row(d=func("2023-11-30"), n1=False, n2=False, n3=False, n30=False),
+                Row(d=func("2023-12-02"), n1=False, n2=False, n3=False, n30=False),
+                Row(d=func("2023-12-03"), n1=False, n2=False, n3=False, n30=True),
+                Row(d=func("2023-12-15"), n1=False, n2=False, n3=False, n30=True),
+                Row(d=func("2023-12-20"), n1=False, n2=False, n3=False, n30=True),
+                Row(d=func("2023-12-29"), n1=False, n2=False, n3=False, n30=True),
+                Row(d=func("2023-12-30"), n1=False, n2=False, n3=True, n30=True),
+                Row(d=func("2023-12-31"), n1=False, n2=True, n3=True, n30=True),
+                Row(d=d0, n1=True, n2=True, n3=True, n30=True),
+                Row(d=func("2024-01-02"), n1=False, n2=False, n3=False, n30=False),
+                Row(d=func("2024-01-08"), n1=False, n2=False, n3=False, n30=False),
+                Row(d=func("2024-01-10"), n1=False, n2=False, n3=False, n30=False),
             ]
         )
 
-        actual = df.transform(sk.filter_date("d", d0=d0, n=1))
-        expected = spark.createDataFrame(
-            [
-                Row(d=d0),
-            ]
-        )
-        self.assert_dataframe_equal(actual, expected)
-
-        actual = df.transform(sk.filter_date("d", d0=d0, n=2))
-        expected = spark.createDataFrame(
-            [
-                Row(d=func("2023-12-31")),
-                Row(d=d0),
-            ]
-        )
-        self.assert_dataframe_equal(actual, expected)
-
-        actual = df.transform(sk.filter_date("d", d0=d0, n=3))
-        expected = spark.createDataFrame(
-            [
-                Row(d=func("2023-12-30")),
-                Row(d=func("2023-12-31")),
-                Row(d=d0),
-            ]
-        )
-        self.assert_dataframe_equal(actual, expected)
-
-        actual = df.transform(sk.filter_date("d", d0=d0, n=30))
-        expected = spark.createDataFrame(
-            [
-                Row(d=func("2023-12-03")),
-                Row(d=func("2023-12-15")),
-                Row(d=func("2023-12-20")),
-                Row(d=func("2023-12-29")),
-                Row(d=func("2023-12-30")),
-                Row(d=func("2023-12-31")),
-                Row(d=d0),
-            ]
-        )
-        self.assert_dataframe_equal(actual, expected)
+        for n, col in [(1, "n1"), (2, "n2"), (3, "n3"), (30, "n30")]:
+            actual = df.transform(sk.filter_date("d", d0=d0, n=n)).select("d")
+            expected = df.where(col).select("d")
+            self.assert_dataframe_equal(actual, expected)
 
         for n in [0, -1, 1.0, 1.5]:
             with pytest.raises(ValueError):
