@@ -482,37 +482,26 @@ class TestSparkKit:
     def test_with_index(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                Row(x="a"),
-                Row(x="b"),
-                Row(x="c"),
-                Row(x="d"),
-                Row(x="e"),
-                Row(x="f"),
-                Row(x="g"),
-                Row(x="h"),
-            ],
-            schema=T.StructType([T.StructField("x", T.StringType(), True)]),
-        )
-
-        actual = df.transform(sk.with_index("idx"))
-        expected = spark.createDataFrame(
-            [
-                Row(x="a", idx=1),
-                Row(x="b", idx=2),
-                Row(x="c", idx=3),
-                Row(x="d", idx=4),
-                Row(x="e", idx=5),
-                Row(x="f", idx=6),
-                Row(x="g", idx=7),
-                Row(x="h", idx=8),
+                Row(i=1, x="a", expect=1),
+                Row(i=2, x="b", expect=2),
+                Row(i=3, x="c", expect=3),
+                Row(i=4, x="d", expect=4),
+                Row(i=5, x="e", expect=5),
+                Row(i=6, x="f", expect=6),
+                Row(i=7, x="g", expect=7),
+                Row(i=8, x="h", expect=8),
             ],
             schema=T.StructType(
                 [
+                    T.StructField("i", T.IntegerType(), True),
                     T.StructField("x", T.StringType(), True),
-                    T.StructField("idx", T.IntegerType(), True),
+                    T.StructField("expect", T.IntegerType(), True),
                 ]
             ),
         )
+
+        actual = df.transform(sk.with_index("fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
     def test_with_startofweek_date(self, spark: SparkSession):
