@@ -235,6 +235,20 @@ def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
             pk.date_ahead(d0, n)
 
 
+def test_date_count_backward():
+    d0 = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_backward(d0), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
+    assert actual == expected
+
+
+def test_date_count_forward():
+    d0 = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_forward(d0), curried.take(3), list)
+    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "d, expected",
     [
@@ -244,18 +258,6 @@ def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
 )
 def test_date_to_str(d: dt.date, expected: str):
     actual = pk.date_to_str(d)
-    assert actual == expected
-
-
-def test_datecount():
-    d0 = dt.date(2022, 1, 1)
-
-    actual = toolz.pipe(pk.datecount(d0, forward=True), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
-    assert actual == expected
-
-    actual = toolz.pipe(pk.datecount(d0, forward=False), curried.take(3), list)
-    expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
 
