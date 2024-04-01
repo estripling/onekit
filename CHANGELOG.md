@@ -2,6 +2,95 @@
 
 
 
+## v1.0.0 (2024-04-01)
+
+### Breaking
+
+* refactor: rename sk.daterange -&gt; sk.date_range (#61)
+
+* refactor: rename sk.daterange -&gt; sk.date_range
+
+* refactor(with_weekday): add type hint for determine_weekday
+
+BREAKING CHANGE: rename sk.daterange -&gt; sk.date_range ([`c1b8661`](https://github.com/estripling/onekit/commit/c1b8661025fbf7bab6be4ea682c436dff330ed98))
+
+* refactor: rename daterange -&gt; date_range (#60)
+
+BREAKING CHANGE: rename daterange -&gt; date_range ([`547d5ac`](https://github.com/estripling/onekit/commit/547d5ac9a040843a945e76cb172da503fae7f3c8))
+
+* feat: datecount -&gt; date_count_backward, date_count_forward (#59)
+
+BREAKING CHANGE: split datecount into date_count_backward and date_count_forward ([`fff3c77`](https://github.com/estripling/onekit/commit/fff3c77ef58c1ba7e96f430e6b78d48d15aebf20))
+
+* feat: improve date functionality (#54)
+
+* feat: add filter_date
+
+* refactor: rename day -&gt; d
+
+* refactor: rename daycount -&gt; datecount
+
+* refactor: rename n_days -&gt; number_of_days
+
+* test(relative_date): rename days -&gt; dates
+
+* feat: add date_ahead
+
+* feat: add date_ago
+
+* fix: remove relative_date
+
+* refactor: change order
+
+BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripling/onekit/commit/72fba4706626ff8b18e208e86271e9595ebe1962))
+
+### Feature
+
+* feat: add with_increasing_id (#62)
+
+* feat: add with_increasing_id
+
+* test: fix nondeterministic test ([`1dd4c19`](https://github.com/estripling/onekit/commit/1dd4c19512d8135f67bc4b18d00d3911ef9767ac))
+
+* feat: add bool_to_int (#58)
+
+* feat: add bool_to_int
+
+* fix(peek): use bool_to_int before converting to pandas ([`bbde5aa`](https://github.com/estripling/onekit/commit/bbde5aa04fadb42de40e2d46d85e0300180d70a0))
+
+* feat: split with_date_diff into with_date_diff_ago and with_date_diff_ahead (#57) ([`1175784`](https://github.com/estripling/onekit/commit/11757848773a9378e89bcc9bb5d3c5b535105a33))
+
+* feat: add date diff (#55)
+
+* docs(str_to_col): update docstring
+
+* feat: add with_date_diff ([`2504dcd`](https://github.com/estripling/onekit/commit/2504dcdf86a77454208c1bff4647ed7c1bc20b9c))
+
+* feat: add all_col and any_col (#52)
+
+* feat: add all_col
+
+* feat: add any_col ([`fb0c07a`](https://github.com/estripling/onekit/commit/fb0c07a55e30e1db6d598b7a47cb0997cfa4a47b))
+
+### Style
+
+* style: change type hint for star parameters (#53) ([`840bc66`](https://github.com/estripling/onekit/commit/840bc66e371be24b254fcc87b1836e0c57b968aa))
+
+### Test
+
+* test: refactor to have shorter tests (#56)
+
+* test: refactor test_with_endofweek_date
+
+* test: refactor test_with_index
+
+* test: refactor test_with_startofweek_date
+
+* test: refactor test_with_weekday
+
+* test: refactor test_filter_date ([`7aa966d`](https://github.com/estripling/onekit/commit/7aa966d409498c03b2b85b2552d8b6952105fd1b))
+
+
 ## v0.16.0 (2024-03-03)
 
 ### Feature
