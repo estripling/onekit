@@ -41,8 +41,8 @@ __all__ = (
     "date_ahead",
     "date_count_backward",
     "date_count_forward",
+    "date_range",
     "date_to_str",
-    "daterange",
     "extend_range",
     "flatten",
     "filter_regex",
@@ -500,20 +500,7 @@ def date_count_forward(d0: dt.date, /) -> Generator:
     return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
 
 
-def date_to_str(d: dt.date, /) -> str:
-    """Cast date to string in ISO format: YYYY-MM-DD.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
-    >>> pk.date_to_str(dt.date(2022, 1, 1))
-    '2022-01-01'
-    """
-    return d.isoformat()
-
-
-def daterange(
+def date_range(
     min_date: dt.date,
     max_date: dt.date,
     /,
@@ -531,44 +518,57 @@ def daterange(
     >>> d1 = dt.date(2022, 1, 1)
     >>> d2 = dt.date(2022, 1, 3)
 
-    >>> curried.pipe(pk.daterange(d1, d2), curried.map(pk.date_to_str), list)
+    >>> curried.pipe(pk.date_range(d1, d2), curried.map(pk.date_to_str), list)
     ['2022-01-01', '2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_min=False, incl_max=True),
+    ...     pk.date_range(d1, d2, incl_min=False, incl_max=True),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-02', '2022-01-03']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_min=True, incl_max=False),
+    ...     pk.date_range(d1, d2, incl_min=True, incl_max=False),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-01', '2022-01-02']
 
     >>> curried.pipe(
-    ...     pk.daterange(d1, d2, incl_min=False, incl_max=False),
+    ...     pk.date_range(d1, d2, incl_min=False, incl_max=False),
     ...     curried.map(pk.date_to_str),
     ...     list,
     ... )
     ['2022-01-02']
 
-    >>> list(pk.daterange(d1, dt.date(2022, 1, 1)))
+    >>> list(pk.date_range(d1, dt.date(2022, 1, 1)))
     [datetime.date(2022, 1, 1)]
 
-    >>> list(pk.daterange(d1, dt.date(2022, 1, 1), incl_min=False))
+    >>> list(pk.date_range(d1, dt.date(2022, 1, 1), incl_min=False))
     []
 
     >>> # function makes sure: start <= end
-    >>> curried.pipe(pk.daterange(d2, d1), curried.map(pk.date_to_str), list)
+    >>> curried.pipe(pk.date_range(d2, d1), curried.map(pk.date_to_str), list)
     ['2022-01-01', '2022-01-02', '2022-01-03']
     """
     d1, d2 = sorted([min_date, max_date])
     d1 = d1 if incl_min else d1 + dt.timedelta(1)
     d2 = d2 if incl_max else d2 - dt.timedelta(1)
     return itertools.takewhile(lambda d: d <= d2, date_count_forward(d1))
+
+
+def date_to_str(d: dt.date, /) -> str:
+    """Cast date to string in ISO format: YYYY-MM-DD.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> pk.date_to_str(dt.date(2022, 1, 1))
+    '2022-01-01'
+    """
+    return d.isoformat()
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
