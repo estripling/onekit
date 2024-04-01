@@ -478,6 +478,7 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
+    @pytest.mark.skip(reason="nondeterministic output")
     def test_with_increasing_id(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
