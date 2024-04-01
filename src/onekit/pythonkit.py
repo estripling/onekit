@@ -39,8 +39,9 @@ __all__ = (
     "create_path",
     "date_ago",
     "date_ahead",
+    "date_count_backward",
+    "date_count_forward",
     "date_to_str",
-    "datecount",
     "daterange",
     "extend_range",
     "flatten",
@@ -457,6 +458,48 @@ def date_ahead(d0: dt.date, /, n: int) -> dt.date:
     return d0 + dt.timedelta(days=n)
 
 
+def date_count_backward(d0: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in backward manner w.r.t. :math:`d_{0}`.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> curried.pipe(
+    ...     pk.date_count_backward(d0),
+    ...     curried.map(pk.date_to_str),
+    ...     curried.take(3),
+    ...     list,
+    ... )
+    ['2022-01-01', '2021-12-31', '2021-12-30']
+    """
+    successor = operator.sub
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+
+
+def date_count_forward(d0: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in forward manner w.r.t. :math:`d_{0}`.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from toolz import curried
+    >>> import onekit.pythonkit as pk
+    >>> d0 = dt.date(2022, 1, 1)
+    >>> curried.pipe(
+    ...     pk.date_count_forward(d0),
+    ...     curried.map(pk.date_to_str),
+    ...     curried.take(3),
+    ...     list,
+    ... )
+    ['2022-01-01', '2022-01-02', '2022-01-03']
+    """
+    successor = operator.add
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+
+
 def date_to_str(d: dt.date, /) -> str:
     """Cast date to string in ISO format: YYYY-MM-DD.
 
@@ -468,30 +511,6 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
-
-
-def datecount(d0: dt.date, /, *, forward: bool = True) -> Generator:
-    """Generate sequence of consecutive dates.
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-    >>> curried.pipe(pk.datecount(d0), curried.take(3), list)
-    [datetime.date(2022, 1, 1), datetime.date(2022, 1, 2), datetime.date(2022, 1, 3)]
-
-    >>> curried.pipe(
-    ...     pk.datecount(d0, forward=False),
-    ...     curried.map(pk.date_to_str),
-    ...     curried.take(3),
-    ...     list,
-    ... )
-    ['2022-01-01', '2021-12-31', '2021-12-30']
-    """
-    successor = operator.add if forward else operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
 
 
 def daterange(
@@ -549,7 +568,7 @@ def daterange(
     d1, d2 = sorted([min_date, max_date])
     d1 = d1 if incl_min else d1 + dt.timedelta(1)
     d2 = d2 if incl_max else d2 - dt.timedelta(1)
-    return itertools.takewhile(lambda d: d <= d2, datecount(d1, forward=True))
+    return itertools.takewhile(lambda d: d <= d2, date_count_forward(d1))
 
 
 def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
