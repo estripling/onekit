@@ -36,7 +36,7 @@ __all__ = (
     "check_column_present",
     "count_nulls",
     "cvf",
-    "daterange",
+    "date_range",
     "filter_date",
     "has_column",
     "is_dataframe_equal",
@@ -608,7 +608,7 @@ def cvf(*cols: str) -> SparkDFTransformFunc:
     return inner
 
 
-def daterange(
+def date_range(
     df: SparkDF,
     /,
     min_date: str,
@@ -634,7 +634,7 @@ def daterange(
     ...     ]
     ... )
     >>> (
-    ...     sk.daterange(df, "2023-05-01", "2023-05-03", "id", "d")
+    ...     sk.date_range(df, "2023-05-01", "2023-05-03", "id", "d")
     ...     .orderBy("id", "d")
     ...     .show()
     ... )
@@ -1286,8 +1286,8 @@ def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
     <BLANKLINE>
     """
 
-    def determine_weekday(date_column):
-        weekday_int = F.dayofweek(date_column)
+    def determine_weekday(date_col: str, /) -> str:
+        weekday_int = F.dayofweek(date_col)
         return (
             F.when(weekday_int == 1, "Sun")
             .when(weekday_int == 2, "Mon")
