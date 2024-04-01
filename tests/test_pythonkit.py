@@ -194,7 +194,7 @@ def test_date_ago(n: int, d0: dt.date, expected: dt.date):
         actual = pk.date_ago(d0, n)
         assert actual == expected
 
-        dates = pk.daterange(actual, d0, incl_min=True, incl_max=True)
+        dates = pk.date_range(actual, d0, incl_min=True, incl_max=True)
         n_days = curried.count(dates)
         n_days_expected = n + 1
         assert n_days == n_days_expected
@@ -226,7 +226,7 @@ def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
         actual = pk.date_ahead(d0, n)
         assert actual == expected
 
-        dates = pk.daterange(d0, actual, incl_min=True, incl_max=True)
+        dates = pk.date_range(d0, actual, incl_min=True, incl_max=True)
         n_days = curried.count(dates)
         n_days_expected = n + 1
         assert n_days == n_days_expected
@@ -246,18 +246,6 @@ def test_date_count_forward():
     d0 = dt.date(2022, 1, 1)
     actual = toolz.pipe(pk.date_count_forward(d0), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
-    "d, expected",
-    [
-        (dt.date(2022, 1, 1), "2022-01-01"),
-        (dt.date(2022, 1, 31), "2022-01-31"),
-    ],
-)
-def test_date_to_str(d: dt.date, expected: str):
-    actual = pk.date_to_str(d)
     assert actual == expected
 
 
@@ -290,17 +278,29 @@ def test_date_to_str(d: dt.date, expected: str):
     ],
 )
 def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
-    actual = tuple(pk.daterange(start, end))
+    actual = tuple(pk.date_range(start, end))
     assert actual == expected
 
-    actual = tuple(pk.daterange(start, end, incl_min=False))
+    actual = tuple(pk.date_range(start, end, incl_min=False))
     assert actual == expected[1:]
 
-    actual = tuple(pk.daterange(start, end, incl_max=False))
+    actual = tuple(pk.date_range(start, end, incl_max=False))
     assert actual == expected[:-1]
 
-    actual = tuple(pk.daterange(start, end, incl_min=False, incl_max=False))
+    actual = tuple(pk.date_range(start, end, incl_min=False, incl_max=False))
     assert actual == expected[1:-1]
+
+
+@pytest.mark.parametrize(
+    "d, expected",
+    [
+        (dt.date(2022, 1, 1), "2022-01-01"),
+        (dt.date(2022, 1, 31), "2022-01-31"),
+    ],
+)
+def test_date_to_str(d: dt.date, expected: str):
+    actual = pk.date_to_str(d)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
