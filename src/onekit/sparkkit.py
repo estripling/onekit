@@ -1286,8 +1286,8 @@ def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
     <BLANKLINE>
     """
 
-    def determine_weekday(date_column):
-        weekday_int = F.dayofweek(date_column)
+    def determine_weekday(date_col: str, /) -> str:
+        weekday_int = F.dayofweek(date_col)
         return (
             F.when(weekday_int == 1, "Sun")
             .when(weekday_int == 2, "Mon")
