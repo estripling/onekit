@@ -478,6 +478,32 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
+    @pytest.mark.skip(reason="nondeterministic output")
+    def test_with_increasing_id(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(i=1, x="a", expect=0),
+                Row(i=2, x="b", expect=8589934592),
+                Row(i=3, x="c", expect=17179869184),
+                Row(i=4, x="d", expect=25769803776),
+                Row(i=5, x="e", expect=34359738368),
+                Row(i=6, x="f", expect=42949672960),
+                Row(i=7, x="g", expect=51539607552),
+                Row(i=8, x="h", expect=60129542144),
+            ],
+            schema=T.StructType(
+                [
+                    T.StructField("i", T.IntegerType(), True),
+                    T.StructField("x", T.StringType(), True),
+                    T.StructField("expect", T.LongType(), True),
+                ]
+            ),
+        )
+
+        actual = df.transform(sk.with_increasing_id("fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect").alias("fx"))
+        self.assert_dataframe_equal(actual, expected)
+
     def test_with_index(self, spark: SparkSession):
         df = spark.createDataFrame(
             [

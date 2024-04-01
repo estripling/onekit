@@ -50,6 +50,7 @@ __all__ = (
     "with_date_diff_ago",
     "with_date_diff_ahead",
     "with_endofweek_date",
+    "with_increasing_id",
     "with_index",
     "with_startofweek_date",
     "with_weekday",
@@ -1177,6 +1178,33 @@ def with_endofweek_date(
         )
 
     return inner
+
+
+def with_increasing_id(new_col: str, /) -> SparkDFTransformFunc:
+    """Add column with monotonically increasing id.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([dict(x="a"), dict(x="b"), dict(x="c"), dict(x="d")])
+    >>> df.transform(sk.with_increasing_id("id")).show()  # doctest: +SKIP
+    +---+-----------+
+    |  x|         id|
+    +---+-----------+
+    |  a| 8589934591|
+    |  b|25769803776|
+    |  c|42949672960|
+    |  d|60129542144|
+    +---+-----------+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:  # pragma: no cover
+        return df.withColumn(new_col, F.monotonically_increasing_id())
+
+    return inner  # pragma: no cover
 
 
 def with_index(new_col: str, /) -> SparkDFTransformFunc:
