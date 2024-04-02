@@ -707,11 +707,11 @@ def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransf
         raise ValueError(f"{n=} - must be a positive integer")
 
     def inner(df: SparkDF, /) -> SparkDF:
-        date_diff = "_date_diff_"
+        date_diff_ago = "_date_diff_ago_"
         return (
-            df.withColumn(date_diff, F.datediff(F.lit(d0), date_col))
-            .where((F.col(date_diff) >= 0) & (F.col(date_diff) < n))
-            .drop(date_diff)
+            df.transform(with_date_diff_ago(date_col, d0, new_col=date_diff_ago))
+            .where((F.col(date_diff_ago) >= 0) & (F.col(date_diff_ago) < n))
+            .drop(date_diff_ago)
         )
 
     return inner
