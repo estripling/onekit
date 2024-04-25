@@ -20,6 +20,8 @@ from typing import (
 )
 
 import pytest
+import pytz
+import time_machine
 import toolz
 from toolz import curried
 
@@ -1150,6 +1152,89 @@ class TestStopwatch:
 def test_str_to_date(string: str, expected: dt.date):
     actual = pk.str_to_date(string)
     assert actual == expected
+
+
+class TestTimestamp:
+    @pytest.mark.parametrize(
+        "fmt,expected",
+        [
+            (None, "2024-01-01 00:00:00"),
+            ("%Y-%m-%d %H:%M:%S", "2024-01-01 00:00:00"),
+            ("%Y%m%d-%H%M%S", "20240101-000000"),
+            ("%H:%M:%S", "00:00:00"),
+            ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 00:00:00"),
+        ],
+    )
+    @pytest.mark.parametrize("zone", ["UTC", "utc"])
+    def test_utc(self, zone: str, fmt: str, expected: str):
+        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+        traveller.start()
+        actual = pk.timestamp(zone, fmt=fmt)
+        assert actual == expected
+        traveller.stop()
+
+    @pytest.mark.parametrize(
+        "fmt,expected",
+        [
+            (None, "2024-01-01 01:00:00"),
+            ("%Y-%m-%d %H:%M:%S", "2024-01-01 01:00:00"),
+            ("%Y%m%d-%H%M%S", "20240101-010000"),
+            ("%H:%M:%S", "01:00:00"),
+            ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 01:00:00"),
+        ],
+    )
+    @pytest.mark.parametrize("zone", ["CET", "cet"])
+    def test_cet(self, zone: str, fmt: str, expected: str):
+        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+        traveller.start()
+        actual = pk.timestamp(zone, fmt=fmt)
+        assert actual == expected
+        traveller.stop()
+
+    @pytest.mark.parametrize(
+        "fmt,expected",
+        [
+            (None, "2023-12-31 14:00:00"),
+            ("%Y-%m-%d %H:%M:%S", "2023-12-31 14:00:00"),
+            ("%Y%m%d-%H%M%S", "20231231-140000"),
+            ("%H:%M:%S", "14:00:00"),
+            ("%A, %d %B %Y %H:%M:%S", "Sunday, 31 December 2023 14:00:00"),
+        ],
+    )
+    @pytest.mark.parametrize("zone", ["US/Hawaii", "us/hawaii", "Us/HawaiI"])
+    def test_hawaii(self, zone: str, fmt: str, expected: str):
+        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+        traveller.start()
+        actual = pk.timestamp(zone, fmt=fmt)
+        assert actual == expected
+        traveller.stop()
+
+    @pytest.mark.parametrize(
+        "fmt,expected",
+        [
+            (None, "2024-01-01 09:00:00"),
+            ("%Y-%m-%d %H:%M:%S", "2024-01-01 09:00:00"),
+            ("%Y%m%d-%H%M%S", "20240101-090000"),
+            ("%H:%M:%S", "09:00:00"),
+            ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 09:00:00"),
+        ],
+    )
+    @pytest.mark.parametrize("zone", ["Asia/Tokyo", "asia/tokyo", "AsIa/ToKyO"])
+    def test_tokyo(self, zone: str, fmt: str, expected: str):
+        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+        traveller.start()
+        actual = pk.timestamp(zone, fmt=fmt)
+        assert actual == expected
+        traveller.stop()
+
+    @pytest.mark.parametrize("zone", ["CTE", "Europe"])
+    def test_invalid_input(self, zone: str):
+        with pytest.raises(pytz.UnknownTimeZoneError):
+            pk.timestamp(zone)
+
+    def test_missing_input(self):
+        with pytest.raises(TypeError, match=r"missing 1 required positional argument"):
+            pk.timestamp()
 
 
 @pytest.mark.parametrize(
