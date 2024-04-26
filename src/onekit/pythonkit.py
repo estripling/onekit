@@ -87,14 +87,13 @@ def archive_files(
     Parameters
     ----------
     target : str
-        Specify the target directory to archive.
-    wildcards : None, list of str, default=None
-        Specify a wildcard to archive files. If ``wildcards`` is None,
-        all files in target directory are archived.
-    name : None, str, default=None
-        Optionally specify the name of the resulting archive.
-        If ``name`` is None, the name of the resulting archive is the name of the
-        target directory with timestamp.
+        Specify target directory to archive.
+    wildcards : list of str, optional
+        Specify wildcard to archive files.
+        Default: all files in target directory are archived.
+    name : str, optional
+        Specify name of resulting archive.
+        Default: name of target directory with timestamp.
     kind : str, default="zip"
         Specify the archive type. Value is passed to the ``format`` argument of
         ``shutil.make_archive``, i.e., possible values are "zip", "tar",
@@ -1042,16 +1041,15 @@ class stopwatch(ContextDecorator):
 
     Parameters
     ----------
-    label : None, str, int, default=None
-        Optionally specify label. When used as a decorator and label is not specified,
+    label : str, int, optional
+        Specify label. When used as a decorator and label is not specified,
         label is the name of the function.
     flush : bool, default=True
         Passed to built-in print function:
          - If ``True``, prints start time before stop time.
          - If ``False``, prints start time and stop time all at once.
-    fmt : None, str, default=None
-        Optionally specify a timestamp format to be used in the output message.
-        If ``fmt`` is None, the following format is used: ``%Y-%m-%d %H:%M:%S``.
+    fmt : str, optional
+        Specify timestamp format. Default: ``%Y-%m-%d %H:%M:%S``.
 
     Notes
     -----

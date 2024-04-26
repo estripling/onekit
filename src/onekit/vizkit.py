@@ -445,17 +445,16 @@ def plot_contour(
     ----------
     xyz_pts : XyzPoints
         :math:`(x, y, z)` coordinate points to plot.
-    kws_contour : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to ``matplotlib.axes.Axes.contour``.
-        By default, using configuration: ``VizConfig.get_kws_contour__base()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    kws_contourf : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to ``matplotlib.axes.Axes.contourf``.
-        By default, using configuration: ``VizConfig.get_kws_contourf__YlOrBr_r()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    ax : matplotlib.axes.Axes, default=None
-        Optionally specify an ``Axes`` object.
-        If None, current ``Axes`` object is retrieved.
+    kws_contour : dict of keyword arguments, optional
+        Keyword arguments to pass to ``matplotlib.axes.Axes.contour``.
+        Default: ``VizConfig.get_kws_contour__base()``.
+        Specify dict of keyword arguments to update configurations.
+    kws_contourf : dict of keyword arguments, optional
+        Keyword arguments to pass to ``matplotlib.axes.Axes.contourf``.
+        Default: `VizConfig.get_kws_contourf__YlOrBr_r()``.
+        Specify dict of keyword arguments to update configurations.
+    ax : matplotlib.axes.Axes, optional
+        Specify ``Axes`` object. Default: current ``Axes`` object.
 
     Examples
     --------
@@ -492,13 +491,12 @@ def plot_line(xy_pts: XyPoints, /, *, kws_plot=None, ax=None) -> Axes:
     ----------
     xy_pts : XyPoints
         :math:`(x, y)` coordinate points to plot.
-    kws_plot : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to ``matplotlib.axes.Axes.plot``.
-        By default, using configuration: ``VizConfig.get_kws_plot__base()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    ax : matplotlib.axes.Axes, default=None
-        Optionally specify an ``Axes`` object.
-        If None, current ``Axes`` object is retrieved.
+    kws_plot : dict of keyword arguments, optional
+        Keyword arguments to pass to ``matplotlib.axes.Axes.plot``.
+        Default: ``VizConfig.get_kws_plot__base()``.
+        Specify dict of keyword arguments to update configurations.
+    ax : matplotlib.axes.Axes, optional
+        Specify ``Axes`` object. Default: current ``Axes`` object.
 
     Examples
     --------
@@ -533,18 +531,17 @@ def plot_surface(
     ----------
     xyz_pts : XyzPoints
         :math:`(x, y, z)` coordinate points to plot.
-    kws_surface : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to
+    kws_surface : dict of keyword arguments, optional
+        Keyword arguments to pass to
         ``mpl_toolkits.mplot3d.axes3d.Axes3D.plot_surface``.
-        By default, using configuration: ``VizConfig.get_kws_surface__YlOrBr_r()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    kws_contourf : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to ``matplotlib.axes.Axes.contourf``.
-        By default, using configuration: ``VizConfig.get_kws_contourf__YlOrBr_r()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    ax : mpl_toolkits.mplot3d.axes3d.Axes3D, default=None
-        Optionally specify an ``Axes3D`` object.
-        If None, current ``Axes3D`` object is retrieved.
+        Default: ``VizConfig.get_kws_surface__YlOrBr_r()``.
+        Specify dict of keyword arguments to update configurations.
+    kws_contourf : dict of keyword arguments, optional
+        Keyword arguments to pass to ``matplotlib.axes.Axes.contourf``.
+        Default: ``VizConfig.get_kws_contourf__YlOrBr_r()``.
+        Specify dict of keyword arguments to update configurations.
+    ax : mpl_toolkits.mplot3d.axes3d.Axes3D, optional
+        Specify ``Axes3D`` object. Default: current ``Axes3D`` object.
 
     Examples
     --------
@@ -590,13 +587,12 @@ def plot_xy_points(xy_pts: XyPoints, /, *, kws_scatter=None, ax=None) -> Axes:
     ----------
     xy_pts : XyPoints
         :math:`(x, y)` coordinate points to plot.
-    kws_scatter : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to ``matplotlib.axes.Axes.scatter``.
-        By default, using configuration: ``VizConfig.get_kws_scatter__base()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    ax : matplotlib.axes.Axes, default=None
-        Optionally specify an ``Axes`` object.
-        If None, current ``Axes`` object is retrieved.
+    kws_scatter : dict of keyword arguments, optional
+        Keyword arguments to pass to ``matplotlib.axes.Axes.scatter``.
+        Default: ``VizConfig.get_kws_scatter__base()``.
+        Specify dict of keyword arguments to update configurations.
+    ax : matplotlib.axes.Axes, optional
+        Specify ``Axes`` object. Default: current ``Axes`` object.
 
     Examples
     --------
@@ -624,14 +620,13 @@ def plot_xyz_points(xyz_pts: XyzPoints, /, *, kws_scatter=None, ax=None) -> Axes
     ----------
     xyz_pts : XyzPoints
         :math:`(x, y, z)` coordinate points to plot.
-    kws_scatter : dict of keyword arguments, default=None
-        Specify keyword arguments to pass to
+    kws_scatter : dict of keyword arguments, optional
+        Keyword arguments to pass to
         ``mpl_toolkits.mplot3d.axes3d.Axes3D.scatter``.
-        By default, using configuration: ``VizConfig.get_kws_scatter__base()``.
-        Optionally specify a dict of keyword arguments to update configurations.
-    ax : mpl_toolkits.mplot3d.axes3d.Axes3D, default=None
-        Optionally specify an ``Axes3D`` object.
-        If None, current ``Axes3D`` object is retrieved.
+        Default: ``VizConfig.get_kws_scatter__base()``.
+        Specify dict of keyword arguments to update configurations.
+    ax : mpl_toolkits.mplot3d.axes3d.Axes3D, optional
+        Specify ``Axes3D`` object. Default: current ``Axes3D`` object.
 
     Examples
     --------
