@@ -2,6 +2,31 @@
 
 
 
+## v1.1.0 (2024-04-26)
+
+### Feature
+
+* feat(stopwatch): add timezone (#65)
+
+* docs: use consistent style for optional parameters
+
+* refactor(archive_files): add timezone
+
+* feat(stopwatch): add timezone ([`d261904`](https://github.com/estripling/onekit/commit/d2619049e437f6cca9032d82046a6b7247134f90))
+
+* feat: add timestamp (#64)
+
+* feat(pythonkit): add timestamp
+
+* docs(LICENSE): update year
+
+* refactor(timestamp): no positional arguments ([`67e657d`](https://github.com/estripling/onekit/commit/67e657d19ea5f20afaafe276cfd159cbe8f81ee4))
+
+### Refactor
+
+* refactor(filter_date): use with_date_diff_ago (#63) ([`b0bd1ec`](https://github.com/estripling/onekit/commit/b0bd1ecd4b0e6d8c51e12854d6d10601dc1b8882))
+
+
 ## v1.0.0 (2024-04-01)
 
 ### Breaking
