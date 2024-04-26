@@ -26,6 +26,7 @@ from typing import (
     Union,
 )
 
+import pytz
 import toolz
 from toolz import curried
 
@@ -63,6 +64,7 @@ __all__ = (
     "source_code",
     "stopwatch",
     "str_to_date",
+    "timestamp",
     "weekday",
 )
 
@@ -1303,6 +1305,35 @@ def str_to_date(string: str, /) -> dt.date:
     datetime.date(2022, 1, 1)
     """
     return dt.datetime.strptime(string, "%Y-%m-%d").date()
+
+
+def timestamp(zone: Optional[str] = None, fmt: Optional[str] = None) -> str:
+    """Get timezone-dependent timestamp.
+
+    Parameters
+    ----------
+    zone : str, optional
+        Specify timezone. Default: local timezone.
+    fmt : str, optional
+        Specify timestamp format. Default: ``%Y-%m-%d %H:%M:%S``.
+
+    Notes
+    -----
+    - Look up available timezones: ``pytz.all_timezones`` ``pytz.common_timezones``
+    - Look up timezones per country:  ``pytz.country_names`` ``pytz.country_timezones``
+
+    Examples
+    --------
+    >>> import onekit.pythonkit as pk
+    >>> pk.timestamp()  # doctest: +SKIP
+    '2024-01-01 00:00:00'
+
+    >>> pk.timestamp("CET")  # doctest: +SKIP
+    '2024-01-01 01:00:00'
+    """
+    zone = None if zone is None else pytz.timezone(zone)
+    fmt = fmt or "%Y-%m-%d %H:%M:%S"
+    return dt.datetime.now(tz=zone).strftime(fmt)
 
 
 def weekday(d: dt.date, /) -> str:
