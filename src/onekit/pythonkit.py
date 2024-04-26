@@ -80,6 +80,7 @@ def archive_files(
     *,
     wildcards: Optional[List[str]] = None,
     name: Optional[str] = None,
+    timezone: Optional[str] = None,
     kind: str = "zip",
 ) -> None:
     """Archive files in target directory.
@@ -94,6 +95,8 @@ def archive_files(
     name : str, optional
         Specify name of resulting archive.
         Default: name of target directory with timestamp.
+    timezone : str, optional
+        Specify timezone. Default: local timezone.
     kind : str, default="zip"
         Specify the archive type. Value is passed to the ``format`` argument of
         ``shutil.make_archive``, i.e., possible values are "zip", "tar",
@@ -113,8 +116,7 @@ def archive_files(
     """
     target = Path(target).resolve()
     wildcards = wildcards or ["**/*"]
-    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
-    name = name or f"{timestamp}_{target.stem}"
+    name = name or f"{timestamp(zone=timezone, fmt='%Y%m%d%H%M%S')}_{target.stem}"
     makedir = functools.partial(os.makedirs, exist_ok=True)
 
     with TemporaryDirectory() as tmpdir:
