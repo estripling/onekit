@@ -1307,22 +1307,33 @@ def str_to_date(string: str, /) -> dt.date:
     return dt.datetime.strptime(string, "%Y-%m-%d").date()
 
 
-def timestamp(zone: str, /, *, fmt: Optional[str] = None) -> str:
+def timestamp(zone: Optional[str] = None, fmt: Optional[str] = None) -> str:
     """Get timezone-dependent timestamp.
+
+    Parameters
+    ----------
+    zone : str, optional
+        Specify timezone. Default: local timezone.
+    fmt : str, optional
+        Specify timestamp format. Default: ``%Y-%m-%d %H:%M:%S``.
 
     Notes
     -----
-    - If ``fmt`` is None, the following format is used: ``%Y-%m-%d %H:%M:%S``
-    - Available timezones: ``pytz.all_timezones``, ``pytz.common_timezones``
-    - Timezones per country:  ``pytz.country_names``, ``pytz.country_timezones``
+    - Look up available timezones: ``pytz.all_timezones`` ``pytz.common_timezones``
+    - Look up timezones per country:  ``pytz.country_names`` ``pytz.country_timezones``
 
     Examples
     --------
     >>> import onekit.pythonkit as pk
+    >>> pk.timestamp()  # doctest: +SKIP
+    '2024-01-01 00:00:00'
+
     >>> pk.timestamp("CET")  # doctest: +SKIP
     '2024-01-01 01:00:00'
     """
-    return dt.datetime.now(tz=pytz.timezone(zone)).strftime(fmt or "%Y-%m-%d %H:%M:%S")
+    zone = None if zone is None else pytz.timezone(zone)
+    fmt = fmt or "%Y-%m-%d %H:%M:%S"
+    return dt.datetime.now(tz=zone).strftime(fmt)
 
 
 def weekday(d: dt.date, /) -> str:
