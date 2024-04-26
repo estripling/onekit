@@ -853,15 +853,17 @@ class TestStopwatch:
             (4, "%A, %d %B %Y %H:%M:%S"),
         ],
     )
+    @pytest.mark.parametrize("zone", [None, "UTC", "CET"])
     def test_context_manager__fmt(
         self,
         slumber,
         regex_default_message,
         case,
+        zone,
         fmt,
         default_fmt="%Y-%m-%d %H:%M:%S",
     ):
-        with pk.stopwatch(fmt=fmt) as sw:
+        with pk.stopwatch(timezone=zone, fmt=fmt) as sw:
             slumber()
 
         actual = str(sw)
@@ -897,6 +899,7 @@ class TestStopwatch:
 
     @pytest.mark.parametrize("label", [None, "lbl"])
     @pytest.mark.parametrize("flush", [True, False])
+    @pytest.mark.parametrize("zone", [None, "UTC", "CET"])
     @pytest.mark.parametrize(
         "case,fmt", [(1, None), (2, "%Y-%m-%d %H:%M:%S"), (3, "%H:%M:%S")]
     )
@@ -906,11 +909,12 @@ class TestStopwatch:
         regex_default_message,
         label,
         flush,
+        zone,
         case,
         fmt,
         default_fmt="%Y-%m-%d %H:%M:%S",
     ):
-        with pk.stopwatch(label, flush=flush, fmt=fmt) as sw:
+        with pk.stopwatch(label, flush=flush, timezone=zone, fmt=fmt) as sw:
             slumber()
 
         actual = str(sw)
@@ -1026,15 +1030,17 @@ class TestStopwatch:
             (4, "%A, %d %B %Y %H:%M:%S"),
         ],
     )
+    @pytest.mark.parametrize("zone", [None, "UTC", "CET"])
     def test_decorator__fmt(
         self,
         slumber,
         regex_default_message,
+        zone,
         case,
         fmt,
         capsys,
     ):
-        @pk.stopwatch(fmt=fmt)
+        @pk.stopwatch(timezone=zone, fmt=fmt)
         def func():
             slumber()
 
@@ -1057,6 +1063,7 @@ class TestStopwatch:
 
     @pytest.mark.parametrize("label", [None, "lbl"])
     @pytest.mark.parametrize("flush", [True, False])
+    @pytest.mark.parametrize("zone", [None, "UTC", "CET"])
     @pytest.mark.parametrize(
         "case,fmt", [(1, None), (2, "%Y-%m-%d %H:%M:%S"), (3, "%H:%M:%S")]
     )
@@ -1066,11 +1073,12 @@ class TestStopwatch:
         regex_default_message,
         label,
         flush,
+        zone,
         case,
         fmt,
         capsys,
     ):
-        @pk.stopwatch(label, fmt=fmt, flush=flush)
+        @pk.stopwatch(label, timezone=zone, fmt=fmt, flush=flush)
         def func():
             slumber()
 
@@ -1104,6 +1112,12 @@ class TestStopwatch:
     def test_raises_type_error__flush(self, slumber, flush):
         with pytest.raises(TypeError, match=r"flush=.* - must be bool"):
             with pk.stopwatch(flush=flush):
+                slumber()
+
+    @pytest.mark.parametrize("zone", [True, 0, 1.0, set(), [2]])
+    def test_raises_type_error__zone(self, slumber, zone):
+        with pytest.raises(TypeError, match=r"timezone=.* - must be str or NoneType"):
+            with pk.stopwatch(timezone=zone):
                 slumber()
 
     @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])

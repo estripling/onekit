@@ -1050,6 +1050,8 @@ class stopwatch(ContextDecorator):
         Passed to built-in print function:
          - If ``True``, prints start time before stop time.
          - If ``False``, prints start time and stop time all at once.
+    timezone : str, optional
+        Specify timezone. Default: local timezone.
     fmt : str, optional
         Specify timestamp format. Default: ``%Y-%m-%d %H:%M:%S``.
 
@@ -1129,6 +1131,7 @@ class stopwatch(ContextDecorator):
         /,
         *,
         flush: bool = True,
+        timezone: Optional[str] = None,
         fmt: Optional[str] = None,
     ):
         if isinstance(label, bool) or (
@@ -1139,11 +1142,15 @@ class stopwatch(ContextDecorator):
         if not isinstance(flush, bool):
             raise TypeError(f"{flush=} - must be bool")
 
+        if timezone is not None and not isinstance(timezone, str):
+            raise TypeError(f"{timezone=} - must be str or NoneType")
+
         if fmt is not None and not isinstance(fmt, str):
             raise TypeError(f"{fmt=} - must be str or NoneType")
 
         self._label = label
         self._flush = flush
+        self._timezone = timezone
         self._fmt = "%Y-%m-%d %H:%M:%S" if fmt is None else fmt
         self._start_time = None
         self._stop_time = None
@@ -1177,6 +1184,17 @@ class stopwatch(ContextDecorator):
             Value used in the built-in function when printing to standard output.
         """
         return self._flush
+
+    @property
+    def timezone(self):
+        """Retrieve timezone value.
+
+        Returns
+        -------
+        str
+            Value used for timezone.
+        """
+        return self._timezone
 
     @property
     def fmt(self):
@@ -1237,13 +1255,17 @@ class stopwatch(ContextDecorator):
         return super().__call__(func)
 
     def __enter__(self):
-        self._start_time = dt.datetime.now()
+        self._start_time = dt.datetime.now(
+            tz=None if self.timezone is None else pytz.timezone(self.timezone)
+        )
         if self.flush:
             print(self._message_part_1(), end="", flush=True)
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        self._stop_time = dt.datetime.now()
+        self._stop_time = dt.datetime.now(
+            tz=None if self.timezone is None else pytz.timezone(self.timezone)
+        )
         self._elapsed_time = self.stop_time - self.start_time
         print(self._message_part_2() if self.flush else self._output_message())
         return False
