@@ -2,6 +2,25 @@
 
 
 
+## v1.1.1 (2024-05-06)
+
+### Fix
+
+* fix: dependencies (#68)
+
+* build: add pytz
+
+* fix: dependencies ([`cb34fc7`](https://github.com/estripling/onekit/commit/cb34fc7cc627e90a5add59404d02e2236f716cec))
+
+### Refactor
+
+* refactor(filter_date): n=inf for no lower bound (#66) ([`46e3606`](https://github.com/estripling/onekit/commit/46e3606739f91d4eee995cc56a57b576a4bf04b8))
+
+### Test
+
+* test: refactor spark session (#67) ([`dc34fe7`](https://github.com/estripling/onekit/commit/dc34fe7d37de8967f034686924472e89bf8321ae))
+
+
 ## v1.1.0 (2024-04-26)
 
 ### Feature
