@@ -1,5 +1,6 @@
 import datetime as dt
 import functools
+import math
 import os
 from typing import (
     Callable,
@@ -667,7 +668,11 @@ def date_range(
     )
 
 
-def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransformFunc:
+def filter_date(
+    date_col: str,
+    d0: Union[str, dt.date],
+    n: Union[int, float],
+) -> SparkDFTransformFunc:
     """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
 
     Notes
@@ -675,6 +680,7 @@ def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransf
     - :math:`d_{0}`: reference date (inclusive)
     - :math:`d_{-n} < d_{0}`: relative date (exclusive)
     - :math:`n > 0`: number of dates from :math:`d_{-n}` to :math:`d_{0}`
+    - If `n=float("inf")`, returned dates are in :math:`(d_{-\\infty}, d_{0}]`
 
     Examples
     --------
@@ -702,9 +708,29 @@ def filter_date(date_col: str, d0: Union[str, dt.date], n: int) -> SparkDFTransf
     |2024-01-07|
     +----------+
     <BLANKLINE>
+
+    >>> df.transform(sk.filter_date("d", d0="2024-01-07", n=float("inf"))).show()
+    +----------+
+    |         d|
+    +----------+
+    |2024-01-01|
+    |2024-01-02|
+    |2024-01-03|
+    |2024-01-04|
+    |2024-01-05|
+    |2024-01-06|
+    |2024-01-07|
+    +----------+
+    <BLANKLINE>
     """
-    if not isinstance(n, int) or n < 1:
+    if not isinstance(n, (int, float)):
+        raise TypeError(f"{type(n)=} - must be an int or float")
+
+    if isinstance(n, int) and n < 1:
         raise ValueError(f"{n=} - must be a positive integer")
+
+    if isinstance(n, float) and not math.isinf(n):
+        raise ValueError(f'{n=} - only valid float value: float("inf")')
 
     def inner(df: SparkDF, /) -> SparkDF:
         date_diff_ago = "_date_diff_ago_"
