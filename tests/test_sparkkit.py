@@ -1,6 +1,5 @@
 import datetime as dt
 import math
-import os
 from typing import Callable
 
 import pytest
@@ -606,21 +605,22 @@ class TestSparkKit:
         sk.assert_dataframe_equal(lft_df, rgt_df)
 
     @pytest.fixture(scope="class")
-    def spark(self) -> SparkSession:
+    def spark(self, request: pytest.FixtureRequest) -> SparkSession:
         spark = (
-            SparkSession.builder.master("local[1]")
+            SparkSession.builder.master("local[*]")
             .appName("spark-session-for-testing")
-            .config("spark.sql.shuffle.partitions", 1)
-            .config("spark.default.parallelism", os.cpu_count())
+            .config("spark.executor.instances", 1)
+            .config("spark.executor.cores", 4)
+            .config("spark.default.parallelism", 4)
+            .config("spark.sql.shuffle.partitions", 4)
             .config("spark.rdd.compress", False)
             .config("spark.shuffle.compress", False)
             .config("spark.dynamicAllocation.enabled", False)
-            .config("spark.executor.cores", 1)
-            .config("spark.executor.instances", 1)
+            .config("spark.speculation", False)
             .config("spark.ui.enabled", False)
             .config("spark.ui.showConsoleProgress", False)
             .getOrCreate()
         )
-        spark.sparkContext.setLogLevel("ERROR")
-        yield spark
-        spark.stop()
+        spark.sparkContext.setLogLevel("OFF")
+        request.addfinalizer(lambda: spark.stop())
+        return spark
