@@ -1,4 +1,5 @@
 import datetime as dt
+import math
 import os
 from typing import Callable
 
@@ -285,25 +286,35 @@ class TestSparkKit:
         d0 = func("2024-01-01")
         df = spark.createDataFrame(
             [
-                Row(d=func("2023-11-30"), n1=False, n2=False, n3=False, n30=False),
-                Row(d=func("2023-12-02"), n1=False, n2=False, n3=False, n30=False),
-                Row(d=func("2023-12-03"), n1=False, n2=False, n3=False, n30=True),
-                Row(d=func("2023-12-15"), n1=False, n2=False, n3=False, n30=True),
-                Row(d=func("2023-12-20"), n1=False, n2=False, n3=False, n30=True),
-                Row(d=func("2023-12-29"), n1=False, n2=False, n3=False, n30=True),
-                Row(d=func("2023-12-30"), n1=False, n2=False, n3=True, n30=True),
-                Row(d=func("2023-12-31"), n1=False, n2=True, n3=True, n30=True),
-                Row(d=d0, n1=True, n2=True, n3=True, n30=True),
-                Row(d=func("2024-01-02"), n1=False, n2=False, n3=False, n30=False),
-                Row(d=func("2024-01-08"), n1=False, n2=False, n3=False, n30=False),
-                Row(d=func("2024-01-10"), n1=False, n2=False, n3=False, n30=False),
-            ]
+                Row(d=func("2023-11-30"), n1=False, n2=False, n30=False, n_inf=True),
+                Row(d=func("2023-12-02"), n1=False, n2=False, n30=False, n_inf=True),
+                Row(d=func("2023-12-03"), n1=False, n2=False, n30=True, n_inf=True),
+                Row(d=func("2023-12-15"), n1=False, n2=False, n30=True, n_inf=True),
+                Row(d=func("2023-12-20"), n1=False, n2=False, n30=True, n_inf=True),
+                Row(d=func("2023-12-29"), n1=False, n2=False, n30=True, n_inf=True),
+                Row(d=func("2023-12-30"), n1=False, n2=False, n30=True, n_inf=True),
+                Row(d=func("2023-12-31"), n1=False, n2=True, n30=True, n_inf=True),
+                Row(d=d0, n1=True, n2=True, n30=True, n_inf=True),
+                Row(d=func("2024-01-02"), n1=False, n2=False, n30=False, n_inf=False),
+                Row(d=func("2024-01-08"), n1=False, n2=False, n30=False, n_inf=False),
+                Row(d=func("2024-01-10"), n1=False, n2=False, n30=False, n_inf=False),
+            ],
         )
 
-        for n, col in [(1, "n1"), (2, "n2"), (3, "n3"), (30, "n30")]:
+        for n, col in [
+            (1, "n1"),
+            (2, "n2"),
+            (30, "n30"),
+            (float("inf"), "n_inf"),
+            (math.inf, "n_inf"),
+        ]:
             actual = df.transform(sk.filter_date("d", d0=d0, n=n)).select("d")
             expected = df.where(col).select("d")
             self.assert_dataframe_equal(actual, expected)
+
+        for n in [None, "0", "a_string"]:
+            with pytest.raises(TypeError):
+                df.transform(sk.filter_date("d", d0=d0, n=n))
 
         for n in [0, -1, 1.0, 1.5]:
             with pytest.raises(ValueError):
