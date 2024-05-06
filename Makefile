@@ -114,7 +114,7 @@ install-dependencies-precommit:
 	autoflake \
 	"black[jupyter]" \
 	isort \
-	flake8 \
+	"flake8>=5.0.4" \
 	pre-commit \
 	pre-commit-hooks
 
