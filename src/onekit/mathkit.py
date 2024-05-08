@@ -13,6 +13,7 @@ __all__ = (
     "isdivisible",
     "iseven",
     "isodd",
+    "sign",
 )
 
 
@@ -222,3 +223,30 @@ def isodd(x: Union[int, float], /) -> bool:
     False
     """
     return toolz.complement(iseven)(x)
+
+
+def sign(x: Union[int, float], /) -> int:
+    """Sign function.
+
+    .. math::
+
+        f(x) =
+        \\begin{cases}
+            -1 & \\text{ if } x < 0 \\\\[6pt]
+            0 & \\text{ if } x = 0 \\\\[6pt]
+            1 & \\text{ if } x > 0
+        \\end{cases}
+
+    Examples
+    --------
+    >>> import onekit.mathkit as mk
+    >>> mk.sign(0)
+    0
+
+    >>> mk.sign(3.14)
+    1
+
+    >>> mk.sign(-10)
+    -1
+    """
+    return int(0 if math.isclose(x, 0) else math.copysign(1, x))

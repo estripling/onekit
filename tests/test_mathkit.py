@@ -89,3 +89,19 @@ def test_isodd(x: Union[int, float]):
     is_even_number = x % 2 == 0
     expected = not is_even_number
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        (-2.0, -1),
+        (-1, -1),
+        (-0, 0),
+        (1, 1),
+        (2.0, 1),
+    ],
+)
+def test_sign(x: Union[int, float], expected: int):
+    actual = mk.sign(x)
+    assert isinstance(actual, int)
+    assert actual == expected
