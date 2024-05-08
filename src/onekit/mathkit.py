@@ -1,3 +1,4 @@
+import math
 from typing import (
     Generator,
     Union,
@@ -7,6 +8,7 @@ import toolz
 
 __all__ = (
     "collatz",
+    "digitscale",
     "fibonacci",
     "isdivisible",
     "iseven",
@@ -77,6 +79,44 @@ def collatz(n: int, /) -> Generator:
 
         # update
         n = n // 2 if iseven(n) else 3 * n + 1
+
+
+def digitscale(x: Union[int, float], /) -> float:
+    """Scale :math:`x` such that its mapped integer part is its number of digits.
+
+    Given a number :math:`x \\in \\mathbb{R}`, the following function
+    :math:`f \\colon \\mathbb{R} \\rightarrow \\mathbb{R}_{\\ge 0}` scales it such that
+    its mapped integer part :math:`\\lfloor f(x) \\rfloor \\in \\mathbb{N}_{0}`
+    is the number of digits in :math:`[x]`:
+
+    .. math::
+
+        f(x) =
+        \\begin{cases}
+            1 + \\log_{10}|x| & \\text{ if } |x| \\ge 0.1 \\\\[6pt]
+            0 & \\text{ otherwise }
+        \\end{cases}
+
+    Notes
+    -----
+    - :math:`\\lfloor \\cdot \\rfloor`: floor function
+    - :math:`\\left[ \\, \\cdot \\, \\right]`: truncation function
+    - For any positive integer :math:`n`, the number of digits in :math:`n` is
+      :math:`1 + \\lfloor \\log_{10} n \\rfloor`
+
+    Examples
+    --------
+    >>> import onekit.mathkit as mk
+    >>> list(map(mk.digitscale, [0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]))
+    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+
+    >>> list(map(mk.digitscale, [0.2, 2, 20, 200]))
+    [0.30102999566398125, 1.3010299956639813, 2.3010299956639813, 3.3010299956639813]
+
+    >>> list(map(mk.digitscale, [-0.5, -5, -50, -500]))
+    [0.6989700043360187, 1.6989700043360187, 2.6989700043360187, 3.6989700043360187]
+    """
+    return 1 + math.log10(abs(x)) if abs(x) >= 0.1 else 0.0
 
 
 def fibonacci() -> Generator:
