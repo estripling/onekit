@@ -105,6 +105,10 @@ def digitscale(x: Union[int, float], /) -> float:
     - For any positive integer :math:`n`, the number of digits in :math:`n` is
       :math:`1 + \\lfloor \\log_{10} n \\rfloor`
 
+    See Also
+    --------
+    onekit.numpykit.digitscale : NumPy version
+
     Examples
     --------
     >>> import onekit.mathkit as mk
