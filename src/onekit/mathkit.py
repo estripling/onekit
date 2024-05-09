@@ -108,6 +108,7 @@ def digitscale(x: Union[int, float], /) -> float:
     See Also
     --------
     onekit.numpykit.digitscale : NumPy version
+    onekit.sparkkit.with_digitscale : PySpark version
 
     Examples
     --------

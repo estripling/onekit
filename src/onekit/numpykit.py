@@ -58,6 +58,7 @@ def digitscale(x: ArrayLike, /) -> np.ndarray:
     See Also
     --------
     onekit.mathkit.digitscale : Python version
+    onekit.sparkkit.with_digitscale : PySpark version
 
     Examples
     --------
