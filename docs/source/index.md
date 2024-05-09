@@ -15,6 +15,7 @@
 :hidden:
 
 examples.ipynb
+mathkit.ipynb
 optfunckit.ipynb
 vizkit.ipynb
 changelog.md

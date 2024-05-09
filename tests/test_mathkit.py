@@ -32,6 +32,36 @@ def test_collatz(n: int, expected: Tuple[int]):
             tuple(mk.collatz(n))
 
 
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        (0, 0.0),
+        (0.1, 0.0),
+        (1, 1.0),
+        (10, 2.0),
+        (100, 3.0),
+        (1_000, 4.0),
+        (10_000, 5.0),
+        (100_000, 6.0),
+        (1_000_000, 7.0),
+        (0.2, 0.30102999566398125),
+        (2, 1.3010299956639813),
+        (20, 2.3010299956639813),
+        (200, 3.3010299956639813),
+        (2_000, 4.3010299956639813),
+        (-0.5, 0.6989700043360187),
+        (-5, 1.6989700043360187),
+        (-50, 2.6989700043360187),
+        (-500, 3.6989700043360187),
+        (-5_000, 4.6989700043360187),
+    ],
+)
+def test_digitscale(x: Union[int, float], expected: float):
+    for v in (-x, x):
+        actual = mk.digitscale(v)
+        assert actual == expected
+
+
 def test_fibonacci():
     actual = tuple(toolz.take(16, mk.fibonacci()))
     expected = (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
@@ -58,4 +88,20 @@ def test_isodd(x: Union[int, float]):
     actual = mk.isodd(x)
     is_even_number = x % 2 == 0
     expected = not is_even_number
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        (-2.0, -1),
+        (-1, -1),
+        (-0, 0),
+        (1, 1),
+        (2.0, 1),
+    ],
+)
+def test_sign(x: Union[int, float], expected: int):
+    actual = mk.sign(x)
+    assert isinstance(actual, int)
     assert actual == expected

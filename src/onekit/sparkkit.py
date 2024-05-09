@@ -50,6 +50,7 @@ __all__ = (
     "union",
     "with_date_diff_ago",
     "with_date_diff_ahead",
+    "with_digitscale",
     "with_endofweek_date",
     "with_increasing_id",
     "with_index",
@@ -1140,6 +1141,59 @@ def with_date_diff_ahead(
 
     def inner(df: SparkDF, /) -> SparkDF:
         return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(d0)))
+
+    return inner
+
+
+def with_digitscale(num_col: str, new_col: str) -> SparkDFTransformFunc:
+    """PySpark version of digitscale.
+
+    See Also
+    --------
+    onekit.mathkit.digitscale : Python version
+    onekit.numpykit.digitscale : NumPy version
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=0.1),
+    ...         dict(x=1.0),
+    ...         dict(x=10.0),
+    ...         dict(x=100.0),
+    ...         dict(x=1_000.0),
+    ...         dict(x=10_000.0),
+    ...         dict(x=100_000.0),
+    ...         dict(x=1_000_000.0),
+    ...         dict(x=None),
+    ...     ],
+    ... )
+    >>> df.transform(sk.with_digitscale("x", "fx")).show()
+    +---------+----+
+    |        x|  fx|
+    +---------+----+
+    |      0.1| 0.0|
+    |      1.0| 1.0|
+    |     10.0| 2.0|
+    |    100.0| 3.0|
+    |   1000.0| 4.0|
+    |  10000.0| 5.0|
+    | 100000.0| 6.0|
+    |1000000.0| 7.0|
+    |     null|null|
+    +---------+----+
+    <BLANKLINE>
+    """
+
+    def inner(df: SparkDF, /) -> SparkDF:
+        x = F.abs(num_col)
+        return df.withColumn(
+            new_col,
+            F.when(x.isNull(), None).when(x >= 0.1, 1 + F.log10(x)).otherwise(0.0),
+        )
 
     return inner
 

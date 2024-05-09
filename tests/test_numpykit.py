@@ -32,6 +32,36 @@ def test_check_vector():
 @pytest.mark.parametrize(
     "x, expected",
     [
+        (
+            [],
+            np.array([]),
+        ),
+        (
+            [0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000],
+            np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]),
+        ),
+        (
+            (0.2, 2, 20),
+            np.array([0.30102999566398125, 1.3010299956639813, 2.3010299956639813]),
+        ),
+        (
+            np.array([-0.5, -5, -50]),
+            np.array([0.6989700043360187, 1.6989700043360187, 2.6989700043360187]),
+        ),
+        (
+            np.array([np.inf, np.nan, 20.0, 10_000_000.0]),
+            np.array([np.inf, 0.0, 2.3010299956639813, 8.0]),
+        ),
+    ],
+)
+def test_digitscale(x: np.ndarray, expected: np.ndarray):
+    actual = npk.digitscale(x)
+    npt.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "x, expected",
+    [
         ([], np.nan),
         ([np.nan], np.nan),
         ([np.nan, np.nan], np.nan),

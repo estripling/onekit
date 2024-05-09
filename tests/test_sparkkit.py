@@ -452,6 +452,31 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
+    def test_with_digitscale(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(i=1, x=0.0, expect=0.0),
+                Row(i=2, x=0.1, expect=0.0),
+                Row(i=3, x=1.0, expect=1.0),
+                Row(i=4, x=10.0, expect=2.0),
+                Row(i=5, x=100.0, expect=3.0),
+                Row(i=6, x=1_000.0, expect=4.0),
+                Row(i=7, x=10_000.0, expect=5.0),
+                Row(i=8, x=100_000.0, expect=6.0),
+                Row(i=9, x=1_000_000.0, expect=7.0),
+                Row(i=10, x=0.2, expect=0.30102999566398125),
+                Row(i=11, x=2.0, expect=1.3010299956639813),
+                Row(i=12, x=20.0, expect=2.3010299956639813),
+                Row(i=13, x=-0.5, expect=0.6989700043360187),
+                Row(i=14, x=-5.0, expect=1.6989700043360187),
+                Row(i=15, x=-50.0, expect=2.6989700043360187),
+                Row(i=16, x=None, expect=None),
+            ],
+        )
+        actual = df.transform(sk.with_digitscale("x", "fx")).select("i", "fx")
+        expected = df.select("i", F.col("expect").alias("fx"))
+        self.assert_dataframe_equal(actual, expected)
+
     @pytest.mark.parametrize("f", [toolz.identity, pk.str_to_date])
     def test_with_endofweek_date(self, spark: SparkSession, f: Callable):
         field_type = T.StringType() if f == toolz.identity else T.DateType()
