@@ -1,6 +1,7 @@
 SHELL := /bin/zsh
 PYTHON := python3.8
 POETRY := poetry
+CURRENT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 
 .PHONY: help \
@@ -27,6 +28,8 @@ POETRY := poetry
 
 
 help:
+	@echo 'current branch: $(CURRENT_BRANCH)'
+	@echo ''
 	@echo 'commands:'
 	@echo ' - check                             ;; run pre-commit and tests consecutively'
 	@echo ' - run-precommit                     ;; run pre-commit'
@@ -87,7 +90,8 @@ remove-docs:
 
 
 remove-local-branches:
-	git -P branch | grep -v "main" | grep -v \* | xargs git branch -D
+	git -P branch | grep -v 'main' | grep -v '$(CURRENT_BRANCH)' | xargs git branch -D
+	git -P branch --all | grep -v 'main' | grep -v '$(CURRENT_BRANCH)' | sed 's/remotes\///g' | xargs git branch -r -d
 
 
 build-package:
