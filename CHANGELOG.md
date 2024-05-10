@@ -2,6 +2,41 @@
 
 
 
+## v1.2.0 (2024-05-10)
+
+### Build
+
+* build: update github workflows (#73)
+
+* build: update github workflows
+
+* build: move time-machine dep to testing group ([`efb2f19`](https://github.com/estripling/onekit/commit/efb2f19a0dd71e724b1526bc3b214729bd373db7))
+
+* build: improve remove-local-branches (#72) ([`0dcd997`](https://github.com/estripling/onekit/commit/0dcd9978cd76e1e9d82efa957fa5830b788c8154))
+
+### Documentation
+
+* docs: update onekit logo (#70) ([`dce595c`](https://github.com/estripling/onekit/commit/dce595c1a148af48d0b500d532367aee20571750))
+
+### Feature
+
+* feat: add digitscale (#69)
+
+* feat(mathkit): add digitscale
+
+* feat(mathkit): add sign
+
+* feat(numpykit): add digitscale
+
+* feat(sparkkit): add with_digitscale
+
+* docs: add mathkit.ipynb ([`4f9c908`](https://github.com/estripling/onekit/commit/4f9c908aa29d20d3b04c18127593b1d86f9a8b18))
+
+### Style
+
+* style: change wording (#71) ([`639d914`](https://github.com/estripling/onekit/commit/639d914225f2a751fbc368acd438a1c6eee0c795))
+
+
 ## v1.1.1 (2024-05-06)
 
 ### Fix
