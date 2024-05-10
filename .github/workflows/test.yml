@@ -32,7 +32,7 @@ jobs:
         version: '1.7.0'
 
     - name: 💻 install onekit
-      run: poetry install
+      run: poetry install --without docs,packaging
 
     - name: 🔍 run pre-commit
       run: poetry run pre-commit run --all-files
