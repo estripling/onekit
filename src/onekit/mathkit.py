@@ -106,6 +106,21 @@ def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, floa
     - For any positive integer :math:`n`, the number of digits in :math:`n` is
       :math:`1 + \\lfloor \\log_{10} n \\rfloor`
     - If `kind="int"`, returns :math:`\\lfloor f(x) \\rfloor`
+    - If `kind="linear"`, linear interpolation is performed:
+
+    .. math::
+
+        \\tilde{f}(x) =
+        \\begin{cases}
+            \\frac{y_{0} (x_{1} - x) + y_{1} (x - x_{0})}{x_{1} - x_{0}}
+              & \\text{ if } |x| \\ge 0.1 \\\\[6pt]
+            0 & \\text{ otherwise }
+        \\end{cases}
+
+        \\\\[6pt]
+
+        \\text{ with } y_{0} = d, y_{1} = d + 1, x_{0} = 10^{d - 1}, x_{1} = 10^{d},
+        \\text{ and } d = \\lfloor f(x) \\rfloor
 
     See Also
     --------
@@ -127,12 +142,33 @@ def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, floa
     >>> # function is curried
     >>> list(map(mk.digitscale(kind="int"), [-0.5, -5, -50, -500]))
     [0, 1, 2, 3]
+
+    >>> list(map(mk.digitscale(kind="linear"), [0.1, 1, 10, 100, 1_000, 10_000]))
+    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    >>> list(map(mk.digitscale(kind="linear"), [0.2, 2, 20, 200]))
+    [0.11111111111111112, 1.1111111111111112, 2.111111111111111, 3.111111111111111]
+    >>> list(map(mk.digitscale(kind="linear"), [-0.5, -5, -50, -500]))
+    [0.4444444444444445, 1.4444444444444444, 2.4444444444444446, 3.4444444444444446]
     """
-    valid_kind = ["log", "int"]
-    if kind not in valid_kind:
+    valid_kind = ["log", "int", "linear"]
+
+    x = abs(x)
+    fx = 1 + math.log10(x) if x >= 0.1 else 0.0
+
+    if kind == "log":
+        return fx
+
+    elif kind == "int":
+        return math.floor(fx)
+
+    elif kind == "linear":
+        d = math.floor(fx)
+        y0, y1 = d, d + 1
+        x0, x1 = 10 ** (d - 1), 10**d
+        return (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0) if x >= 0.1 else 0.0
+
+    else:
         raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
-    y = 1 + math.log10(abs(x)) if abs(x) >= 0.1 else 0.0
-    return math.floor(y) if kind == "int" else y
 
 
 def fibonacci() -> Generator:

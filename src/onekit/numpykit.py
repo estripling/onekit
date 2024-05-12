@@ -63,11 +63,14 @@ def digitscale(x: ArrayLike, /, *, kind: str = "log") -> np.ndarray:
     Examples
     --------
     >>> import onekit.numpykit as npk
-    >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000])
-    array([0., 1., 2., 3., 4., 5., 6., 7.])
+    >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 2_000_000])
+    array([0.     , 1.     , 2.     , 3.     , 4.     , 5.     , 7.30103])
 
-    >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000], kind="int")
+    >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 100_000, 2_000_000], kind="int")
     array([0, 1, 2, 3, 4, 5, 6, 7])
+
+    >>> npk.digitscale([0.2, 2, 20], kind="linear")
+    array([0.11111111, 1.11111111, 2.11111111])
     """
     otypes = [int] if kind == "int" else [float]
     return np.vectorize(mk.digitscale(kind=kind), otypes=otypes)(x)

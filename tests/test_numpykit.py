@@ -67,6 +67,16 @@ def test_check_vector():
             "int",
             np.array([0, 1, 2]),
         ),
+        (
+            (0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000),
+            "linear",
+            np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]),
+        ),
+        (
+            (0.2, 2, 20),
+            "linear",
+            np.array([0.11111111111111112, 1.1111111111111112, 2.111111111111111]),
+        ),
     ],
 )
 def test_digitscale(x: np.ndarray, kind: str, expected: np.ndarray):

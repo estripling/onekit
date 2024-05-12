@@ -1174,23 +1174,25 @@ def with_digitscale(
     ...         dict(x=10_000.0),
     ...         dict(x=100_000.0),
     ...         dict(x=1_000_000.0),
+    ...         dict(x=2_000_000.0),
     ...         dict(x=None),
     ...     ],
     ... )
     >>> df.transform(sk.with_digitscale("x", "fx")).show()
-    +---------+----+
-    |        x|  fx|
-    +---------+----+
-    |      0.1| 0.0|
-    |      1.0| 1.0|
-    |     10.0| 2.0|
-    |    100.0| 3.0|
-    |   1000.0| 4.0|
-    |  10000.0| 5.0|
-    | 100000.0| 6.0|
-    |1000000.0| 7.0|
-    |     null|null|
-    +---------+----+
+    +---------+-----------------+
+    |        x|               fx|
+    +---------+-----------------+
+    |      0.1|              0.0|
+    |      1.0|              1.0|
+    |     10.0|              2.0|
+    |    100.0|              3.0|
+    |   1000.0|              4.0|
+    |  10000.0|              5.0|
+    | 100000.0|              6.0|
+    |1000000.0|              7.0|
+    |2000000.0|7.301029995663981|
+    |     null|             null|
+    +---------+-----------------+
     <BLANKLINE>
 
     >>> df.transform(sk.with_digitscale("x", "fx", kind="int")).show()
@@ -1205,11 +1207,29 @@ def with_digitscale(
     |  10000.0|   5|
     | 100000.0|   6|
     |1000000.0|   7|
+    |2000000.0|   7|
     |     null|null|
     +---------+----+
     <BLANKLINE>
+
+    >>> df.transform(sk.with_digitscale("x", "fx", kind="linear")).show()
+    +---------+-----------------+
+    |        x|               fx|
+    +---------+-----------------+
+    |      0.1|              0.0|
+    |      1.0|              1.0|
+    |     10.0|              2.0|
+    |    100.0|              3.0|
+    |   1000.0|              4.0|
+    |  10000.0|              5.0|
+    | 100000.0|              6.0|
+    |1000000.0|              7.0|
+    |2000000.0|7.111111111111111|
+    |     null|             null|
+    +---------+-----------------+
+    <BLANKLINE>
     """
-    valid_kind = ["log", "int"]
+    valid_kind = ["log", "int", "linear"]
     if kind not in valid_kind:
         raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
 
@@ -1222,6 +1242,24 @@ def with_digitscale(
 
         if kind == "int":
             df = df.withColumn(new_col, F.floor(new_col).cast(T.IntegerType()))
+
+        if kind == "linear":
+            d = "_d_"
+            y0 = F.col(d)
+            y1 = F.col(d) + 1
+            x0 = 10 ** (F.col(d) - 1)
+            x1 = 10 ** F.col(d)
+
+            df = (
+                df.withColumn(d, F.floor(new_col).cast(T.IntegerType()))
+                .withColumn(
+                    new_col,
+                    F.when(x.isNull(), None)
+                    .when(x >= 0.1, (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0))
+                    .otherwise(0.0),
+                )
+                .drop(d)
+            )
 
         return df
 
