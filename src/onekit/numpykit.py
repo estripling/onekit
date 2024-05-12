@@ -52,7 +52,7 @@ def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vec
     return x
 
 
-def digitscale(x: ArrayLike, /) -> np.ndarray:
+def digitscale(x: ArrayLike, /, *, kind: str = "log") -> np.ndarray:
     """NumPy version of digitscale.
 
     See Also
@@ -65,8 +65,12 @@ def digitscale(x: ArrayLike, /) -> np.ndarray:
     >>> import onekit.numpykit as npk
     >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000])
     array([0., 1., 2., 3., 4., 5., 6., 7.])
+
+    >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000], kind="int")
+    array([0, 1, 2, 3, 4, 5, 6, 7])
     """
-    return np.vectorize(mk.digitscale, otypes=[float])(x)
+    otypes = [int] if kind == "int" else [float]
+    return np.vectorize(mk.digitscale(kind=kind), otypes=otypes)(x)
 
 
 def stderr(x: ArrayLike, /) -> float:

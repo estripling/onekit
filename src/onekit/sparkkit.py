@@ -1145,7 +1145,13 @@ def with_date_diff_ahead(
     return inner
 
 
-def with_digitscale(num_col: str, new_col: str) -> SparkDFTransformFunc:
+def with_digitscale(
+    num_col: str,
+    new_col: str,
+    /,
+    *,
+    kind: str = "log",
+) -> SparkDFTransformFunc:
     """PySpark version of digitscale.
 
     See Also
@@ -1186,14 +1192,38 @@ def with_digitscale(num_col: str, new_col: str) -> SparkDFTransformFunc:
     |     null|null|
     +---------+----+
     <BLANKLINE>
+
+    >>> df.transform(sk.with_digitscale("x", "fx", kind="int")).show()
+    +---------+----+
+    |        x|  fx|
+    +---------+----+
+    |      0.1|   0|
+    |      1.0|   1|
+    |     10.0|   2|
+    |    100.0|   3|
+    |   1000.0|   4|
+    |  10000.0|   5|
+    | 100000.0|   6|
+    |1000000.0|   7|
+    |     null|null|
+    +---------+----+
+    <BLANKLINE>
     """
+    valid_kind = ["log", "int"]
+    if kind not in valid_kind:
+        raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
 
     def inner(df: SparkDF, /) -> SparkDF:
         x = F.abs(num_col)
-        return df.withColumn(
+        df = df.withColumn(
             new_col,
             F.when(x.isNull(), None).when(x >= 0.1, 1 + F.log10(x)).otherwise(0.0),
         )
+
+        if kind == "int":
+            df = df.withColumn(new_col, F.floor(new_col).cast(T.IntegerType()))
+
+        return df
 
     return inner
 

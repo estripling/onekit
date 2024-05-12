@@ -82,7 +82,8 @@ def collatz(n: int, /) -> Generator:
         n = n // 2 if iseven(n) else 3 * n + 1
 
 
-def digitscale(x: Union[int, float], /) -> float:
+@toolz.curry
+def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, float]:
     """Scale :math:`x` such that its mapped integer part is its number of digits.
 
     Given a number :math:`x \\in \\mathbb{R}`, the following function
@@ -104,6 +105,7 @@ def digitscale(x: Union[int, float], /) -> float:
     - :math:`\\left[ \\, \\cdot \\, \\right]`: truncation function
     - For any positive integer :math:`n`, the number of digits in :math:`n` is
       :math:`1 + \\lfloor \\log_{10} n \\rfloor`
+    - If `kind="int"`, returns :math:`\\lfloor f(x) \\rfloor`
 
     See Also
     --------
@@ -121,8 +123,16 @@ def digitscale(x: Union[int, float], /) -> float:
 
     >>> list(map(mk.digitscale, [-0.5, -5, -50, -500]))
     [0.6989700043360187, 1.6989700043360187, 2.6989700043360187, 3.6989700043360187]
+
+    >>> # function is curried
+    >>> list(map(mk.digitscale(kind="int"), [-0.5, -5, -50, -500]))
+    [0, 1, 2, 3]
     """
-    return 1 + math.log10(abs(x)) if abs(x) >= 0.1 else 0.0
+    valid_kind = ["log", "int"]
+    if kind not in valid_kind:
+        raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
+    y = 1 + math.log10(abs(x)) if abs(x) >= 0.1 else 0.0
+    return math.floor(y) if kind == "int" else y
 
 
 def fibonacci() -> Generator:
