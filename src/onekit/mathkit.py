@@ -103,14 +103,14 @@ def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, floa
     -----
     - :math:`\\lfloor \\cdot \\rfloor`: floor function
     - :math:`\\left[ \\, \\cdot \\, \\right]`: truncation function
-    - For any positive integer :math:`n`, the number of digits in :math:`n` is
-      :math:`1 + \\lfloor \\log_{10} n \\rfloor`
+    - For any positive integer :math:`k`, the number of digits in :math:`k` is
+      :math:`1 + \\lfloor \\log_{10} k \\rfloor`
     - If `kind="int"`, returns :math:`\\lfloor f(x) \\rfloor`
     - If `kind="linear"`, linear interpolation is performed:
 
     .. math::
 
-        \\tilde{f}(x) =
+        f_{linear}(x) =
         \\begin{cases}
             \\frac{y_{0} (x_{1} - x) + y_{1} (x - x_{0})}{x_{1} - x_{0}}
               & \\text{ if } |x| \\ge 0.1 \\\\[6pt]
@@ -119,8 +119,8 @@ def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, floa
 
         \\\\[6pt]
 
-        \\text{ with } y_{0} = d, y_{1} = d + 1, x_{0} = 10^{d - 1}, x_{1} = 10^{d},
-        \\text{ and } d = \\lfloor f(x) \\rfloor
+        \\text{ with } n = \\lfloor f(x) \\rfloor, y_{0} = n, y_{1} = n + 1,
+        x_{0} = 10^{n - 1}, \\text{ and } x_{1} = 10^{n}
 
     See Also
     --------
@@ -162,9 +162,9 @@ def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, floa
         return math.floor(fx)
 
     elif kind == "linear":
-        d = math.floor(fx)
-        y0, y1 = d, d + 1
-        x0, x1 = 10 ** (d - 1), 10**d
+        n = math.floor(fx)
+        y0, y1 = n, n + 1
+        x0, x1 = 10 ** (n - 1), 10**n
         return (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0) if x >= 0.1 else 0.0
 
     else:

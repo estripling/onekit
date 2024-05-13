@@ -1244,21 +1244,21 @@ def with_digitscale(
             df = df.withColumn(new_col, F.floor(new_col).cast(T.IntegerType()))
 
         if kind == "linear":
-            d = "_d_"
-            y0 = F.col(d)
-            y1 = F.col(d) + 1
-            x0 = 10 ** (F.col(d) - 1)
-            x1 = 10 ** F.col(d)
+            n = "_n_"
+            y0 = F.col(n)
+            y1 = F.col(n) + 1
+            x0 = 10 ** (F.col(n) - 1)
+            x1 = 10 ** F.col(n)
 
             df = (
-                df.withColumn(d, F.floor(new_col).cast(T.IntegerType()))
+                df.withColumn(n, F.floor(new_col).cast(T.IntegerType()))
                 .withColumn(
                     new_col,
                     F.when(x.isNull(), None)
                     .when(x >= 0.1, (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0))
                     .otherwise(0.0),
                 )
-                .drop(d)
+                .drop(n)
             )
 
         return df
