@@ -82,7 +82,8 @@ def collatz(n: int, /) -> Generator:
         n = n // 2 if iseven(n) else 3 * n + 1
 
 
-def digitscale(x: Union[int, float], /) -> float:
+@toolz.curry
+def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, float]:
     """Scale :math:`x` such that its mapped integer part is its number of digits.
 
     Given a number :math:`x \\in \\mathbb{R}`, the following function
@@ -102,8 +103,24 @@ def digitscale(x: Union[int, float], /) -> float:
     -----
     - :math:`\\lfloor \\cdot \\rfloor`: floor function
     - :math:`\\left[ \\, \\cdot \\, \\right]`: truncation function
-    - For any positive integer :math:`n`, the number of digits in :math:`n` is
-      :math:`1 + \\lfloor \\log_{10} n \\rfloor`
+    - For any positive integer :math:`k`, the number of digits in :math:`k` is
+      :math:`1 + \\lfloor \\log_{10} k \\rfloor`
+    - If `kind="int"`, returns :math:`\\lfloor f(x) \\rfloor`
+    - If `kind="linear"`, linear interpolation is performed:
+
+    .. math::
+
+        f_{linear}(x) =
+        \\begin{cases}
+            \\frac{y_{0} (x_{1} - x) + y_{1} (x - x_{0})}{x_{1} - x_{0}}
+              & \\text{ if } |x| \\ge 0.1 \\\\[6pt]
+            0 & \\text{ otherwise }
+        \\end{cases}
+
+        \\\\[6pt]
+
+        \\text{ with } n = \\lfloor f(x) \\rfloor, y_{0} = n, y_{1} = n + 1,
+        x_{0} = 10^{n - 1}, \\text{ and } x_{1} = 10^{n}
 
     See Also
     --------
@@ -121,8 +138,37 @@ def digitscale(x: Union[int, float], /) -> float:
 
     >>> list(map(mk.digitscale, [-0.5, -5, -50, -500]))
     [0.6989700043360187, 1.6989700043360187, 2.6989700043360187, 3.6989700043360187]
+
+    >>> # function is curried
+    >>> list(map(mk.digitscale(kind="int"), [-0.5, -5, -50, -500]))
+    [0, 1, 2, 3]
+
+    >>> list(map(mk.digitscale(kind="linear"), [0.1, 1, 10, 100, 1_000, 10_000]))
+    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    >>> list(map(mk.digitscale(kind="linear"), [0.2, 2, 20, 200]))
+    [0.11111111111111112, 1.1111111111111112, 2.111111111111111, 3.111111111111111]
+    >>> list(map(mk.digitscale(kind="linear"), [-0.5, -5, -50, -500]))
+    [0.4444444444444445, 1.4444444444444444, 2.4444444444444446, 3.4444444444444446]
     """
-    return 1 + math.log10(abs(x)) if abs(x) >= 0.1 else 0.0
+    valid_kind = ["log", "int", "linear"]
+
+    x = abs(x)
+    fx = 1 + math.log10(x) if x >= 0.1 else 0.0
+
+    if kind == "log":
+        return fx
+
+    elif kind == "int":
+        return math.floor(fx)
+
+    elif kind == "linear":
+        n = math.floor(fx)
+        y0, y1 = n, n + 1
+        x0, x1 = 10 ** (n - 1), 10**n
+        return (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0) if x >= 0.1 else 0.0
+
+    else:
+        raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
 
 
 def fibonacci() -> Generator:
