@@ -46,6 +46,7 @@ __all__ = (
     "is_schema_equal",
     "join",
     "peek",
+    "select_col_types",
     "str_to_col",
     "union",
     "with_date_diff_ago",
@@ -1002,6 +1003,40 @@ def peek(
         return df
 
     return inner
+
+
+def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
+    """Identify columns of specified data type.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import types as T
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [dict(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
+    ...     schema=T.StructType(
+    ...         [
+    ...             T.StructField("bool", T.BooleanType(), nullable=True),
+    ...             T.StructField("double", T.DoubleType(), nullable=True),
+    ...             T.StructField("float", T.FloatType(), nullable=True),
+    ...             T.StructField("int", T.IntegerType(), nullable=True),
+    ...             T.StructField("long", T.LongType(), nullable=True),
+    ...             T.StructField("str", T.StringType(), nullable=True),
+    ...         ]
+    ...     ),
+    ... )
+    >>> sk.select_col_types(df, T.BooleanType)
+    ['bool']
+
+    >>> sk.select_col_types(df, T.IntegerType, T.LongType)
+    ['int', 'long']
+    """
+    col_types = tuple(pk.flatten(col_types))
+    if not all(isinstance(col_type, T.DataTypeSingleton) for col_type in col_types):
+        raise TypeError(f"{col_types=} - must be a data type of pyspark.sql.types")
+    return [c for c in df.columns if isinstance(df.schema[c].dataType, col_types)]
 
 
 def str_to_col(x: str, /) -> SparkCol:
