@@ -1,6 +1,9 @@
 import datetime as dt
 import math
-from typing import Callable
+from typing import (
+    Callable,
+    List,
+)
 
 import pytest
 import toolz
@@ -17,7 +20,7 @@ import onekit.pythonkit as pk
 import onekit.sparkkit as sk
 
 
-# @pytest.mark.slow
+@pytest.mark.slow
 class TestSparkKit:
     def test_add_prefix(self, spark: SparkSession):
         df = spark.createDataFrame([Row(a=1, b=2)])
@@ -391,6 +394,54 @@ class TestSparkKit:
         )
         expected = df.where(F.col("x").isNotNull())
         self.assert_dataframe_equal(actual, expected)
+
+    @pytest.mark.parametrize(
+        "col_type, expected",
+        [
+            (T.BooleanType, ["bool"]),
+            (T.DoubleType, ["double"]),
+            (T.FloatType, ["float"]),
+            (T.IntegerType, ["int"]),
+            (T.LongType, ["long"]),
+            (T.StringType, ["str"]),
+            ([T.DoubleType, T.FloatType], ["double", "float"]),
+            ([T.IntegerType, T.LongType], ["int", "long"]),
+            (
+                [T.DoubleType, T.FloatType, T.IntegerType, T.LongType],
+                ["double", "float", "int", "long"],
+            ),
+            (None, None),
+            ("BooleanType", None),
+            (1, None),
+            (2.0, None),
+            ([None, "BooleanType"], None),
+        ],
+    )
+    def test_select_col_types(
+        self,
+        spark: SparkSession,
+        col_type: T.DataType,
+        expected: List[str],
+    ):
+        df = spark.createDataFrame(
+            [Row(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
+            schema=T.StructType(
+                [
+                    T.StructField("bool", T.BooleanType(), nullable=True),
+                    T.StructField("double", T.DoubleType(), nullable=True),
+                    T.StructField("float", T.FloatType(), nullable=True),
+                    T.StructField("int", T.IntegerType(), nullable=True),
+                    T.StructField("long", T.LongType(), nullable=True),
+                    T.StructField("str", T.StringType(), nullable=True),
+                ]
+            ),
+        )
+        if expected is not None:
+            actual = sk.select_col_types(df, col_type)
+            assert actual == expected
+        else:
+            with pytest.raises(TypeError):
+                sk.select_col_types(df, col_type)
 
     def test_str_to_col(self):
         actual = sk.str_to_col("x")
