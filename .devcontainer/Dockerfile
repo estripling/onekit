@@ -30,13 +30,10 @@ RUN apt-get update \
     && apt-get autoremove --purge  -y \
     && rm -rf /var/lib/apt/lists/*
 
-# install poetry
-RUN python3.8 -m pip install poetry==${POETRY_VERSION}
+WORKDIR /workspaces/arena
 
-# create workspace
-WORKDIR /workspaces/onekit
-
-# install project dependencies
 COPY . .
-RUN poetry install \
+
+RUN python3 -m pip install poetry==${POETRY_VERSION} \
+    && poetry install --no-interaction \
     && rm -rf ~/.cache/pypoetry/{cache,artifacts}
