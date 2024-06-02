@@ -3,6 +3,7 @@ import functools
 import math
 import operator
 import os
+import platform
 import random
 import re
 import time
@@ -1153,12 +1154,14 @@ def test_str_to_date(string: str, expected: dt.date):
 
 class TestTimestamp:
     def test_default_call(self):
-        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
-        traveller.start()
-        actual = pk.timestamp()
-        expected = "2024-01-01 00:00:00"
-        assert actual == expected
-        traveller.stop()
+        if platform.system() != "Windows":
+            # LD_PRELOAD is only available on Unix platforms
+            traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+            traveller.start()
+            actual = pk.timestamp()
+            expected = "2024-01-01 00:00:00"
+            assert actual == expected
+            traveller.stop()
 
     @pytest.mark.parametrize(
         "fmt,expected",
