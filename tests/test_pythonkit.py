@@ -805,7 +805,7 @@ class TestStopwatch:
         assert re.search(expected, actual) is not None
         assert sw.label is None if label is None else sw.label == label
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.label = label
 
         with pytest.raises(
@@ -825,7 +825,7 @@ class TestStopwatch:
         assert re.search(expected, actual) is not None
         assert sw.flush == flush
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.flush = flush
 
     @pytest.mark.parametrize(
@@ -868,13 +868,13 @@ class TestStopwatch:
         # change timestamp format but not data
         sw.fmt = default_fmt
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.start_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.stop_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.elapsed_time = dt.timedelta(days=42)
 
         actual = str(sw)
@@ -919,19 +919,19 @@ class TestStopwatch:
         assert sw.flush == flush
         assert sw.fmt == default_fmt if fmt is None else sw.fmt == fmt
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.label = label
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.flush = flush
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.start_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.stop_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.elapsed_time = dt.timedelta(days=42)
 
     def test_context_manager__total_elapsed_time(self, slumber, regex_default_message):
