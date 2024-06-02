@@ -60,7 +60,7 @@ pre-commit install
 ```
 
 ```shell
-python command.py --run-pre-commit --run-pytest
+python command.py --check
 ```
 
 ## Git Commit Guidelines

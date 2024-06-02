@@ -29,21 +29,28 @@ def main() -> None:
 
     if args.create_venv:
         print(" create - venv")
-        process_argument__create_venv(poetry_version="1.8.3")
+        run_create_venv(poetry_version="1.8.3")
 
     else:
-        process_argument__clear_cache(args.clear_cache)
-        process_argument__pre_commit(args.run_pre_commit)
-        process_argument__pytest(args.run_pytest)
-        process_argument__pytest__slow(args.run_pytest_slow)
-        process_argument__pytest__slow_doctests(args.run_pytest_slow_doctests)
-        process_argument__create_docs(args.create_docs)
-        process_argument__remove_docs(args.remove_docs)
-        process_argument__remove_branches(args.remove_branches)
+        functions = [
+            (run_check, args.check),
+            (run_clear_cache, args.clear_cache),
+            (run_pre_commit, args.run_pre_commit),
+            (run_pytest, args.run_pytest),
+            (run_pytest__slow, args.run_pytest_slow),
+            (run_pytest__slow_doctests, args.run_pytest_slow_doctests),
+            (run_create_docs, args.create_docs),
+            (run_remove_docs, args.remove_docs),
+            (run_remove_branches, args.remove_branches),
+        ]
+        for func, condition in functions:
+            if condition:
+                func()
 
 
 def get_arguments() -> Namespace:
     parser = ArgumentParser(description="Execute command")
+    parser.add_argument("-c", "--check", action="store_true", help="run quick checks")
     parser.add_argument("--create-venv", action="store_true", help="create venv")
     parser.add_argument(
         "--clear-cache",
@@ -88,108 +95,108 @@ def get_arguments() -> Namespace:
     return parser.parse_args()
 
 
-def process_argument__clear_cache(execute: bool):
-    if execute:
-        cwd = Path().cwd()
-        file_extensions = ["*.py[co]", ".coverage", ".coverage.*"]
-        directories = ["__pycache__", ".pytest_cache", ".ipynb_checkpoints"]
-
-        for file_extension in file_extensions:
-            for path in cwd.rglob(file_extension):
-                if "venv" in str(path):
-                    continue
-                path.unlink()
-                print(f"deleted - {path}")
-
-        for directory in directories:
-            for path in cwd.rglob(directory):
-                if "venv" in str(path):
-                    continue
-                shutil.rmtree(path.absolute(), ignore_errors=False)
-                print(f"deleted - {path}")
+def run_check() -> None:
+    run_clear_cache()
+    run_pre_commit()
+    run_pytest()
 
 
-def process_argument__create_docs(execute: bool) -> None:
-    if execute:
-        print("create local documentation files")
-        cwd = Path().cwd()
-        os.chdir(get_root().joinpath("docs"))
-        run_shell_command("make html")
-        os.chdir(cwd)
+def run_clear_cache() -> None:
+    print("clear cache")
+    cwd = Path().cwd()
+    file_extensions = ["*.py[co]", ".coverage", ".coverage.*"]
+    directories = ["__pycache__", ".pytest_cache", ".ipynb_checkpoints"]
+
+    for file_extension in file_extensions:
+        for path in cwd.rglob(file_extension):
+            if "venv" in str(path):
+                continue
+            path.unlink()
+            print(f"deleted - {path}")
+
+    for directory in directories:
+        for path in cwd.rglob(directory):
+            if "venv" in str(path):
+                continue
+            shutil.rmtree(path.absolute(), ignore_errors=False)
+            print(f"deleted - {path}")
 
 
-def process_argument__create_venv(poetry_version: str) -> None:
+def run_create_docs() -> None:
+    print("create local documentation files")
+    cwd = Path().cwd()
+    os.chdir(get_root().joinpath("docs"))
+    run_shell_command("make html")
+    os.chdir(cwd)
+
+
+def run_create_venv(poetry_version: str) -> None:
     run_multiple_shell_commands(
         f"{get_python_exe()} -m venv {get_venv_path()} --clear --upgrade-deps",
         f"{get_python_venv_exe()} -m pip install poetry=={poetry_version}",
     )
 
 
-def process_argument__pre_commit(execute: bool) -> None:
-    if execute:
-        run_shell_command("pre-commit run --all-files", print_cmd=True)
+def run_pre_commit() -> None:
+    run_shell_command("pre-commit run --all-files", print_cmd=True)
 
 
-def process_argument__pytest(execute: bool) -> None:
-    if execute:
-        run_shell_command(
-            [
-                f"{get_python_venv_exe()} -m pytest",
-                "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
-                "--cov-report term-missing --cov=src/",
-                "tests/",
-            ],
-            print_cmd=True,
-        )
+def run_pytest() -> None:
+    run_shell_command(
+        [
+            f"{get_python_venv_exe()} -m pytest",
+            "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
+            "--cov-report term-missing --cov=src/",
+            "tests/",
+        ],
+        print_cmd=True,
+    )
 
 
-def process_argument__pytest__slow(execute: bool) -> None:
-    if execute:
-        run_shell_command(
-            [
-                f"{get_python_venv_exe()} -m pytest",
-                "--slow",
-                "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
-                "--cov-report term-missing --cov=src/",
-                "tests/",
-            ],
-            print_cmd=True,
-        )
+def run_pytest__slow() -> None:
+    run_shell_command(
+        [
+            f"{get_python_venv_exe()} -m pytest",
+            "--slow",
+            "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
+            "--cov-report term-missing --cov=src/",
+            "tests/",
+        ],
+        print_cmd=True,
+    )
 
 
-def process_argument__pytest__slow_doctests(execute: bool) -> None:
-    if execute:
-        run_shell_command(
-            f"{get_python_venv_exe()} -m pytest --doctest-modules src/",
-            print_cmd=True,
-        )
+def run_pytest__slow_doctests() -> None:
+    run_shell_command(
+        f"{get_python_venv_exe()} -m pytest --doctest-modules src/",
+        print_cmd=True,
+    )
 
 
-def process_argument__remove_docs(execute: bool) -> None:
-    if execute:
-        path = get_root().joinpath("docs").joinpath("_build")
-        shutil.rmtree(path.absolute(), ignore_errors=False)
-        print(f"deleted - {path}")
+def run_remove_docs() -> None:
+    path = get_root().joinpath("docs").joinpath("_build")
+    shutil.rmtree(path.absolute(), ignore_errors=False)
+    print(f"deleted - {path}")
 
 
-def process_argument__remove_branches(execute: bool) -> None:
-    if execute:
-        response__delete_local_branches = run_pipe_command(
-            "git -P branch",
-            "grep -v 'main'",
-            f"grep -v '{get_current_branch()}'",
-            "xargs git branch -D",
-        )
-        print(process(response__delete_local_branches))
+def run_remove_branches() -> None:
+    """Remove local git branches, except main and current."""
+    response__delete_local_branches = run_pipe_command(
+        "git -P branch",
+        "grep -v 'main'",
+        f"grep -v '{get_current_branch()}'",
+        "xargs git branch -D",
+    )
+    print(process(response__delete_local_branches))
 
-        response__delete_remote_branch_reference = run_pipe_command(
-            "git -P branch --all",
-            "grep -v 'main'",
-            f"grep -v '{get_current_branch()}'",
-            r"sed 's/remotes\///g'",
-            "xargs git branch -r -d",
-        )
-        print(process(response__delete_remote_branch_reference))
+    response__delete_remote_branch_reference = run_pipe_command(
+        "git -P branch --all",
+        "grep -v 'main'",
+        f"grep -v '{get_current_branch()}'",
+        r"sed 's/remotes\///g'",
+        "xargs git branch -r -d",
+    )
+    print(process(response__delete_remote_branch_reference))
 
 
 def get_current_branch() -> Optional[str]:
