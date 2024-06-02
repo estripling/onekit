@@ -19,7 +19,7 @@ Next,
 
 Once the dev container is created, you are all set and ready to code!
 
-## Things To Try
+### Things To Try
 
 The `Makefile` in the root directory provides a collection of common commands.
 In the dev container, open a new terminal and run the following command to see what is available:
@@ -32,6 +32,35 @@ Use the following command to run `pre-commit` and `pytest` with one command to m
 
 ```shell
 make check
+```
+
+## Development Environment: Local Python VENV
+
+To install a virtual Python environment locally, run the following commands from the root directory:
+
+```shell
+which python
+```
+
+```shell
+python command.py --create-venv
+```
+
+```shell
+source venv/Scripts/activate  # Windows - Git Bash
+```
+
+```shell
+source venv/bin/activate  # Linux
+```
+
+```shell
+poetry install --no-interaction; \
+pre-commit install
+```
+
+```shell
+python command.py --run-pre-commit --run-pytest
 ```
 
 ## Git Commit Guidelines
