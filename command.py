@@ -38,7 +38,7 @@ def main() -> None:
         process_argument__pytest__slow(args.run_pytest_slow)
         process_argument__pytest__slow_doctests(args.run_pytest_slow_doctests)
         process_argument__create_docs(args.create_docs)
-        process_argument__remove_docs(args.create_docs)
+        process_argument__remove_docs(args.remove_docs)
         process_argument__remove_branches(args.remove_branches)
 
 
@@ -167,7 +167,9 @@ def process_argument__pytest__slow_doctests(execute: bool) -> None:
 
 def process_argument__remove_docs(execute: bool) -> None:
     if execute:
-        pass
+        path = get_root().joinpath("docs").joinpath("_build")
+        shutil.rmtree(path.absolute(), ignore_errors=False)
+        print(f"deleted - {path}")
 
 
 def process_argument__remove_branches(execute: bool) -> None:
