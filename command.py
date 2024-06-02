@@ -141,9 +141,9 @@ def run_create_docs() -> None:
 
 def run_create_venv(poetry_version: str) -> None:
     run_multiple_shell_commands(
-        f"{get_python_exe()} -m venv {get_venv_path()} --clear",
-        f"{get_python_venv_exe()} -m pip install --upgrade pip",
-        f"{get_python_venv_exe()} -m pip install poetry=={poetry_version}",
+        f"{get_local_python()} -m venv {get_venv_path()} --clear",
+        f"{get_python_exe()} -m pip install --upgrade pip",
+        f"{get_python_exe()} -m pip install poetry=={poetry_version}",
     )
 
 
@@ -154,7 +154,7 @@ def run_pre_commit() -> None:
 def run_pytest() -> None:
     run_shell_command(
         [
-            f"{get_python_venv_exe()} -m pytest",
+            f"{get_python_exe()} -m pytest",
             "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
             "--cov-report term-missing --cov=src/",
             "tests/",
@@ -166,7 +166,7 @@ def run_pytest() -> None:
 def run_pytest__slow() -> None:
     run_shell_command(
         [
-            f"{get_python_venv_exe()} -m pytest",
+            f"{get_python_exe()} -m pytest",
             "--slow",
             "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
             "--cov-report term-missing --cov=src/",
@@ -178,7 +178,7 @@ def run_pytest__slow() -> None:
 
 def run_pytest__slow_doctests() -> None:
     run_shell_command(
-        f"{get_python_venv_exe()} -m pytest --doctest-modules src/",
+        f"{get_python_exe()} -m pytest --doctest-modules src/",
         print_cmd=True,
     )
 
@@ -218,8 +218,12 @@ def decode(response: CompletedProcess) -> str:
     return response.stdout.decode("utf-8").rstrip()
 
 
-def get_python_exe() -> str:
+def get_local_python() -> str:
     return "python.exe" if is_windows() else "python3"
+
+
+def get_python_exe() -> str:
+    return "python3" if is_docker_container() else get_python_venv_exe()
 
 
 def get_python_venv_exe() -> str:
@@ -227,7 +231,7 @@ def get_python_venv_exe() -> str:
         Path()
         .joinpath(get_venv_path())
         .joinpath("Scripts" if is_windows() else "bin")
-        .joinpath(get_python_exe())
+        .joinpath(get_local_python())
         .as_posix()
     )
 
@@ -244,6 +248,10 @@ def get_venv_path() -> str:
 
 def has_command_run_successfully(response: CompletedProcess) -> bool:
     return response.returncode == 0
+
+
+def is_docker_container() -> bool:
+    return str(get_root().resolve()).startswith("/workspaces/onekit")
 
 
 def is_linux() -> bool:
