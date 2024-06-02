@@ -42,8 +42,6 @@ def main() -> None:
             (run_create_docs, args.create_docs),
             (run_remove_docs, args.remove_docs),
             (run_remove_branches, args.remove_branches),
-            (run_build_package, args.build_package),
-            (run_publish_package, args.publish_package),
         ]
         for func, condition in functions:
             if condition:
@@ -51,9 +49,18 @@ def main() -> None:
 
 
 def get_arguments() -> Namespace:
-    parser = ArgumentParser(description="Execute command")
-    parser.add_argument("-c", "--check", action="store_true", help="run quick checks")
-    parser.add_argument("--create-venv", action="store_true", help="create venv")
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--check",
+        action="store_true",
+        help="run sequence of commands to check code quality",
+    )
+    parser.add_argument(
+        "--create-venv",
+        action="store_true",
+        help="create virtual Python environment",
+    )
     parser.add_argument(
         "--clear-cache",
         action="store_true",
@@ -94,31 +101,16 @@ def get_arguments() -> Namespace:
         action="store_true",
         help="remove local git branches, except main and current",
     )
-    parser.add_argument(
-        "--build-package",
-        action="store_true",
-        help="build sdist and wheel distributions with poetry",
-    )
-    parser.add_argument(
-        "--publish-package",
-        action="store_true",
-        help="publish package to PyPI with poetry",
-    )
     return parser.parse_args()
 
 
-def run_build_package() -> None:
-    run_shell_command(f"{get_python_venv_exe()} -m poetry build")
-
-
 def run_check() -> None:
-    run_clear_cache()
     run_pre_commit()
     run_pytest()
 
 
 def run_clear_cache() -> None:
-    print("clear cache")
+    print("  clear - cache")
     cwd = Path().cwd()
     file_extensions = ["*.py[co]", ".coverage", ".coverage.*"]
     directories = ["__pycache__", ".pytest_cache", ".ipynb_checkpoints"]
@@ -139,7 +131,7 @@ def run_clear_cache() -> None:
 
 
 def run_create_docs() -> None:
-    print("create local documentation files")
+    print(" create - local documentation files")
     cwd = Path().cwd()
     os.chdir(get_root().joinpath("docs"))
     run_shell_command("make html")
@@ -155,10 +147,6 @@ def run_create_venv(poetry_version: str) -> None:
 
 def run_pre_commit() -> None:
     run_shell_command("pre-commit run --all-files", print_cmd=True)
-
-
-def run_publish_package() -> None:
-    run_shell_command(f"{get_python_venv_exe()} -m poetry publish")
 
 
 def run_pytest() -> None:
@@ -229,7 +217,7 @@ def decode(response: CompletedProcess) -> str:
 
 
 def get_python_exe() -> str:
-    return "python" if is_windows() else "python3"
+    return "python.exe" if is_windows() else "python3"
 
 
 def get_python_venv_exe() -> str:
@@ -248,7 +236,8 @@ def get_root() -> Path:
 
 
 def get_venv_path() -> str:
-    return get_root().joinpath("venv").as_posix()
+    name = f"onekit_on_{platform.system().lower()}"
+    return get_root().joinpath("venv").joinpath(name).as_posix()
 
 
 def has_command_run_successfully(response: CompletedProcess) -> bool:
