@@ -1,6 +1,5 @@
 import calendar
 import datetime as dt
-import distutils
 import functools
 import inspect
 import itertools
@@ -920,11 +919,31 @@ def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
 
     answer = input(f"{question} {prompt} ").lower()
 
+    def strtobool(value: str) -> bool:
+        """Convert a string representation of truth to true (1) or false (0).
+
+        True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+        are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+        'val' is anything else.
+
+        Notes
+        -----
+        - Shamelessly copied and modified from: distutils.util.strtobool
+        - distutils is not available with Python>=3.12
+        """
+        value = value.lower()
+        if value in ("y", "yes", "t", "true", "on", "1"):
+            return True
+        elif value in ("n", "no", "f", "false", "off", "0"):
+            return False
+        else:
+            raise ValueError("invalid truth value {!r}".format(value))
+
     while True:
         try:
             if answer == "" and default in ["yes", "no"]:
-                return bool(distutils.util.strtobool(default))
-            return bool(distutils.util.strtobool(answer))
+                return bool(strtobool(default))
+            return bool(strtobool(answer))
 
         except ValueError:
             response_text = "{} Please respond with 'yes' [{}] or 'no' [{}] ".format(
