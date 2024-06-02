@@ -13,6 +13,7 @@ from subprocess import (
     CompletedProcess,
 )
 from typing import (
+    List,
     Optional,
     Union,
 )
@@ -25,7 +26,7 @@ def main() -> None:
 
     print(f" branch - {get_current_branch()}")
     print(f"rootdir - {get_root()}")
-    print(f"    cwd - {os.getcwd()}")
+    print(f"    cwd - {Path.cwd()}")
 
     if args.create_venv:
         print(" create - venv")
@@ -140,7 +141,8 @@ def run_create_docs() -> None:
 
 def run_create_venv(poetry_version: str) -> None:
     run_multiple_shell_commands(
-        f"{get_python_exe()} -m venv {get_venv_path()} --clear --upgrade-deps",
+        f"{get_python_exe()} -m venv {get_venv_path()} --clear",
+        f"{get_python_venv_exe()} -m pip install --upgrade pip",
         f"{get_python_venv_exe()} -m pip install poetry=={poetry_version}",
     )
 
@@ -232,7 +234,7 @@ def get_python_venv_exe() -> str:
 
 def get_root() -> Path:
     """Get path to root directory."""
-    return Path(__file__).parent
+    return Path(__file__).parent.resolve()
 
 
 def get_venv_path() -> str:
@@ -275,7 +277,7 @@ def run_pipe_command(*commands: str, print_cmd: bool = True) -> Response:
 
 
 def run_shell_command(
-    cmd: str | list[str],
+    cmd: Union[str, List[str]],
     capture_output: bool = False,
     print_cmd: bool = False,
     other: Optional[Response] = None,
@@ -286,7 +288,7 @@ def run_shell_command(
         cmd_to_run = shlex.split(cmd) if is_cmd_str else shlex.split(" ".join(cmd))
         if print_cmd:
             print(cmd if is_cmd_str else " ".join(cmd_to_run))
-        stdout = other.stdout if isinstance(other, Response) else None
+        stdout = other.stdout if hasattr(other, "stdout") else None
         return subprocess.run(
             cmd_to_run,
             input=stdout,
