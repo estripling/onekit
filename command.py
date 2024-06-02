@@ -184,9 +184,10 @@ def run_pytest__slow_doctests() -> None:
 
 
 def run_remove_docs() -> None:
-    path = get_root().joinpath("docs").joinpath("_build")
-    shutil.rmtree(path.absolute(), ignore_errors=False)
-    print(f"deleted - {path}")
+    path = get_root().joinpath("docs").joinpath("_build").resolve()
+    if path.exists():
+        shutil.rmtree(path, ignore_errors=False)
+        print(f"deleted - {path}")
 
 
 def run_remove_branches() -> None:
