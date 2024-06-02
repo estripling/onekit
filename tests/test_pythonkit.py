@@ -381,7 +381,7 @@ def test_headline():
     ],
 )
 def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str):
-    actual = pk.highlight_string_differences(lft_str, rgt_str)
+    actual = pk.highlight_string_differences(lft_str, rgt_str).replace(os.linesep, "\n")
     assert actual == expected
 
 

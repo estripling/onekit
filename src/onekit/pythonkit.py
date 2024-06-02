@@ -666,13 +666,13 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
     Examples
     --------
     >>> import onekit.pythonkit as pk
-    >>> print(pk.highlight_string_differences("hello", "hall"))
+    >>> print(pk.highlight_string_differences("hello", "hall"))  # doctest: +SKIP
     hello
      |  |
     hall
 
     >>> # no differences when there is no '|' character
-    >>> print(pk.highlight_string_differences("hello", "hello"))
+    >>> print(pk.highlight_string_differences("hello", "hello"))  # doctest: +SKIP
     hello
     <BLANKLINE>
     hello
@@ -682,7 +682,7 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
         lft_str,
         concat_strings(
             "",
-            (
+            *(
                 " " if x == y else "|"
                 for x, y in itertools.zip_longest(lft_str, rgt_str, fillvalue="")
             ),
