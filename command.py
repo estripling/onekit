@@ -42,6 +42,8 @@ def main() -> None:
             (run_create_docs, args.create_docs),
             (run_remove_docs, args.remove_docs),
             (run_remove_branches, args.remove_branches),
+            (run_build_package, args.build_package),
+            (run_publish_package, args.publish_package),
         ]
         for func, condition in functions:
             if condition:
@@ -92,7 +94,21 @@ def get_arguments() -> Namespace:
         action="store_true",
         help="remove local git branches, except main and current",
     )
+    parser.add_argument(
+        "--build-package",
+        action="store_true",
+        help="build sdist and wheel distributions with poetry",
+    )
+    parser.add_argument(
+        "--publish-package",
+        action="store_true",
+        help="publish package to PyPI with poetry",
+    )
     return parser.parse_args()
+
+
+def run_build_package() -> None:
+    run_shell_command(f"{get_python_venv_exe()} -m poetry build")
 
 
 def run_check() -> None:
@@ -139,6 +155,10 @@ def run_create_venv(poetry_version: str) -> None:
 
 def run_pre_commit() -> None:
     run_shell_command("pre-commit run --all-files", print_cmd=True)
+
+
+def run_publish_package() -> None:
+    run_shell_command(f"{get_python_venv_exe()} -m poetry publish")
 
 
 def run_pytest() -> None:
