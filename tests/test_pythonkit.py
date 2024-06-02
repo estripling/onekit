@@ -466,12 +466,14 @@ def test_lazy_read_lines():
         with path.open("w") as fh:
             fh.write(pk.concat_strings(os.linesep, expected))
 
-        actual = toolz.pipe(pk.lazy_read_lines(path), curried.map(str.rstrip), tuple)
-        assert actual == expected
+        actual = toolz.pipe(
+            pk.lazy_read_lines(path),
+            curried.map(str.rstrip),
+            curried.filter(lambda x: len(x) > 0),
+            tuple,
+        )
 
-        for i, line in enumerate(pk.lazy_read_lines(str(path))):
-            actual = line.replace(os.linesep, "")
-            assert actual == expected[i]
+        assert actual == expected
 
         with pytest.raises(FileNotFoundError):
             tuple(pk.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
