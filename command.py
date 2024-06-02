@@ -112,10 +112,10 @@ def process_argument__clear_cache(execute: bool):
 def process_argument__create_docs(execute: bool) -> None:
     if execute:
         print("create local documentation files")
-        root = get_root()
-        os.chdir(root.joinpath("docs"))
+        cwd = Path().cwd()
+        os.chdir(get_root().joinpath("docs"))
         run_shell_command("make html")
-        os.chdir(root)
+        os.chdir(cwd)
 
 
 def process_argument__create_venv(poetry_version: str) -> None:
