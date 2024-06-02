@@ -155,25 +155,6 @@ def test_contrast_sets():
 
 
 @pytest.mark.parametrize(
-    "strings, expected",
-    [
-        (["path", "to", "file"], "path/to/file"),
-        (["hdfs:", "path", "to", "file"], "hdfs:/path/to/file"),
-        (["hdfs:/", "path", "to", "file"], "hdfs:/path/to/file"),
-        (["hdfs://", "path", "to", "file"], "hdfs://path/to/file"),
-    ],
-)
-def test_create_path(strings: List[str], expected: str):
-    expected = expected.replace("/", os.sep)
-
-    actual = pk.create_path(strings)
-    assert actual == expected
-
-    actual = pk.create_path(*strings)
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
     "n, d0, expected",
     [
         (1.0, dt.date(2022, 1, 1), None),

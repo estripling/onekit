@@ -37,7 +37,6 @@ __all__ = (
     "coinflip",
     "concat_strings",
     "contrast_sets",
-    "create_path",
     "date_ago",
     "date_ahead",
     "date_count_backward",
@@ -388,21 +387,6 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     output["report"] = "\n".join(lines)
 
     return output
-
-
-def create_path(*strings: str) -> str:
-    """Create path by concatenating strings.
-
-    Examples
-    --------
-    >>> import onekit.pythonkit as pk
-    >>> pk.create_path("path", "to", "file")
-    'path/to/file'
-
-    >>> pk.create_path(["hdfs://", "path", "to", "file"])
-    'hdfs://path/to/file'
-    """
-    return functools.reduce(os.path.join, flatten(strings))
 
 
 @toolz.curry
