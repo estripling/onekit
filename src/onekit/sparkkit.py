@@ -476,7 +476,7 @@ def bool_to_int(df: SparkDF, /, *, subset=None) -> SparkDF:
     <BLANKLINE>
     """
     cols = subset or df.columns
-    bool_cols = [c for c in cols if isinstance(df.schema[c].dataType, T.BooleanType)]
+    bool_cols = [c for c in select_col_types(df, T.BooleanType) if c in cols]
     for bool_col in bool_cols:
         df = df.withColumn(bool_col, F.col(bool_col).cast(T.IntegerType()))
     return df
