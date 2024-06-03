@@ -48,6 +48,6 @@ echo '}' >> ${HOME}/.zshrc
 
 echo 'install pre-commit'
 git config --global --add safe.directory /workspaces/onekit
-cd /workspaces/onekit && pre-commit install
+cd /workspaces/onekit && sudo pre-commit install
 
 echo 'Post creation script complete'

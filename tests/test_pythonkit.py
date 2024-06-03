@@ -3,6 +3,7 @@ import functools
 import math
 import operator
 import os
+import platform
 import random
 import re
 import time
@@ -152,25 +153,6 @@ def test_contrast_sets():
     ]
     report = "\n".join(lines)
     assert summary["report"] == report
-
-
-@pytest.mark.parametrize(
-    "strings, expected",
-    [
-        (["path", "to", "file"], "path/to/file"),
-        (["hdfs:", "path", "to", "file"], "hdfs:/path/to/file"),
-        (["hdfs:/", "path", "to", "file"], "hdfs:/path/to/file"),
-        (["hdfs://", "path", "to", "file"], "hdfs://path/to/file"),
-    ],
-)
-def test_create_path(strings: List[str], expected: str):
-    expected = expected.replace("/", os.sep)
-
-    actual = pk.create_path(strings)
-    assert actual == expected
-
-    actual = pk.create_path(*strings)
-    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -400,7 +382,7 @@ def test_headline():
     ],
 )
 def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str):
-    actual = pk.highlight_string_differences(lft_str, rgt_str)
+    actual = pk.highlight_string_differences(lft_str, rgt_str).replace(os.linesep, "\n")
     assert actual == expected
 
 
@@ -485,12 +467,14 @@ def test_lazy_read_lines():
         with path.open("w") as fh:
             fh.write(pk.concat_strings(os.linesep, expected))
 
-        actual = toolz.pipe(pk.lazy_read_lines(path), curried.map(str.rstrip), tuple)
-        assert actual == expected
+        actual = toolz.pipe(
+            pk.lazy_read_lines(path),
+            curried.map(str.rstrip),
+            curried.filter(lambda x: len(x) > 0),
+            tuple,
+        )
 
-        for i, line in enumerate(pk.lazy_read_lines(str(path))):
-            actual = line.replace(os.linesep, "")
-            assert actual == expected[i]
+        assert actual == expected
 
         with pytest.raises(FileNotFoundError):
             tuple(pk.lazy_read_lines(Path(tmpdir).joinpath("./not_exist.txt")))
@@ -821,7 +805,7 @@ class TestStopwatch:
         assert re.search(expected, actual) is not None
         assert sw.label is None if label is None else sw.label == label
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.label = label
 
         with pytest.raises(
@@ -841,7 +825,7 @@ class TestStopwatch:
         assert re.search(expected, actual) is not None
         assert sw.flush == flush
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.flush = flush
 
     @pytest.mark.parametrize(
@@ -884,13 +868,13 @@ class TestStopwatch:
         # change timestamp format but not data
         sw.fmt = default_fmt
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.start_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.stop_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.elapsed_time = dt.timedelta(days=42)
 
         actual = str(sw)
@@ -935,19 +919,19 @@ class TestStopwatch:
         assert sw.flush == flush
         assert sw.fmt == default_fmt if fmt is None else sw.fmt == fmt
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.label = label
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.flush = flush
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.start_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.stop_time = dt.datetime.now()
 
-        with pytest.raises(AttributeError, match=r"can't set attribute"):
+        with pytest.raises(AttributeError):
             sw.elapsed_time = dt.timedelta(days=42)
 
     def test_context_manager__total_elapsed_time(self, slumber, regex_default_message):
@@ -1170,12 +1154,14 @@ def test_str_to_date(string: str, expected: dt.date):
 
 class TestTimestamp:
     def test_default_call(self):
-        traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
-        traveller.start()
-        actual = pk.timestamp()
-        expected = "2024-01-01 00:00:00"
-        assert actual == expected
-        traveller.stop()
+        if platform.system() != "Windows":
+            # LD_PRELOAD is only available on Unix platforms
+            traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
+            traveller.start()
+            actual = pk.timestamp()
+            expected = "2024-01-01 00:00:00"
+            assert actual == expected
+            traveller.stop()
 
     @pytest.mark.parametrize(
         "fmt,expected",

@@ -44,14 +44,14 @@ class TestFunctionPlotter:
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
-        assert isinstance(ax3d, mpl_toolkits.mplot3d.Axes3D)
+        assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
     def test_surface_plot(self, func: Callable, bounds2n: List[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n, with_contour=False)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert ax is None
-        assert isinstance(ax3d, mpl_toolkits.mplot3d.Axes3D)
+        assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
     def test_contour_plot(self, func: Callable, bounds2n: List[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n, with_surface=False)
@@ -65,14 +65,14 @@ class TestFunctionPlotter:
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
-        assert isinstance(ax3d, mpl_toolkits.mplot3d.Axes3D)
+        assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
     def test_default_plot__ackley(self, bounds2n: List[vk.Pair]):
         plotter = vk.FunctionPlotter(ofk.ackley, bounds2n)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
-        assert isinstance(ax3d, mpl_toolkits.mplot3d.Axes3D)
+        assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
     @pytest.fixture
     def func(self) -> Callable:
@@ -165,7 +165,7 @@ def test_plot_surface():
         vk.plot_surface,
     )
     plt.close()
-    assert isinstance(actual, mpl_toolkits.mplot3d.Axes3D)
+    assert isinstance(actual, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
 
 def test_plot_xy_points():
@@ -183,4 +183,4 @@ def test_plot_xyz_points():
         vk.plot_xyz_points,
     )
     plt.close()
-    assert isinstance(actual, matplotlib.axes.Axes)
+    assert isinstance(actual, mpl_toolkits.mplot3d.axes3d.Axes3D)

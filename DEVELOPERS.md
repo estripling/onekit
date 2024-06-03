@@ -19,19 +19,120 @@ Next,
 
 Once the dev container is created, you are all set and ready to code!
 
-## Things To Try
+### Things To Try
 
-The `Makefile` in the root directory provides a collection of common commands.
+The `c2.py` file in the root directory provides a collection of commands.
 In the dev container, open a new terminal and run the following command to see what is available:
 
 ```shell
-make help
+python c2.py --help
 ```
 
 Use the following command to run `pre-commit` and `pytest` with one command to make sure everything works as intended:
 
 ```shell
-make check
+python c2.py --check
+```
+
+## Development Environment: Local Python Venv
+
+To install a virtual Python environment locally, run the following commands from the root directory:
+
+```shell
+which python
+```
+
+```shell
+python c2.py --create-venv
+```
+
+```shell
+source venv/onekit_on_windows/Scripts/activate  # Windows - Git Bash
+```
+
+```shell
+source venv/onekit_on_linux/bin/activate  # Linux
+```
+
+```shell
+poetry install --no-interaction; \
+pre-commit install
+```
+
+```shell
+python c2.py --check
+```
+
+## Useful Poetry commands
+
+```shell
+poetry check --lock
+```
+
+```shell
+poetry lock --no-update
+```
+
+```shell
+poetry add \
+toolz \
+pytz
+```
+
+```shell
+poetry add --group precommit \
+autoflake \
+"black[jupyter]" \
+isort \
+"flake8>=5.0.4" \
+pre-commit \
+pre-commit-hooks
+```
+
+```shell
+poetry add --group testing \
+pytest \
+pytest-cov \
+pytest-skip-slow
+```
+
+```shell
+poetry add --group docs \
+furo \
+jupyterlab \
+myst-parser \
+nbsphinx \
+sphinx-autoapi \
+sphinx-copybutton \
+time-machine
+```
+
+```shell
+poetry add --group packaging \
+python-semantic-release
+```
+
+```shell
+poetry add --group pandaskit \
+"pandas>=0.23.2"
+```
+
+```shell
+poetry add --group sparkkit \
+pyspark==3.1.1
+```
+
+```shell
+poetry add --group vizkit \
+"matplotlib>=3.7.1"
+```
+
+```shell
+poetry build
+```
+
+```shell
+poetry publish
 ```
 
 ## Git Commit Guidelines
