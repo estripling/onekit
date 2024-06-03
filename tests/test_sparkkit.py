@@ -170,6 +170,27 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
+    def test_bool_to_str(self, spark: SparkSession):
+        df = spark.createDataFrame(
+            [
+                Row(i=1, x=True, expect="true"),
+                Row(i=2, x=False, expect="false"),
+            ],
+            schema=T.StructType(
+                [
+                    T.StructField("i", T.IntegerType(), True),
+                    T.StructField("x", T.BooleanType(), True),
+                    T.StructField("expect", T.StringType(), True),
+                ]
+            ),
+        )
+
+        actual = df.transform(sk.bool_to_str()).select("i", F.col("x").alias("fx"))
+        expected = df.select("i", F.col("expect").alias("fx"))
+        self.assert_dataframe_equal(actual, expected)
+
+        assert sk.select_col_types(actual, T.StringType) == ["fx"]
+
     def test_check_column_present(self, spark: SparkSession):
         df = spark.createDataFrame([Row(x=1, y=2)])
         actual = df.transform(sk.check_column_present("x"))
