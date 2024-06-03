@@ -34,6 +34,7 @@ __all__ = (
     "assert_row_equal",
     "assert_schema_equal",
     "bool_to_int",
+    "bool_to_str",
     "check_column_present",
     "count_nulls",
     "cvf",
@@ -479,6 +480,47 @@ def bool_to_int(df: SparkDF, /, *, subset=None) -> SparkDF:
     bool_cols = [c for c in select_col_types(df, T.BooleanType) if c in cols]
     for bool_col in bool_cols:
         df = df.withColumn(bool_col, F.col(bool_col).cast(T.IntegerType()))
+    return df
+
+
+@toolz.curry
+def bool_to_str(df: SparkDF, /, *, subset=None) -> SparkDF:
+    """Cast values of Boolean columns to string values.
+
+    Examples
+    --------
+    >>> from pyspark.sql import SparkSession
+    >>> import onekit.sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame(
+    ...     [
+    ...         dict(x=True, y=False, z=None),
+    ...         dict(x=False, y=None, z=True),
+    ...         dict(x=True, y=None, z=None),
+    ...     ]
+    ... )
+    >>> sk.bool_to_str(df).show()
+    +-----+-----+----+
+    |    x|    y|   z|
+    +-----+-----+----+
+    | true|false|null|
+    |false| null|true|
+    | true| null|null|
+    +-----+-----+----+
+    <BLANKLINE>
+
+    >>> # function is curried
+    >>> df.transform(sk.bool_to_str(subset=["y", "z"])).printSchema()
+    root
+     |-- x: boolean (nullable = true)
+     |-- y: string (nullable = true)
+     |-- z: string (nullable = true)
+    <BLANKLINE>
+    """
+    cols = subset or df.columns
+    bool_cols = [c for c in select_col_types(df, T.BooleanType) if c in cols]
+    for bool_col in bool_cols:
+        df = df.withColumn(bool_col, F.col(bool_col).cast(T.StringType()))
     return df
 
 
