@@ -25,6 +25,7 @@ def main() -> None:
     args = get_arguments()
 
     print(f" branch - {get_current_branch()}")
+    print(f" commit - {get_last_commit(7)}")
     print(f"rootdir - {get_root()}")
     print(f"    cwd - {Path.cwd()}")
 
@@ -213,6 +214,12 @@ def run_remove_branches() -> None:
 def get_current_branch() -> Optional[str]:
     response = run_shell_command("git rev-parse --abbrev-ref HEAD", capture_output=True)
     return process(response)
+
+
+def get_last_commit(n: Optional[int] = None) -> Optional[str]:
+    """Returns hash of the most recent commit of current branch."""
+    response = run_shell_command("git rev-parse HEAD", capture_output=True)
+    return process(response)[:n]
 
 
 def decode(response: CompletedProcess) -> str:
