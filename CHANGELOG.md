@@ -2,6 +2,96 @@
 
 
 
+## v1.3.0 (2024-06-03)
+
+### Build
+
+* build: improve setup (#77)
+
+- Replace Makefile with a Python script to run commands
+- Enable easy setup on host machine next to docker
+- Make sure tests pass one Windows OS
+
+Commits
+----------
+
+* build: improve docker setup
+
+* build: refactor clear_cache.py
+
+* build: update poetry.lock
+
+* build: add command.py
+
+* build: update process_argument__create_docs
+
+* docs: update year
+
+* build: add remove_docs
+
+* build(command.py): refactor main
+
+* build(command.py): add poetry commands
+
+* build: update poetry.lock
+
+* revert: &#34;build: update poetry.lock&#34;
+
+This reverts commit 1e1f10cf54790358c5fee4f914a893654fcd277c.
+
+* build: update poetry.lock
+
+* build: delete Makefile
+
+* build: update commands
+
+* build: update commands
+
+* build: update commands
+
+* fix: remove create_path
+
+* fix: add strtobool
+
+* build: upgrade pip
+
+* test: fix test_highlight_string_differences
+
+* test: fix test_lazy_read_lines
+
+* test: fix TestTimestamp.test_default_call
+
+* test: fix TestStopwatch no regex match
+
+* test: fix test_vizkit.py
+
+* refactor: run_remove_docs
+
+* build: add get_last_commit
+
+* build: rename command.py to c2.py ([`7b61657`](https://github.com/estripling/onekit/commit/7b616571789f0c0a962b04d5f8514c58e0377fdc))
+
+* build: update poetry (#74) ([`bae0e62`](https://github.com/estripling/onekit/commit/bae0e6226e08c36d4a245986fe97a40a620c5ba3))
+
+### Feature
+
+* feat: add bool_to_str (#78)
+
+* refactor(bool_to_int): use select_col_types
+
+* feat: add bool_to_str ([`fadd710`](https://github.com/estripling/onekit/commit/fadd710a52ba0f18942796a563017912bef5f595))
+
+* feat: add select_col_types (#76) ([`0720987`](https://github.com/estripling/onekit/commit/0720987349a5c70bc99d3b116796d09905f00024))
+
+* feat: extend digitscale (#75)
+
+* feat(digitscale): add kind
+
+* feat(digitscale): add linear kind
+
+* style: be consistent ([`80771d3`](https://github.com/estripling/onekit/commit/80771d3b865bc1a3d26901726209bd7009b2d25a))
+
+
 ## v1.2.0 (2024-05-10)
 
 ### Build
