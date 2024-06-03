@@ -51,7 +51,7 @@ def main() -> None:
 
 
 def get_arguments() -> Namespace:
-    parser = ArgumentParser()
+    parser = ArgumentParser(description="command and control")
     parser.add_argument(
         "-c",
         "--check",
