@@ -26,10 +26,15 @@ def main() -> None:
 
     print(f" branch - {get_current_branch()}")
     print(f" commit - {get_last_commit(7)}")
-    print(f"rootdir - {get_root()}")
-    print(f"    cwd - {Path.cwd()}")
+    print(f"rootdir - {get_root().as_posix()}")
+    print(f"    cwd - {Path.cwd().as_posix()}")
 
-    if args.create_venv:
+    if all(v is False for v in args.__dict__.values()):
+        print()
+        print("see help:")
+        print(f"python {Path(__file__).name} -h")
+
+    elif args.create_venv:
         print(" create - venv")
         run_create_venv(poetry_version="1.8.3")
 
@@ -251,7 +256,7 @@ def get_root() -> Path:
 
 def get_venv_path() -> str:
     name = f"onekit_on_{platform.system().lower()}"
-    return get_root().joinpath("venv").joinpath(name).as_posix()
+    return get_root().joinpath("venv").joinpath(name).resolve().as_posix()
 
 
 def has_command_run_successfully(response: CompletedProcess) -> bool:
