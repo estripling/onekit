@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 # configurations
 ENV PYTHONUNBUFFERED=on \
@@ -23,7 +23,6 @@ RUN apt-get update \
     gcc \
     make \
     pandoc \
-    python3.8-dev \
     ## cleanup
     && apt-get clean -y \
     && apt-get autoclean -y \
