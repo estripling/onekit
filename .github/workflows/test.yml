@@ -21,10 +21,10 @@ jobs:
     - name: 📥 check out repository
       uses: actions/checkout@v4
 
-    - name: 🐍 set up Python 3.8
+    - name: 🐍 set up Python 3.9
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8'
+        python-version: '3.9'
 
     - name: 💻 install Poetry
       uses: snok/install-poetry@v1

@@ -10,7 +10,6 @@ documentation = "https://onekit.readthedocs.io/en/stable/"
 keywords = ["onekit"]
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -18,7 +17,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1"
+python = ">=3.9"
 toolz = "^0.12.0"
 pytz = "^2024.1"
 
@@ -49,6 +48,9 @@ python-semantic-release = "^8.3.0"
 
 [tool.poetry.group.pandaskit.dependencies]
 pandas = ">=0.23.2"
+
+[tool.poetry.group.sklearnkit.dependencies]
+scikit-learn = ">=1.3"
 
 [tool.poetry.group.sparkkit.dependencies]
 pyspark = "3.1.1"

@@ -118,6 +118,11 @@ poetry add --group pandaskit \
 ```
 
 ```shell
+poetry add --group sklearnkit \
+"scikit-learn>=1.3"
+```
+
+```shell
 poetry add --group sparkkit \
 pyspark==3.1.1
 ```
