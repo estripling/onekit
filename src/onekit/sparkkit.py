@@ -1047,7 +1047,7 @@ def peek(
     return inner
 
 
-def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
+def select_col_types(df: SparkDF, /, *col_types: T.AtomicType) -> List[str]:
     """Identify columns of specified data type.
 
     Examples
@@ -1075,9 +1075,11 @@ def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
     >>> sk.select_col_types(df, T.IntegerType, T.LongType)
     ['int', 'long']
     """
+    valid_types = {v.typeName() for k, v in T.__dict__.items() if k.endswith("Type")}
     col_types = tuple(pk.flatten(col_types))
-    if not all(isinstance(col_type, T.DataTypeSingleton) for col_type in col_types):
-        raise TypeError(f"{col_types=} - must be a data type of pyspark.sql.types")
+    for col_type in col_types:
+        if not hasattr(col_type, "typeName") or col_type.typeName() not in valid_types:
+            raise TypeError(f"{col_type=} - must be a valid data type: {valid_types}")
     return [c for c in df.columns if isinstance(df.schema[c].dataType, col_types)]
 
 

@@ -425,6 +425,7 @@ class TestSparkKit:
             (T.IntegerType, ["int"]),
             (T.LongType, ["long"]),
             (T.StringType, ["str"]),
+            (T.DecimalType, ["decimal"]),
             ([T.DoubleType, T.FloatType], ["double", "float"]),
             ([T.IntegerType, T.LongType], ["int", "long"]),
             (
@@ -445,7 +446,17 @@ class TestSparkKit:
         expected: List[str],
     ):
         df = spark.createDataFrame(
-            [Row(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
+            [
+                Row(
+                    bool=True,
+                    double=1.0,
+                    float=2.0,
+                    int=3,
+                    long=4,
+                    str="string",
+                    decimal="123.45",
+                )
+            ],
             schema=T.StructType(
                 [
                     T.StructField("bool", T.BooleanType(), nullable=True),
@@ -454,9 +465,11 @@ class TestSparkKit:
                     T.StructField("int", T.IntegerType(), nullable=True),
                     T.StructField("long", T.LongType(), nullable=True),
                     T.StructField("str", T.StringType(), nullable=True),
+                    T.StructField("decimal", T.StringType(), nullable=True),
                 ]
             ),
-        )
+        ).withColumn("decimal", F.col("decimal").cast(T.DecimalType(10, 2)))
+
         if expected is not None:
             actual = sk.select_col_types(df, col_type)
             assert actual == expected
