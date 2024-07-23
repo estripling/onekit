@@ -1,9 +1,34 @@
 import numpy as np
 import pandas as pd
+import pytest
 from pandas import DataFrame as PandasDF
 from sklearn import metrics
 
 import onekit.sklearnkit as slk
+
+
+@pytest.mark.parametrize(
+    "min_recall, expected",
+    [
+        (0, None),
+        (0.7, 0.6),
+        (0.75, 0.6),
+        (0.80, 2 / 3),
+        (1.0, 2 / 3),
+    ],
+)
+def test_precision_given_recall_score(min_recall: float, expected: float):
+    y_true = np.array([0, 1, 1, 1, 0, 0, 0, 1])
+    y_score = np.array([0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5])
+
+    if min_recall > 0:
+        actual = slk.precision_given_recall_score(
+            y_true, y_score, min_recall=min_recall
+        )
+        assert actual == expected
+    else:
+        with pytest.raises(ValueError):
+            slk.precision_given_recall_score(y_true, y_score, min_recall=min_recall)
 
 
 def test_threshold_summary(expected_threshold_summary: PandasDF):

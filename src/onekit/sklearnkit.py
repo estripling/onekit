@@ -5,10 +5,48 @@ from pandas import DataFrame as PandasDF
 from sklearn import metrics
 from sklearn.utils import validation
 
-__all__ = ("threshold_summary",)
+__all__ = (
+    "precision_given_recall_score",
+    "threshold_summary",
+)
 
 
 ArrayLike = npt.ArrayLike
+
+
+def precision_given_recall_score(
+    y_true: ArrayLike,
+    y_score: ArrayLike,
+    *,
+    min_recall: float,
+    pos_label: int | str | None = None,
+) -> float:
+    """Compute precision given a desired minimum recall level.
+
+    Examples
+    --------
+    >>> import onekit.sklearnkit as slk
+    >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
+    >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
+    >>> slk.precision_given_recall_score(y_true, y_score, min_recall=0.7)
+    0.6
+    """
+    if not (0 < min_recall <= 1):
+        raise ValueError(f"{min_recall=} - must be a float in (0, 1]")
+
+    df = (
+        threshold_summary(y_true, y_score, pos_label=pos_label)
+        .filter(items=["precision", "recall"])
+        .query(f"recall >= {min_recall}")
+    )
+
+    min_empirical_recall = df["recall"].min()
+
+    return float(
+        0
+        if df.empty
+        else df.query(f"recall == {min_empirical_recall}")["precision"].max()
+    )
 
 
 def threshold_summary(
