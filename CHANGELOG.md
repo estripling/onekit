@@ -1,6 +1,42 @@
 # CHANGELOG
 
+## v1.4.0 (2024-07-23)
 
+### Build
+
+* build: upgrade to Python 3.9 (#80)
+
+* build(pyproject.toml): upgrade to 3.9
+
+* build: add scikit-learn
+
+* build: upgrade to Python 3.9 ([`4266907`](https://github.com/estripling/onekit/commit/42669079b7678933c32cf09281d6d9332b122644))
+
+* build(c2.py): add help hint (#79) ([`efdca0b`](https://github.com/estripling/onekit/commit/efdca0be5cc3b8af7994c05e68d842c797e3651f))
+
+### Feature
+
+* feat: add sklearnkit (#81)
+
+* feat: add threshold_summary
+
+* refactor(c2.py): use shorthand type hinting
+
+* feat(sklearnkit): add precision_given_recall_score
+
+* revert: &#34;refactor(c2.py): use shorthand type hinting&#34;
+
+This reverts commit 3e7784ac821371dde6112076e6e25b96998f3d6b.
+
+* test: fix casting ([`a667f0d`](https://github.com/estripling/onekit/commit/a667f0da25c4bf9061496761f44d5830c4654c13))
+
+### Fix
+
+* fix(select_col_types): check for vaild data types (#82)
+
+* fix(select_col_types): check for vaild data types
+
+* fix(select_col_types): type hint ([`36bf1e1`](https://github.com/estripling/onekit/commit/36bf1e10fe81968c44d334b65c0f17a97e90c4b8))
 
 ## v1.3.0 (2024-06-03)
 
@@ -91,7 +127,6 @@ This reverts commit 1e1f10cf54790358c5fee4f914a893654fcd277c.
 
 * style: be consistent ([`80771d3`](https://github.com/estripling/onekit/commit/80771d3b865bc1a3d26901726209bd7009b2d25a))
 
-
 ## v1.2.0 (2024-05-10)
 
 ### Build
@@ -126,7 +161,6 @@ This reverts commit 1e1f10cf54790358c5fee4f914a893654fcd277c.
 
 * style: change wording (#71) ([`639d914`](https://github.com/estripling/onekit/commit/639d914225f2a751fbc368acd438a1c6eee0c795))
 
-
 ## v1.1.1 (2024-05-06)
 
 ### Fix
@@ -144,7 +178,6 @@ This reverts commit 1e1f10cf54790358c5fee4f914a893654fcd277c.
 ### Test
 
 * test: refactor spark session (#67) ([`dc34fe7`](https://github.com/estripling/onekit/commit/dc34fe7d37de8967f034686924472e89bf8321ae))
-
 
 ## v1.1.0 (2024-04-26)
 
@@ -169,7 +202,6 @@ This reverts commit 1e1f10cf54790358c5fee4f914a893654fcd277c.
 ### Refactor
 
 * refactor(filter_date): use with_date_diff_ago (#63) ([`b0bd1ec`](https://github.com/estripling/onekit/commit/b0bd1ecd4b0e6d8c51e12854d6d10601dc1b8882))
-
 
 ## v1.0.0 (2024-04-01)
 
@@ -259,7 +291,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 
 * test: refactor test_filter_date ([`7aa966d`](https://github.com/estripling/onekit/commit/7aa966d409498c03b2b85b2552d8b6952105fd1b))
 
-
 ## v0.16.0 (2024-03-03)
 
 ### Feature
@@ -286,13 +317,11 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 
 * build: add pre-commit hook ([`0bd7103`](https://github.com/estripling/onekit/commit/0bd7103ff176e5c3645a8f3596ffebaa779d1831))
 
-
 ## v0.15.0 (2024-01-29)
 
 ### Feature
 
 * feat(pandaskit): add cvf (#49) ([`a8c9cb6`](https://github.com/estripling/onekit/commit/a8c9cb66e87f1ff3ef968a6604be96c110f23151))
-
 
 ## v0.14.0 (2024-01-24)
 
@@ -311,7 +340,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 * refactor(pandaskit.profile): use basic_info_df variable
 
 * feat(pandaskit.profile): add sum ([`f10bf9a`](https://github.com/estripling/onekit/commit/f10bf9a0acf4c981dcd1e5263a2a2afbee28de81))
-
 
 ## v0.13.0 (2023-12-22)
 
@@ -342,7 +370,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 * docs(optfunckit): add ai-roomi reference
 
 * docs(concat_strings): add docstring example ([`c6f02d7`](https://github.com/estripling/onekit/commit/c6f02d701965b6c34ae50392f5b2fdd5a573d654))
-
 
 ## v0.12.0 (2023-12-21)
 
@@ -375,7 +402,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 ### Refactor
 
 * refactor: error messages (#42) ([`e7e353e`](https://github.com/estripling/onekit/commit/e7e353e234b8ebd32ce2b036e51122033e5c8837))
-
 
 ## v0.11.0 (2023-12-11)
 
@@ -441,7 +467,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 
 * test: add type hints ([`6269e3a`](https://github.com/estripling/onekit/commit/6269e3a38ab07b9cb685cec769b65e3bdb8036fa))
 
-
 ## v0.10.1 (2023-11-22)
 
 ### Documentation
@@ -459,7 +484,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 ### Fix
 
 * fix(README.md): disclaimer section ([`9428fee`](https://github.com/estripling/onekit/commit/9428feef002ba4648f1c3f63f2de6f5ad7b1fd1d))
-
 
 ## v0.10.0 (2023-11-22)
 
@@ -485,7 +509,6 @@ BREAKING CHANGE: renamed date functions ([`72fba47`](https://github.com/estripli
 
 * feat(sparkkit): add cvf ([`b989f31`](https://github.com/estripling/onekit/commit/b989f31bb4a9fa9a0e40eed24852cf8b7a6b1335))
 
-
 ## v0.9.0 (2023-11-20)
 
 ### Breaking
@@ -509,7 +532,6 @@ BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.c
 ### Refactor
 
 * refactor(signif): curry function (#34) ([`6880f9c`](https://github.com/estripling/onekit/commit/6880f9c297f1e178612b72187528a289ffafc25a))
-
 
 ## v0.8.0 (2023-11-17)
 
@@ -571,7 +593,6 @@ BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.c
 
 * test: add itertools (#28) ([`b83469d`](https://github.com/estripling/onekit/commit/b83469d1a05c139e8ff6f941119e805ba4dca4a1))
 
-
 ## v0.7.0 (2023-11-17)
 
 ### Documentation
@@ -605,7 +626,6 @@ BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.c
 * feat(pytlz): add are_predicates_true (#25)
 
 - Apply DRY principle: replace all_predicates_true and any_predicates_true ([`de96017`](https://github.com/estripling/onekit/commit/de960173809febc8947b80e2a7735ae140574fd7))
-
 
 ## v0.6.0 (2023-11-15)
 
@@ -646,7 +666,6 @@ BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.c
 * docs(reduce_sets): indicate function is curried
 
 * refactor(signif): replace curry with partial ([`acbbcea`](https://github.com/estripling/onekit/commit/acbbcea2f31f063469cb140ea70f18d63cbea099))
-
 
 ## v0.5.0 (2023-11-14)
 
@@ -750,7 +769,6 @@ BREAKING CHANGE: rename modules to have kit suffix ([`5dfd157`](https://github.c
 
 This reverts commit f2ca10a65ca2e3828685148a2a96f3934afe51cd. ([`0054460`](https://github.com/estripling/onekit/commit/0054460595c40699e8bda73576c04ac8281dca3d))
 
-
 ## v0.4.0 (2023-11-13)
 
 ### Build
@@ -793,7 +811,6 @@ This reverts commit f2ca10a65ca2e3828685148a2a96f3934afe51cd. ([`0054460`](https
 
 * tests: set up Spark session ([`443dc33`](https://github.com/estripling/onekit/commit/443dc338543f301da19d4a656e65bb7632949363))
 
-
 ## v0.3.0 (2023-11-09)
 
 ### Feature
@@ -814,7 +831,6 @@ This reverts commit f2ca10a65ca2e3828685148a2a96f3934afe51cd. ([`0054460`](https
 
 * changelog.md: remove bullet points ([`2447205`](https://github.com/estripling/onekit/commit/2447205871da761d1ac321475fac4bea1ee6107e))
 
-
 ## v0.2.0 (2023-11-09)
 
 ### Ci
@@ -828,7 +844,6 @@ This reverts commit f2ca10a65ca2e3828685148a2a96f3934afe51cd. ([`0054460`](https
 * feat(pytlz): add num_to_str
 
 * docs: show pytlz module ([`cc130e6`](https://github.com/estripling/onekit/commit/cc130e6850d9a8a325067a0935ccceada27b0e40))
-
 
 ## v0.1.0 (2023-11-09)
 
