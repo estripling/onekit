@@ -1047,7 +1047,7 @@ def peek(
     return inner
 
 
-def select_col_types(df: SparkDF, /, *col_types: T.AtomicType) -> List[str]:
+def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
     """Identify columns of specified data type.
 
     Examples
