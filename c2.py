@@ -12,8 +12,13 @@ from subprocess import (
     CalledProcessError,
     CompletedProcess,
 )
+from typing import (
+    List,
+    Optional,
+    Union,
+)
 
-Response = CompletedProcess | CalledProcessError
+Response = Union[CompletedProcess, CalledProcessError]
 
 
 def main() -> None:
@@ -211,12 +216,12 @@ def run_remove_branches() -> None:
     print(process(response__delete_remote_branch_reference))
 
 
-def get_current_branch() -> str | None:
+def get_current_branch() -> Optional[str]:
     response = run_shell_command("git rev-parse --abbrev-ref HEAD", capture_output=True)
     return process(response)
 
 
-def get_last_commit(n: int | None = None) -> str | None:
+def get_last_commit(n: Optional[int] = None) -> Optional[str]:
     """Returns hash of the most recent commit of current branch."""
     response = run_shell_command("git rev-parse HEAD", capture_output=True)
     return process(response)[:n]
@@ -270,7 +275,7 @@ def is_windows() -> bool:
     return platform.system() == "Windows"
 
 
-def process(response: Response) -> str | None:
+def process(response: Response) -> Optional[str]:
     if has_command_run_successfully(response):
         return decode(response)
 
@@ -293,10 +298,10 @@ def run_pipe_command(*commands: str, print_cmd: bool = True) -> Response:
 
 
 def run_shell_command(
-    cmd: str | list[str],
+    cmd: Union[str, List[str]],
     capture_output: bool = False,
     print_cmd: bool = False,
-    other: Response | None = None,
+    other: Optional[Response] = None,
 ) -> Response:
     """Execute a shell command with Python."""
     try:
