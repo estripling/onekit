@@ -132,6 +132,6 @@ def expected_threshold_summary() -> PandasDF:
     ]
 
     for int_col in int_cols:
-        df[int_col] = df[int_col].astype(np.int32)
+        df[int_col] = df[int_col].astype(int)
 
     return df

@@ -1,3 +1,8 @@
+from typing import (
+    Optional,
+    Union,
+)
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -19,7 +24,7 @@ def precision_given_recall_score(
     y_score: ArrayLike,
     *,
     min_recall: float,
-    pos_label: int | str | None = None,
+    pos_label: Optional[Union[int, str]] = None,
 ) -> float:
     """Compute precision given a desired minimum recall level.
 
@@ -53,7 +58,7 @@ def threshold_summary(
     y_true: ArrayLike,
     y_score: ArrayLike,
     *,
-    pos_label: int | str | None = None,
+    pos_label: Optional[Union[int, str]] = None,
 ) -> PandasDF:
     """Threshold summary.
 
