@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v1.5.0 (2024-07-24)
+
+### Feature
+
+* feat: add precision given recall (#83)
+
+* feat(sklearnkit): add precision_recall_values
+
+* feat(sklearnkit): add precision_given_recall
+
+* feat(sklearnkit): add precision_given_recall_score
+
+* feat(sklearnkit): add precision_given_recall_summary ([`405aa2d`](https://github.com/estripling/onekit/commit/405aa2d913b3627b001b7cb80d2fc4964b0625e9))
+
 ## v1.4.0 (2024-07-23)
 
 ### Build
