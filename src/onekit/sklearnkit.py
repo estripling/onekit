@@ -12,6 +12,7 @@ from sklearn import metrics
 __all__ = (
     "precision_given_recall",
     "precision_given_recall_score",
+    "precision_given_recall_summary",
     "precision_recall_values",
 )
 
@@ -76,6 +77,74 @@ def precision_given_recall_score(
         min_recall=min_recall,
         pos_label=pos_label,
     ).at[0, "precision"]
+
+
+def precision_given_recall_summary(
+    y_true: ArrayLike,
+    y_score: ArrayLike,
+    *,
+    min_recall: float,
+    pos_label: Optional[Union[int, str]] = None,
+) -> PandasDF:
+    """Extend `precision_given_recall` with additional performance metrics.
+
+    Examples
+    --------
+    >>> import onekit.sklearnkit as slk
+    >>> import pandas as pd
+    >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
+    >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
+    >>> with pd.option_context("display.float_format", "{:.4f}".format):
+    ...     slk.precision_given_recall_summary(y_true, y_score, min_recall=0.7).T
+                            0
+    threshold          0.4000
+    predicted_positive 5.0000
+    true_positive      3.0000
+    false_positive     2.0000
+    false_negative     1.0000
+    true_negative      2.0000
+    precision          0.6000
+    recall             0.7500
+    f1                 0.6667
+    accuracy           0.6250
+    balanced_accuracy  0.6250
+    matthews_corrcoef  0.2582
+    pos_lr             1.5000
+    neg_lr             0.5000
+    """
+    pr = precision_given_recall(
+        y_true,
+        y_score,
+        min_recall=min_recall,
+        pos_label=pos_label,
+    )
+    t = pr.at[0, "threshold"]
+    y_pred = y_score >= t
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+
+    pos_label = 1 if pos_label is None else pos_label
+    neg_label = set(y_true).difference({pos_label}).pop()
+    labels = [neg_label, pos_label]
+    pos_lr, neg_lr = metrics.class_likelihood_ratios(y_true, y_pred, labels=labels)
+
+    data = dict(
+        threshold=t,
+        predicted_positive=tp + fp,
+        true_positive=tp,
+        false_positive=fp,
+        false_negative=fn,
+        true_negative=tn,
+        precision=pr.at[0, "precision"],
+        recall=pr.at[0, "recall"],
+        f1=metrics.f1_score(y_true, y_pred),
+        accuracy=metrics.accuracy_score(y_true, y_pred),
+        balanced_accuracy=metrics.balanced_accuracy_score(y_true, y_pred),
+        matthews_corrcoef=metrics.matthews_corrcoef(y_true, y_pred),
+        pos_lr=pos_lr,
+        neg_lr=neg_lr,
+    )
+
+    return pd.DataFrame([data])
 
 
 def precision_recall_values(

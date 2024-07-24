@@ -25,6 +25,31 @@ class TestPrecisionRecall:
         assert isinstance(actual, float)
         assert actual == expected
 
+    def test_precision_given_recall_summary(
+        self,
+        y_true: np.ndarray,
+        y_score: np.ndarray,
+    ):
+        actual = slk.precision_given_recall_summary(y_true, y_score, min_recall=0.7)
+        expected_data = dict(
+            threshold=0.4,
+            predicted_positive=5,
+            true_positive=3,
+            false_positive=2,
+            false_negative=1,
+            true_negative=2,
+            precision=0.6,
+            recall=0.75,
+            f1=2 / 3,
+            accuracy=0.625,
+            balanced_accuracy=0.625,
+            matthews_corrcoef=0.2581988897471611,
+            pos_lr=1.5,
+            neg_lr=0.5,
+        )
+        expected = pd.DataFrame([expected_data])
+        pd.testing.assert_frame_equal(actual, expected)
+
     def test_precision_recall_values(self, y_true: np.ndarray, y_score: np.ndarray):
         actual = slk.precision_recall_values(y_true, y_score)
         expected = pd.DataFrame(
