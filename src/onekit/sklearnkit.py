@@ -11,6 +11,7 @@ from sklearn import metrics
 
 __all__ = (
     "precision_given_recall",
+    "precision_given_recall_score",
     "precision_recall_values",
 )
 
@@ -50,6 +51,31 @@ def precision_given_recall(
         .reset_index(drop=True)
         .head(1)
     )
+
+
+def precision_given_recall_score(
+    y_true: ArrayLike,
+    y_score: ArrayLike,
+    *,
+    min_recall: float,
+    pos_label: Optional[Union[int, str]] = None,
+) -> float:
+    """Compute precision score given a desired recall level.
+
+    Examples
+    --------
+    >>> import onekit.sklearnkit as slk
+    >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
+    >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
+    >>> slk.precision_given_recall_score(y_true, y_score, min_recall=0.7)
+    0.6
+    """
+    return precision_given_recall(
+        y_true,
+        y_score,
+        min_recall=min_recall,
+        pos_label=pos_label,
+    ).at[0, "precision"]
 
 
 def precision_recall_values(

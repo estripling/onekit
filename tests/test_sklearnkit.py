@@ -14,6 +14,17 @@ class TestPrecisionRecall:
         with pytest.raises(ValueError):
             slk.precision_given_recall(y_true, y_score, min_recall=0)
 
+    def test_precision_given_recall_score(
+        self,
+        y_true: np.ndarray,
+        y_score: np.ndarray,
+    ):
+        actual = slk.precision_given_recall_score(y_true, y_score, min_recall=0.7)
+        expected = 0.6
+
+        assert isinstance(actual, float)
+        assert actual == expected
+
     def test_precision_recall_values(self, y_true: np.ndarray, y_score: np.ndarray):
         actual = slk.precision_recall_values(y_true, y_score)
         expected = pd.DataFrame(
