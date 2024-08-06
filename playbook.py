@@ -56,7 +56,7 @@ def main() -> None:
 
 
 def get_arguments() -> Namespace:
-    parser = ArgumentParser(description="command and control")
+    parser = ArgumentParser(description="set of predefined commands")
     parser.add_argument(
         "-c",
         "--check",

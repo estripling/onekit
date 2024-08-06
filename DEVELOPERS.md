@@ -21,17 +21,17 @@ Once the dev container is created, you are all set and ready to code!
 
 ### Things To Try
 
-The `c2.py` file in the root directory provides a collection of commands.
+The `playbook.py` file in the root directory provides a set of predefined commands.
 In the dev container, open a new terminal and run the following command to see what is available:
 
 ```shell
-python c2.py --help
+python playbook.py --help
 ```
 
 Use the following command to run `pre-commit` and `pytest` with one command to make sure everything works as intended:
 
 ```shell
-python c2.py --check
+python playbook.py --check
 ```
 
 ## Development Environment: Local Python Venv
@@ -43,7 +43,7 @@ which python
 ```
 
 ```shell
-python c2.py --create-venv
+python playbook.py --create-venv
 ```
 
 ```shell
@@ -60,7 +60,7 @@ pre-commit install
 ```
 
 ```shell
-python c2.py --check
+python playbook.py --check
 ```
 
 ## Useful Poetry commands
