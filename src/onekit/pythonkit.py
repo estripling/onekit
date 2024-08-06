@@ -1049,7 +1049,7 @@ class stopwatch(ContextDecorator):
     label : str, int, optional
         Specify label. When used as a decorator and label is not specified,
         label is the name of the function.
-    flush : bool, default=True
+    flush : bool, default=False
         Passed to built-in print function:
          - If ``True``, prints start time before stop time.
          - If ``False``, prints start time and stop time all at once.
@@ -1133,7 +1133,7 @@ class stopwatch(ContextDecorator):
         label: Optional[Union[str, int]] = None,
         /,
         *,
-        flush: bool = True,
+        flush: bool = False,
         timezone: Optional[str] = None,
         fmt: Optional[str] = None,
     ):
