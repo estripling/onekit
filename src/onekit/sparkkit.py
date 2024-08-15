@@ -19,6 +19,7 @@ from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql import types as SparkColType
 from pyspark.sql import types as T
 from toolz import curried
 
@@ -1047,7 +1048,7 @@ def peek(
     return inner
 
 
-def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
+def select_col_types(df: SparkDF, /, *col_types: SparkColType) -> List[str]:
     """Identify columns of specified data type.
 
     Examples
@@ -1075,7 +1076,11 @@ def select_col_types(df: SparkDF, /, *col_types: T.DataType) -> List[str]:
     >>> sk.select_col_types(df, T.IntegerType, T.LongType)
     ['int', 'long']
     """
-    valid_types = {v.typeName() for k, v in T.__dict__.items() if k.endswith("Type")}
+    valid_types = {
+        v.typeName()
+        for k, v in T.__dict__.items()
+        if k.endswith("Type") and hasattr(v, "typeName")
+    }
     col_types = tuple(pk.flatten(col_types))
     for col_type in col_types:
         if not hasattr(col_type, "typeName") or col_type.typeName() not in valid_types:
