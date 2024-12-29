@@ -24,9 +24,10 @@ class Individual:
     def is_evaluated(self) -> bool:
         return False if self._fun is None else True
 
-    def evaluate(self, func: Callable) -> None:
+    def evaluate(self, func: Callable[[Any], Any]) -> "Individual":
         if not self.is_evaluated:
             self._fun = func(self._x)
+        return self
 
     def __repr__(self):
         return f"{self.fun} <- {self.x}"
