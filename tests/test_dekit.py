@@ -118,7 +118,7 @@ class TestPopulation:
         ind3 = dek.Individual([2, 2])
 
         pop = dek.Population(ind1, ind2, ind3).evaluate(ofk.ackley)
-        assert all(ind.is_evaluated for ind in pop)
+        assert pop.is_evaluated
 
         expected = [0.0, 3.6254, 6.5936]
         assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
@@ -129,7 +129,7 @@ class TestPopulation:
         ind3 = dek.Individual([2, 2])
 
         pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
-        assert all(ind.is_evaluated for ind in pop)
+        assert pop.is_evaluated
 
         expected = [6.5936, 0.0, 3.6254]
         assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
@@ -148,7 +148,7 @@ class TestPopulation:
         ind3 = dek.Individual([2, 2])
 
         pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
-        assert all(ind.is_evaluated for ind in pop)
+        assert pop.is_evaluated
 
         actual = pop.min()
         expected = ind1
@@ -160,7 +160,7 @@ class TestPopulation:
         ind3 = dek.Individual([2, 2])
 
         pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
-        assert all(ind.is_evaluated for ind in pop)
+        assert pop.is_evaluated
 
         actual = pop.max()
         expected = ind3
