@@ -153,6 +153,18 @@ class TestPopulation:
         expected = ind1
         assert actual == expected
 
+    def test_max(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1])
+        ind3 = dek.Individual([2, 2])
+
+        pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        assert all(ind.is_evaluated for ind in pop)
+
+        actual = pop.max()
+        expected = ind3
+        assert actual == expected
+
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):

@@ -60,6 +60,10 @@ class Population(UserList):
         key = self.key if key is None else key
         return min(self.data, key=key)
 
+    def max(self, *, key=None) -> "Individual":
+        key = self.key if key is None else key
+        return max(self.data, key=key)
+
 
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
