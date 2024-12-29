@@ -13,6 +13,7 @@ class TestIndividual:
         assert ind.x == x
         assert ind.fun is None
         assert ind.is_evaluated is False
+        assert str(ind).startswith("None <-")
 
     # noinspection PyPropertyAccess
     def test_immutable_property(self):
