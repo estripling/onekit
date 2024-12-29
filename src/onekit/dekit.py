@@ -2,6 +2,7 @@ from collections import UserList
 from typing import (
     Any,
     Callable,
+    Iterable,
 )
 
 import onekit.pythonkit as pk
@@ -34,7 +35,7 @@ class Individual:
 
 
 class Population(UserList):
-    def __init__(self, *individuals: Individual, key=None):
+    def __init__(self, *individuals: Iterable[Individual], key=None):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
         self._key = lambda ind: ind.fun if key is None else key
 
