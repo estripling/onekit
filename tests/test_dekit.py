@@ -141,6 +141,18 @@ class TestPopulation:
         expected = [6.5936, 3.6254, 0.0]
         assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
 
+    def test_min(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1])
+        ind3 = dek.Individual([2, 2])
+
+        pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        assert all(ind.is_evaluated for ind in pop)
+
+        actual = pop.min()
+        expected = ind1
+        assert actual == expected
+
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):

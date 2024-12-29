@@ -56,6 +56,10 @@ class Population(UserList):
         self.data.sort(key=key, reverse=reverse)
         return self
 
+    def min(self, *, key=None) -> "Individual":
+        key = self.key if key is None else key
+        return min(self.data, key=key)
+
 
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
