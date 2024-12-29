@@ -1,8 +1,10 @@
 import numpy as np
+import numpy.testing as npt
 import pytest
 
 import onekit.dekit as dek
 import onekit.optfunckit as ofk
+from onekit.dekit import Bounds
 
 
 class TestIndividual:
@@ -180,6 +182,37 @@ class TestPopulation:
         assert pop == [ind1, ind4, ind2, ind3]
         assert pop.min() == ind1
         assert pop.max() == ind3
+
+
+class TestBoundsHandler:
+    def test_init(
+        self,
+        bounds: Bounds,
+        lower_bounds: np.ndarray,
+        upper_bounds: np.ndarray,
+        scale: np.ndarray,
+    ):
+        actual = dek.check_bounds(bounds)
+        npt.assert_array_equal(actual.lower_bounds, lower_bounds)
+        npt.assert_array_equal(actual.upper_bounds, upper_bounds)
+        npt.assert_array_equal(actual.scale, scale)
+        assert actual.n_dim == 2
+
+    @pytest.fixture(scope="class")
+    def bounds(self) -> Bounds:
+        return [(-5, 5), (-5, 5)]
+
+    @pytest.fixture(scope="class")
+    def lower_bounds(self) -> np.ndarray:
+        return np.array([-5] * 2)
+
+    @pytest.fixture(scope="class")
+    def upper_bounds(self) -> np.ndarray:
+        return np.array([5] * 2)
+
+    @pytest.fixture(scope="class")
+    def scale(self) -> np.ndarray:
+        return np.array([10] * 2)
 
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])

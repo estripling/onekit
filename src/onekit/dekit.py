@@ -1,13 +1,22 @@
+import random
 from collections import UserList
 from typing import (
     Any,
     Callable,
     Iterable,
+    Sequence,
+    Tuple,
 )
 
 import numpy as np
+import numpy.typing as npt
 
 import onekit.pythonkit as pk
+
+ArrayLike = npt.ArrayLike
+Bounds = Sequence[Tuple[float, float]]
+Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
+Vector = npt.NDArray[np.float64]
 
 
 class Individual:
@@ -78,7 +87,36 @@ class Population(UserList):
         return max(self.data, key=key)
 
 
+class BoundsHandler:
+    def __init__(self, bounds: Bounds):
+        self._bounds = bounds
+
+    @property
+    def bounds(self) -> Bounds:
+        return self._bounds
+
+    @property
+    def lower_bounds(self) -> np.ndarray:
+        return np.array([bound[0] for bound in self.bounds])
+
+    @property
+    def upper_bounds(self) -> np.ndarray:
+        return np.array([bound[1] for bound in self.bounds])
+
+    @property
+    def scale(self) -> np.ndarray:
+        return self.upper_bounds - self.lower_bounds
+
+    @property
+    def n_dim(self) -> int:
+        return len(self._bounds)
+
+
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
         raise TypeError(f"{type(individual)=} - must be {Individual}")
     return individual
+
+
+def check_bounds(bounds: Bounds) -> BoundsHandler:
+    return BoundsHandler(bounds)
