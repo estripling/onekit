@@ -1,8 +1,31 @@
+import random
+
 import numpy as np
 import numpy.testing as npt
 import pytest
 
 import onekit.numpykit as npk
+from onekit.numpykit import Seed
+
+
+@pytest.mark.parametrize(
+    "seed",
+    [
+        None,
+        0,
+        1.0,
+        random.Random(),
+        np.random.RandomState(),
+        np.random.default_rng(),
+        "invalid seed",
+    ],
+)
+def test_check_random_state(seed):
+    if seed is None or isinstance(seed, Seed):
+        assert isinstance(npk.check_random_state(seed), np.random.Generator)
+    else:
+        with pytest.raises(ValueError):
+            npk.check_random_state(seed)
 
 
 def test_check_vector():
