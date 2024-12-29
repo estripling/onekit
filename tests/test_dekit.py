@@ -111,6 +111,17 @@ class TestPopulation:
         assert pop.size == 2
         assert pop == [ind1, ind1]
 
+    def test_evaluate(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1])
+        ind3 = dek.Individual([2, 2])
+
+        pop = dek.Population(ind1, ind2, ind3).evaluate(ofk.ackley)
+        assert all(ind.is_evaluated for ind in pop)
+
+        expected = [0.0, 3.6254, 6.5936]
+        assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
+
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):

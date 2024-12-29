@@ -41,6 +41,11 @@ class Population(UserList):
     def size(self) -> int:
         return len(self)
 
+    def evaluate(self, func: Callable[[Any], Any]) -> "Population":
+        for individual in self:
+            individual.evaluate(func)
+        return self
+
 
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
