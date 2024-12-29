@@ -75,6 +75,8 @@ class TestPopulation:
         assert pop.index(ind1) == 0
         assert pop.count(ind1) == 1
         assert pop[0] == ind1
+        assert pop[-1] == ind3
+        assert pop[:-1] == [ind1, ind2]
 
         ind = pop.pop(0)
         assert pop.size == 2
