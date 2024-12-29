@@ -8,7 +8,7 @@ import onekit.pythonkit as pk
 
 
 class Individual:
-    def __init__(self, x: Any):
+    def __init__(self, x: Any, /):
         self._x = x
         self._fun = None
 
