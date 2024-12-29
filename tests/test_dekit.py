@@ -60,6 +60,10 @@ class TestPopulation:
         with pytest.raises(TypeError):
             dek.Population(ind)
 
+    def test_size(self):
+        pop = dek.Population(dek.Individual(0), dek.Individual(1))
+        assert pop.size == 2
+
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):

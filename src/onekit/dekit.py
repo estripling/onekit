@@ -36,6 +36,10 @@ class Population(UserList):
     def __init__(self, *individuals: Individual):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
 
+    @property
+    def size(self) -> int:
+        return len(self)
+
 
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
