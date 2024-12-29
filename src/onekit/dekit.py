@@ -24,3 +24,6 @@ class Individual:
     def evaluate(self, func: Callable) -> None:
         if not self.is_evaluated:
             self._fun = func(self._x)
+
+    def __repr__(self):
+        return f"{self.fun} <- {self.x}"
