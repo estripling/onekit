@@ -215,6 +215,25 @@ class TestBoundsHandler:
         return np.array([10] * 2)
 
 
+class TestInitialization:
+    def test_random_real_vectors(self, bounds: Bounds, seed: int):
+        n_pop = 10
+        init_strategy = dek.Initialization.random_real_vectors(n_pop, bounds, seed)
+        pop = init_strategy()
+        assert pop.size == n_pop
+        assert not pop.is_evaluated
+        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
+        assert all(ind.x.shape == (2,) for ind in pop)
+
+    @pytest.fixture(scope="class")
+    def bounds(self) -> Bounds:
+        return [(-5, 5), (-5, 5)]
+
+    @pytest.fixture(scope="class")
+    def seed(self) -> int:
+        return 101
+
+
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):
     if not isinstance(ind, dek.Individual):

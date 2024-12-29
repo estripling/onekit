@@ -9,14 +9,12 @@ from typing import (
 )
 
 import numpy as np
-import numpy.typing as npt
 
+import onekit.numpykit as npk
 import onekit.pythonkit as pk
 
-ArrayLike = npt.ArrayLike
 Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
-Vector = npt.NDArray[np.float64]
 
 
 class Individual:
@@ -110,6 +108,24 @@ class BoundsHandler:
     @property
     def n_dim(self) -> int:
         return len(self._bounds)
+
+
+class Initialization:
+    @staticmethod
+    def random_real_vectors(
+        n_pop: int,
+        bounds: Bounds,
+        random_state=Seed,
+    ) -> Callable[[], Population]:
+        def inner():
+            rng = npk.check_random_state(random_state)
+            bnd = check_bounds(bounds)
+            return Population(
+                Individual(vec)
+                for vec in bnd.lower_bounds + bnd.scale * rng.random((n_pop, bnd.n_dim))
+            )
+
+        return inner
 
 
 def check_individual_type(individual: Individual) -> Individual:
