@@ -5,6 +5,8 @@ from typing import (
     Iterable,
 )
 
+import numpy as np
+
 import onekit.pythonkit as pk
 
 
@@ -37,7 +39,13 @@ class Individual:
 class Population(UserList):
     def __init__(self, *individuals: Individual | Iterable[Individual], key=None):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
-        self._key = lambda ind: ind.fun if key is None else key
+        self._key = (
+            lambda ind: -float("inf")
+            if ind.fun is None or not np.isfinite(ind.fun)
+            else ind.fun
+            if key is None
+            else key
+        )
 
     @property
     def key(self) -> Callable:

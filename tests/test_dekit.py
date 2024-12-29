@@ -166,6 +166,18 @@ class TestPopulation:
         expected = ind3
         assert actual == expected
 
+    def test_incomplete_evaluation(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1]).evaluate(ofk.ackley)
+        ind3 = dek.Individual([2, 2]).evaluate(ofk.ackley)
+        ind4 = dek.Individual([3, 3])
+
+        pop = dek.Population(ind1, ind2, ind3, ind4).sort()
+        assert not pop.is_evaluated
+        assert pop == [ind1, ind4, ind2, ind3]
+        assert pop.min() == ind1
+        assert pop.max() == ind3
+
 
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):
