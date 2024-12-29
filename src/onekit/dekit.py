@@ -1,7 +1,10 @@
+from collections import UserList
 from typing import (
     Any,
     Callable,
 )
+
+import onekit.pythonkit as pk
 
 
 class Individual:
@@ -27,3 +30,14 @@ class Individual:
 
     def __repr__(self):
         return f"{self.fun} <- {self.x}"
+
+
+class Population(UserList):
+    def __init__(self, *individuals: Individual):
+        super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
+
+
+def check_individual_type(individual: Individual) -> Individual:
+    if not isinstance(individual, Individual):
+        raise TypeError(f"{type(individual)=} - must be {Individual}")
+    return individual

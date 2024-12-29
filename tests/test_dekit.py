@@ -44,3 +44,25 @@ class TestIndividual:
         assert ind.is_evaluated is True
 
         assert round(ind.fun, 4) == expected
+
+
+class TestPopulation:
+    def test_init(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1])
+        ind3 = dek.Individual([2, 2])
+
+        pop = dek.Population(ind1, ind2, ind3)
+        assert pop == [ind1, ind2, ind3]
+
+    @pytest.mark.parametrize("ind", [None, 1, "two"])
+    def test_init__failed(self, ind: dek.Individual):
+        with pytest.raises(TypeError):
+            dek.Population(ind)
+
+
+@pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
+def test_check_individual_type(ind: dek.Individual):
+    if not isinstance(ind, dek.Individual):
+        with pytest.raises(TypeError):
+            dek.check_individual_type(ind)
