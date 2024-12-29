@@ -14,6 +14,7 @@ class TestIndividual:
         assert ind.fun is None
         assert ind.is_evaluated is False
 
+    # noinspection PyPropertyAccess
     def test_immutable_property(self):
         ind = dek.Individual([1, 1])
 
