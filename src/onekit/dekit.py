@@ -128,7 +128,8 @@ class Initialization:
     ) -> InitializationStrategy:
         def inner():
             rng = npk.check_random_state(random_state)
-            return Population(Individual(vec) for vec in rng.random((n_pop, n_dim)))
+            x_mat = rng.random((n_pop, n_dim))
+            return Population(Individual(vec) for vec in x_mat)
 
         return inner
 
@@ -141,10 +142,8 @@ class Initialization:
         def inner():
             rng = npk.check_random_state(random_state)
             bnd = check_bounds(bounds)
-            return Population(
-                Individual(vec)
-                for vec in bnd.x_min + bnd.x_diff * rng.random((n_pop, bnd.n_dim))
-            )
+            x_mat = rng.random((n_pop, bnd.n_dim))
+            return Population(Individual(vec) for vec in bnd.x_min + bnd.x_diff * x_mat)
 
         return inner
 
