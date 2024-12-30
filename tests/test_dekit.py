@@ -60,13 +60,21 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind1, ind2, ind3)
+        pop = dek.Population(ind1, ind2, ind3, generation=0)
         assert pop == [ind1, ind2, ind3]
+        assert pop.generation == 0
 
     def test_init__empty(self):
         pop = dek.Population()
         assert pop.size == 0
         assert not pop.is_evaluated
+        assert pop.generation is None
+
+    def test_init__empty__generation_count(self):
+        pop = dek.Population(generation=0)
+        assert pop.size == 0
+        assert not pop.is_evaluated
+        assert pop.generation == 0
 
     @pytest.mark.parametrize("ind", [None, 1, "two"])
     def test_init__failed(self, ind: dek.Individual):
@@ -192,6 +200,22 @@ class TestPopulation:
         assert pop.min() == ind1
         assert pop.max() == ind3
 
+    # noinspection PyPropertyAccess
+    def test_immutable_property(self):
+        pop = dek.Population(dek.Individual([0, 0]), generation=0)
+
+        with pytest.raises(AttributeError):
+            pop.generation += 1
+
+        with pytest.raises(AttributeError):
+            pop.key = None
+
+        with pytest.raises(AttributeError):
+            pop.size = 100
+
+        with pytest.raises(AttributeError):
+            pop.is_evaluated = None
+
 
 class TestBoundsHandler:
     def test_init(
@@ -237,6 +261,7 @@ class TestInitialization:
         pop = init_strategy()
         assert isinstance(pop, Population)
         assert pop.size == n_pop
+        assert pop.generation == 0
         assert not pop.is_evaluated
         assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
         assert all(ind.x.shape == (n_dim,) for ind in pop)
@@ -251,6 +276,7 @@ class TestInitialization:
         pop = init_strategy()
         assert isinstance(pop, Population)
         assert pop.size == n_pop
+        assert pop.generation == 0
         assert not pop.is_evaluated
         assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
         assert all(ind.x.shape == (2,) for ind in pop)

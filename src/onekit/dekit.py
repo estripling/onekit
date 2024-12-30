@@ -49,8 +49,14 @@ class Individual:
 
 
 class Population(UserList):
-    def __init__(self, *individuals: Individual | Iterable[Individual], key=None):
+    def __init__(
+        self,
+        *individuals: Individual | Iterable[Individual],
+        generation: int | None = None,
+        key=None,
+    ):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
+        self._generation = generation
         self._key = (
             lambda ind: -float("inf")
             if ind.fx is None or not np.isfinite(ind.fx)
@@ -58,6 +64,10 @@ class Population(UserList):
             if key is None
             else key
         )
+
+    @property
+    def generation(self) -> int | None:
+        return self._generation
 
     @property
     def key(self) -> Callable:
@@ -129,7 +139,7 @@ class Initialization:
         def inner():
             rng = npk.check_random_state(random_state)
             x_mat = rng.random((n_pop, n_dim))
-            return Population(Individual(vec) for vec in x_mat)
+            return Population((Individual(vec) for vec in x_mat), generation=0)
 
         return inner
 
@@ -143,7 +153,10 @@ class Initialization:
             rng = npk.check_random_state(random_state)
             bnd = check_bounds(bounds)
             x_mat = rng.random((n_pop, bnd.n_dim))
-            return Population(Individual(vec) for vec in bnd.x_min + bnd.x_diff * x_mat)
+            return Population(
+                (Individual(vec) for vec in bnd.x_min + bnd.x_diff * x_mat),
+                generation=0,
+            )
 
         return inner
 
