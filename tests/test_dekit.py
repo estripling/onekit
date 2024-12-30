@@ -233,9 +233,9 @@ class TestInitialization:
         assert 0 <= mat.max() <= 1
         assert mat.min() < mat.max()
 
-    def test_random_real_vectors(self, bounds: Bounds, seed: int):
+    def test_random__uniform(self, bounds: Bounds, seed: int):
         n_pop = 10
-        init_strategy = dek.Initialization.random_real_vectors(n_pop, bounds, seed)
+        init_strategy = dek.Initialization.random__uniform(n_pop, bounds, seed)
         pop = init_strategy()
         assert isinstance(pop, Population)
         assert pop.size == n_pop

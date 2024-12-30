@@ -125,7 +125,7 @@ class Initialization:
         return inner
 
     @staticmethod
-    def random_real_vectors(
+    def random__uniform(
         n_pop: int,
         bounds: Bounds,
         random_state=Seed,
