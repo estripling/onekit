@@ -18,6 +18,7 @@ Seed = int | float | random.Random | np.random.RandomState | np.random.Generator
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
+SelectionStrategy = Callable[["Individual", "Individual"], "Individual"]
 
 
 class Individual:
@@ -223,6 +224,19 @@ class Crossover:
                 xover_mask[j_rand] = False
 
             return Individual(np.where(xover_mask, mutant.x, target.x))
+
+        return inner
+
+
+class Selection:
+    @staticmethod
+    def smaller_function_value() -> SelectionStrategy:
+        def inner(
+            target: Individual,
+            trial: Individual,
+            /,
+        ) -> Individual:
+            return trial if trial.fun <= target.fun else target
 
         return inner
 

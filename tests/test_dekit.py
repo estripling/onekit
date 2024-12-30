@@ -372,6 +372,38 @@ class TestCrossover:
         assert list(trial.x) not in [[0, 0], [1, 1]]
 
 
+class TestSelection:
+    def test_smaller_function_value__target_selected(self):
+        target = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
+        trail = dek.Individual(np.array([1, 1])).evaluate(ofk.sphere)
+        selection_strategy = dek.Selection.smaller_function_value()
+
+        winner = selection_strategy(target, trail)
+        assert isinstance(winner, Individual)
+        assert winner == target
+        assert winner != trail
+
+    def test_smaller_function_value__trail_selected(self):
+        target = dek.Individual(np.array([1, 1])).evaluate(ofk.sphere)
+        trail = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
+        selection_strategy = dek.Selection.smaller_function_value()
+
+        winner = selection_strategy(target, trail)
+        assert isinstance(winner, Individual)
+        assert winner != target
+        assert winner == trail
+
+    def test_smaller_function_value__trail_selected__equal_values(self):
+        target = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
+        trail = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
+        selection_strategy = dek.Selection.smaller_function_value()
+
+        winner = selection_strategy(target, trail)
+        assert isinstance(winner, Individual)
+        assert winner != target
+        assert winner == trail
+
+
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):
     if not isinstance(ind, dek.Individual):
