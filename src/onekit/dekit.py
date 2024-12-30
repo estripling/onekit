@@ -86,6 +86,11 @@ class Population(UserList):
             individual.evaluate(func)
         return self
 
+    def increment_generation_count(self) -> "Population":
+        if self.generation is not None:
+            self._generation += 1
+        return self
+
     def copy(self) -> "Population":
         return Population(self.data, generation=self.generation, key=self.key)
 
