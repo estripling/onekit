@@ -29,7 +29,10 @@ def check_random_state(seed: Seed = None, /) -> np.random.Generator:
     >>> isinstance(rng, np.random.Generator)
     True
     """
-    if seed is None:
+    if isinstance(seed, np.random.Generator):
+        return seed
+
+    elif seed is None:
         return np.random.default_rng()
 
     elif isinstance(seed, int):
@@ -45,9 +48,6 @@ def check_random_state(seed: Seed = None, /) -> np.random.Generator:
     elif isinstance(seed, np.random.RandomState):
         seed = seed.random_integers(1, np.iinfo(np.int32).max, size=1)
         return np.random.default_rng(seed)
-
-    elif isinstance(seed, np.random.Generator):
-        return seed
 
     else:
         raise ValueError(f"{seed=} - cannot be used to seed Generator instance")
