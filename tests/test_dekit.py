@@ -451,3 +451,29 @@ def test_check_individual_type(ind: dek.Individual):
     if not isinstance(ind, dek.Individual):
         with pytest.raises(TypeError):
             dek.check_individual_type(ind)
+
+
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        (np.array([0.0, 0.0]), np.array([-5.0, -5.0])),
+        (np.array([0.5, 0.5]), np.array([0.0, 0.0])),
+        (np.array([1.0, 1.0]), np.array([5.0, 5.0])),
+    ],
+)
+def test_denormalize(x: np.ndarray, expected: np.ndarray):
+    actual = dek.denormalize(x, x_min=np.array([-5] * 2), x_max=np.array([5] * 2))
+    npt.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        (np.array([-5.0, -5.0]), np.array([0.0, 0.0])),
+        (np.array([0.0, 0.0]), np.array([0.5, 0.5])),
+        (np.array([5.0, 5.0]), np.array([1.0, 1.0])),
+    ],
+)
+def test_normalize(x: np.ndarray, expected: np.ndarray):
+    actual = dek.normalize(x, x_min=np.array([-5] * 2), x_max=np.array([5] * 2))
+    npt.assert_array_equal(actual, expected)

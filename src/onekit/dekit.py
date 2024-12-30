@@ -271,3 +271,11 @@ def check_individual_type(individual: Individual) -> Individual:
 
 def check_bounds(bounds: Bounds) -> BoundsHandler:
     return BoundsHandler(bounds)
+
+
+def denormalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarray:
+    return x_min + (x_max - x_min) * x
+
+
+def normalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarray:
+    return (x - x_min) / (x_max - x_min)
