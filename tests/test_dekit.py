@@ -341,6 +341,37 @@ class TestMutation:
         return 101
 
 
+class TestBoundRepair:
+    def test_identity(self):
+        ind = dek.Individual(0)
+        bound_repair_strategy = dek.BoundRepair.identity()
+        actual = bound_repair_strategy(ind)
+        assert actual == ind
+
+    def test_clip__standard_uniform(self):
+        ind1 = dek.Individual(np.array([0.1, 0.9]))
+        ind2 = dek.Individual(np.array([0.1, 1.1]))
+        ind3 = dek.Individual(np.array([-0.1, 0.9]))
+        ind4 = dek.Individual(np.array([-0.1, 1.1]))
+
+        bound_repair_strategy = dek.BoundRepair.clip__standard_uniform()
+
+        actual = bound_repair_strategy(ind1)
+        assert actual == ind1
+
+        actual = bound_repair_strategy(ind2)
+        assert actual != ind2
+        npt.assert_array_equal(actual.x, np.array([0.1, 1.0]))
+
+        actual = bound_repair_strategy(ind3)
+        assert actual != ind3
+        npt.assert_array_equal(actual.x, np.array([0.0, 0.9]))
+
+        actual = bound_repair_strategy(ind4)
+        assert actual != ind4
+        npt.assert_array_equal(actual.x, np.array([0.0, 1.0]))
+
+
 class TestCrossover:
     @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
     def test_binomial_variant_1(self, seed: int):

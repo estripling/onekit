@@ -17,6 +17,7 @@ Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
+BoundRepairStrategy = Callable[["Individual"], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 SelectionStrategy = Callable[["Individual", "Individual"], "Individual"]
 
@@ -184,6 +185,24 @@ class Mutation:
             )
             ind_r1, ind_r2 = (population[i] for i in random_indices)
             return Individual(ind_best.x + scale_factor * (ind_r1.x - ind_r2.x))
+
+        return inner
+
+
+class BoundRepair:
+    @staticmethod
+    def identity() -> BoundRepairStrategy:
+        def inner(ind: Individual, /) -> Individual:
+            return ind
+
+        return inner
+
+    @staticmethod
+    def clip__standard_uniform() -> BoundRepairStrategy:
+        def inner(ind: Individual, /) -> Individual:
+            if ((ind.x < 0) | (ind.x > 1)).any():
+                ind = Individual(np.clip(ind.x, 0, 1))
+            return ind
 
         return inner
 
