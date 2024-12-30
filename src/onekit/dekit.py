@@ -163,6 +163,28 @@ class Mutation:
 
         return inner
 
+    @staticmethod
+    def best_1(seed: Seed) -> MutationStrategy:
+        rng = npk.check_random_state(seed)
+
+        def inner(
+            population: Population,
+            target: Individual,
+            scale_factor: float,
+            /,
+        ) -> Individual:
+            ind_best = population.min()
+            exclude_indices = {population.index(target), population.index(ind_best)}
+            random_indices = rng.choice(
+                [i for i in range(population.size) if i not in exclude_indices],
+                size=2,
+                replace=False,
+            )
+            ind_r1, ind_r2 = (population[i] for i in random_indices)
+            return Individual(ind_best.x + scale_factor * (ind_r1.x - ind_r2.x))
+
+        return inner
+
 
 def check_individual_type(individual: Individual) -> Individual:
     if not isinstance(individual, Individual):
