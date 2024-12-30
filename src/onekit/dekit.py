@@ -32,7 +32,7 @@ class Individual:
         return self._x
 
     @property
-    def fun(self) -> Any | None:
+    def fx(self) -> Any | None:
         return self._fun
 
     @property
@@ -45,7 +45,7 @@ class Individual:
         return self
 
     def __repr__(self):
-        return f"{self.fun} <- {self.x}"
+        return f"{self.fx} <- {self.x}"
 
 
 class Population(UserList):
@@ -53,8 +53,8 @@ class Population(UserList):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
         self._key = (
             lambda ind: -float("inf")
-            if ind.fun is None or not np.isfinite(ind.fun)
-            else ind.fun
+            if ind.fx is None or not np.isfinite(ind.fx)
+            else ind.fx
             if key is None
             else key
         )
@@ -258,7 +258,7 @@ class Selection:
             trial: Individual,
             /,
         ) -> Individual:
-            return trial if trial.fun <= target.fun else target
+            return trial if trial.fx <= target.fx else target
 
         return inner
 

@@ -17,7 +17,7 @@ class TestIndividual:
         ind = dek.Individual(x)
 
         assert ind.x == x
-        assert ind.fun is None
+        assert ind.fx is None
         assert ind.is_evaluated is False
         assert str(ind).startswith("None <-")
 
@@ -29,7 +29,7 @@ class TestIndividual:
             ind.x = [2, 2]
 
         with pytest.raises(AttributeError):
-            ind.fun = 3.0
+            ind.fx = 3.0
 
     @pytest.mark.parametrize(
         "x, expected",
@@ -44,14 +44,14 @@ class TestIndividual:
         ind = dek.Individual(x)
 
         assert np.all(ind.x == x)
-        assert ind.fun is None
+        assert ind.fx is None
         assert ind.is_evaluated is False
 
         ind.evaluate(ofk.ackley)
-        assert ind.fun is not None
+        assert ind.fx is not None
         assert ind.is_evaluated is True
 
-        assert round(ind.fun, 4) == expected
+        assert round(ind.fx, 4) == expected
 
 
 class TestPopulation:
@@ -135,7 +135,7 @@ class TestPopulation:
         assert pop.is_evaluated
 
         expected = [0.0, 3.6254, 6.5936]
-        assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
+        assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
     def test_overwritten_sort(self):
         ind1 = dek.Individual([0, 0])
@@ -146,15 +146,15 @@ class TestPopulation:
         assert pop.is_evaluated
 
         expected = [6.5936, 0.0, 3.6254]
-        assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
+        assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
         pop.sort()
         expected = [0.0, 3.6254, 6.5936]
-        assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
+        assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
         pop.sort(reverse=True)
         expected = [6.5936, 3.6254, 0.0]
-        assert all(round(ind.fun, 4) == fx for ind, fx in zip(pop, expected))
+        assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
     def test_min(self):
         ind1 = dek.Individual([0, 0])
