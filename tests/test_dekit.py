@@ -63,6 +63,11 @@ class TestPopulation:
         pop = dek.Population(ind1, ind2, ind3)
         assert pop == [ind1, ind2, ind3]
 
+    def test_init__empty(self):
+        pop = dek.Population()
+        assert pop.size == 0
+        assert not pop.is_evaluated
+
     @pytest.mark.parametrize("ind", [None, 1, "two"])
     def test_init__failed(self, ind: dek.Individual):
         with pytest.raises(TypeError):

@@ -68,7 +68,7 @@ class Population(UserList):
 
     @property
     def is_evaluated(self) -> bool:
-        return all(individual.is_evaluated for individual in self)
+        return self.size > 0 and all(individual.is_evaluated for individual in self)
 
     def evaluate(self, func: Callable[[Any], Any]) -> "Population":
         for individual in self:
