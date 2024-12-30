@@ -6,6 +6,7 @@ import onekit.dekit as dek
 import onekit.optfunckit as ofk
 from onekit.dekit import (
     Bounds,
+    Individual,
     Population,
 )
 
@@ -246,6 +247,51 @@ class TestInitialization:
     @pytest.fixture(scope="class")
     def bounds(self) -> Bounds:
         return [(-5, 5), (-5, 5)]
+
+    @pytest.fixture(scope="class")
+    def seed(self) -> int:
+        return 101
+
+
+class TestMutation:
+    def test_rand_1(self, seed: int):
+        n_pop, n_dim = 6, 2
+        ind1 = dek.Individual(np.array([0, 0]))
+        ind2 = dek.Individual(np.array([1, 1]))
+        ind3 = dek.Individual(np.array([2, 2]))
+        ind4 = dek.Individual(np.array([3, 3]))
+        ind5 = dek.Individual(np.array([4, 4]))
+        ind6 = dek.Individual(np.array([5, 5]))
+        pop = dek.Population(ind1, ind2, ind3, ind4, ind5, ind6)
+
+        mutation_strategy = dek.Mutation.rand_1(seed=seed)
+
+        # target = ind1
+        mutant1 = mutation_strategy(pop, ind1, 0.8)
+        assert pop.size == n_pop
+        assert not pop.is_evaluated
+        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
+        assert isinstance(mutant1, Individual)
+        assert mutant1 != ind1
+        assert all(mutant1 != ind for ind in pop)
+        assert not mutant1.is_evaluated
+        assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
+        assert mutant1.x.shape == (n_dim,)
+
+        # target = ind2
+        mutant2 = mutation_strategy(pop, ind2, 0.8)
+        assert pop.size == n_pop
+        assert not pop.is_evaluated
+        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
+        assert isinstance(mutant2, Individual)
+        assert mutant2 != ind2
+        assert all(mutant2 != ind for ind in pop)
+        assert not mutant2.is_evaluated
+        assert mutant2.x.dtype.kind in np.typecodes["AllFloat"]
+        assert mutant2.x.shape == (n_dim,)
+
+        assert mutant1 != mutant2
+        assert np.all(mutant1.x != mutant2.x)
 
     @pytest.fixture(scope="class")
     def seed(self) -> int:

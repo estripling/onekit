@@ -16,6 +16,7 @@ import onekit.pythonkit as pk
 Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
 InitializationStrategy = Callable[[], "Population"]
+MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
 
 
 class Individual:
@@ -137,6 +138,28 @@ class Initialization:
                 Individual(vec)
                 for vec in bnd.lower_bounds + bnd.scale * rng.random((n_pop, bnd.n_dim))
             )
+
+        return inner
+
+
+class Mutation:
+    @staticmethod
+    def rand_1(seed: Seed) -> MutationStrategy:
+        rng = npk.check_random_state(seed)
+
+        def inner(
+            population: Population,
+            target: Individual,
+            scale_factor: float,
+            /,
+        ) -> Individual:
+            random_indices = rng.choice(
+                [i for i in range(population.size) if i != population.index(target)],
+                size=3,
+                replace=False,
+            )
+            ind_r0, ind_r1, ind_r2 = (population[i] for i in random_indices)
+            return Individual(ind_r0.x + scale_factor * (ind_r1.x - ind_r2.x))
 
         return inner
 
