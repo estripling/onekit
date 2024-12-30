@@ -14,7 +14,7 @@ from onekit.dekit import (
 class TestIndividual:
     def test_init(self):
         x = [1, 1]
-        ind = dek.Individual(x)
+        ind = Individual(x)
 
         assert ind.x == x
         assert ind.fx is None
@@ -60,18 +60,18 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind1, ind2, ind3, generation=0)
+        pop = Population(ind1, ind2, ind3, generation=0)
         assert pop == [ind1, ind2, ind3]
         assert pop.generation == 0
 
     def test_init__empty(self):
-        pop = dek.Population()
+        pop = Population()
         assert pop.size == 0
         assert not pop.is_evaluated
         assert pop.generation is None
 
     def test_init__empty__generation_count(self):
-        pop = dek.Population(generation=0)
+        pop = Population(generation=0)
         assert pop.size == 0
         assert not pop.is_evaluated
         assert pop.generation == 0
@@ -79,10 +79,10 @@ class TestPopulation:
     @pytest.mark.parametrize("ind", [None, 1, "two"])
     def test_init__failed(self, ind: dek.Individual):
         with pytest.raises(TypeError):
-            dek.Population(ind)
+            Population(ind)
 
     def test_size(self):
-        pop = dek.Population(dek.Individual(0), dek.Individual(1))
+        pop = Population(dek.Individual(0), dek.Individual(1))
         assert pop.size == 2
 
     def test_list_methods(self):
@@ -90,7 +90,7 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind1, ind2, ind3)
+        pop = Population(ind1, ind2, ind3)
         assert pop.size == 3
         assert pop.index(ind1) == 0
         assert pop.count(ind1) == 1
@@ -139,7 +139,7 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind1, ind2, ind3).evaluate(ofk.ackley)
+        pop = Population(ind1, ind2, ind3).evaluate(ofk.ackley)
         assert pop.is_evaluated
 
         expected = [0.0, 3.6254, 6.5936]
@@ -179,7 +179,7 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
         assert pop.is_evaluated
 
         expected = [6.5936, 0.0, 3.6254]
@@ -198,7 +198,7 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
         assert pop.is_evaluated
 
         actual = pop.min()
@@ -210,7 +210,7 @@ class TestPopulation:
         ind2 = dek.Individual([1, 1])
         ind3 = dek.Individual([2, 2])
 
-        pop = dek.Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
         assert pop.is_evaluated
 
         actual = pop.max()
@@ -223,7 +223,7 @@ class TestPopulation:
         ind3 = dek.Individual([2, 2]).evaluate(ofk.ackley)
         ind4 = dek.Individual([3, 3])
 
-        pop = dek.Population(ind1, ind2, ind3, ind4).sort()
+        pop = Population(ind1, ind2, ind3, ind4).sort()
         assert not pop.is_evaluated
         assert pop == [ind1, ind4, ind2, ind3]
         assert pop.min() == ind1
@@ -231,7 +231,7 @@ class TestPopulation:
 
     # noinspection PyPropertyAccess
     def test_immutable_property(self):
-        pop = dek.Population(dek.Individual([0, 0]), generation=0)
+        pop = Population(dek.Individual([0, 0]), generation=0)
 
         with pytest.raises(AttributeError):
             pop.generation += 1
@@ -328,7 +328,7 @@ class TestMutation:
         ind4 = dek.Individual(np.array([3, 3]))
         ind5 = dek.Individual(np.array([4, 4]))
         ind6 = dek.Individual(np.array([5, 5]))
-        pop = dek.Population(ind1, ind2, ind3, ind4, ind5, ind6)
+        pop = Population(ind1, ind2, ind3, ind4, ind5, ind6)
 
         mutation_strategy = dek.Mutation.rand_1(seed=seed)
 
@@ -367,7 +367,7 @@ class TestMutation:
         ind4 = dek.Individual(np.array([3, 3]))
         ind5 = dek.Individual(np.array([4, 4]))
         ind6 = dek.Individual(np.array([5, 5]))
-        pop = dek.Population(ind1, ind2, ind3, ind4, ind5, ind6).evaluate(ofk.sphere)
+        pop = Population(ind1, ind2, ind3, ind4, ind5, ind6).evaluate(ofk.sphere)
         assert pop.is_evaluated
 
         mutation_strategy = dek.Mutation.best_1(seed=seed)
