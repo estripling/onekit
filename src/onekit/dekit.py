@@ -15,6 +15,7 @@ import onekit.pythonkit as pk
 
 Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
+InitializationStrategy = Callable[[], "Population"]
 
 
 class Individual:
@@ -116,7 +117,7 @@ class Initialization:
         n_pop: int,
         bounds: Bounds,
         random_state=Seed,
-    ) -> Callable[[], Population]:
+    ) -> InitializationStrategy:
         def inner():
             rng = npk.check_random_state(random_state)
             bnd = check_bounds(bounds)
