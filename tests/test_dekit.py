@@ -4,7 +4,10 @@ import pytest
 
 import onekit.dekit as dek
 import onekit.optfunckit as ofk
-from onekit.dekit import Bounds
+from onekit.dekit import (
+    Bounds,
+    Population,
+)
 
 
 class TestIndividual:
@@ -216,10 +219,25 @@ class TestBoundsHandler:
 
 
 class TestInitialization:
+    def test_random__standard_uniform(self, seed: int):
+        n_pop, n_dim = 10, 2
+        init_strategy = dek.Initialization.random__standard_uniform(n_pop, n_dim, seed)
+        pop = init_strategy()
+        assert isinstance(pop, Population)
+        assert pop.size == n_pop
+        assert not pop.is_evaluated
+        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
+        assert all(ind.x.shape == (n_dim,) for ind in pop)
+        mat = np.row_stack([ind.x for ind in pop])
+        assert 0 <= mat.min() <= 1
+        assert 0 <= mat.max() <= 1
+        assert mat.min() < mat.max()
+
     def test_random_real_vectors(self, bounds: Bounds, seed: int):
         n_pop = 10
         init_strategy = dek.Initialization.random_real_vectors(n_pop, bounds, seed)
         pop = init_strategy()
+        assert isinstance(pop, Population)
         assert pop.size == n_pop
         assert not pop.is_evaluated
         assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)

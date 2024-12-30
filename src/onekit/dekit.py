@@ -113,6 +113,18 @@ class BoundsHandler:
 
 class Initialization:
     @staticmethod
+    def random__standard_uniform(
+        n_pop: int,
+        n_dim: int,
+        random_state=Seed,
+    ) -> InitializationStrategy:
+        def inner():
+            rng = npk.check_random_state(random_state)
+            return Population(Individual(vec) for vec in rng.random((n_pop, n_dim)))
+
+        return inner
+
+    @staticmethod
     def random_real_vectors(
         n_pop: int,
         bounds: Bounds,
