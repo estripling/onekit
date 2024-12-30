@@ -100,7 +100,7 @@ class BoundsHandler:
 
     @property
     def x_bounds(self) -> np.ndarray:
-        return np.array(self._bounds).T
+        return np.array(self._bounds, dtype=np.int32).T
 
     @property
     def x_min(self) -> np.ndarray:
