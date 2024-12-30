@@ -99,16 +99,20 @@ class BoundsHandler:
         return self._bounds
 
     @property
-    def lower_bounds(self) -> np.ndarray:
-        return np.array([bound[0] for bound in self.bounds])
+    def x_bounds(self) -> np.ndarray:
+        return np.array(self._bounds).T
 
     @property
-    def upper_bounds(self) -> np.ndarray:
-        return np.array([bound[1] for bound in self.bounds])
+    def x_min(self) -> np.ndarray:
+        return self.x_bounds[0, :]
 
     @property
-    def scale(self) -> np.ndarray:
-        return self.upper_bounds - self.lower_bounds
+    def x_max(self) -> np.ndarray:
+        return self.x_bounds[1, :]
+
+    @property
+    def x_diff(self) -> np.ndarray:
+        return self.x_max - self.x_min
 
     @property
     def n_dim(self) -> int:
@@ -139,7 +143,7 @@ class Initialization:
             bnd = check_bounds(bounds)
             return Population(
                 Individual(vec)
-                for vec in bnd.lower_bounds + bnd.scale * rng.random((n_pop, bnd.n_dim))
+                for vec in bnd.x_min + bnd.x_diff * rng.random((n_pop, bnd.n_dim))
             )
 
         return inner

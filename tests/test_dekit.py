@@ -197,30 +197,36 @@ class TestBoundsHandler:
     def test_init(
         self,
         bounds: Bounds,
-        lower_bounds: np.ndarray,
-        upper_bounds: np.ndarray,
-        scale: np.ndarray,
+        x_bounds: np.ndarray,
+        x_min: np.ndarray,
+        x_max: np.ndarray,
+        x_diff: np.ndarray,
     ):
         actual = dek.check_bounds(bounds)
-        npt.assert_array_equal(actual.lower_bounds, lower_bounds)
-        npt.assert_array_equal(actual.upper_bounds, upper_bounds)
-        npt.assert_array_equal(actual.scale, scale)
+        npt.assert_array_equal(actual.x_bounds, x_bounds)
+        npt.assert_array_equal(actual.x_min, x_min)
+        npt.assert_array_equal(actual.x_max, x_max)
+        npt.assert_array_equal(actual.x_diff, x_diff)
         assert actual.n_dim == 2
 
     @pytest.fixture(scope="class")
     def bounds(self) -> Bounds:
-        return [(-5, 5), (-5, 5)]
+        return [(-5, 5)] * 2
 
     @pytest.fixture(scope="class")
-    def lower_bounds(self) -> np.ndarray:
+    def x_bounds(self) -> Bounds:
+        return np.array([(-5, -5), (5, 5)])
+
+    @pytest.fixture(scope="class")
+    def x_min(self) -> np.ndarray:
         return np.array([-5] * 2)
 
     @pytest.fixture(scope="class")
-    def upper_bounds(self) -> np.ndarray:
+    def x_max(self) -> np.ndarray:
         return np.array([5] * 2)
 
     @pytest.fixture(scope="class")
-    def scale(self) -> np.ndarray:
+    def x_diff(self) -> np.ndarray:
         return np.array([10] * 2)
 
 
