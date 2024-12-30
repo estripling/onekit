@@ -145,6 +145,35 @@ class TestPopulation:
         expected = [0.0, 3.6254, 6.5936]
         assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
+    def test_overwritten_copy(self):
+        ind1 = dek.Individual([0, 0])
+        ind2 = dek.Individual([1, 1])
+        ind3 = dek.Individual([2, 2])
+
+        pop1 = Population(ind1, ind2, generation=0)
+        assert pop1 == [ind1, ind2]
+        assert pop1.size == 2
+        assert not pop1.is_evaluated
+        assert pop1.generation == 0
+
+        pop2 = pop1.copy()
+        assert isinstance(pop2, Population)
+        assert pop2 == [ind1, ind2]
+        assert pop2.size == 2
+        assert not pop2.is_evaluated
+        assert pop2.generation == 0
+
+        pop2.append(ind3)
+        assert pop1 == [ind1, ind2]
+        assert pop1.size == 2
+        assert not pop2.is_evaluated
+        assert pop1.generation == 0
+
+        assert pop2 == [ind1, ind2, ind3]
+        assert pop2.size == 3
+        assert not pop2.is_evaluated
+        assert pop2.generation == 0
+
     def test_overwritten_sort(self):
         ind1 = dek.Individual([0, 0])
         ind2 = dek.Individual([1, 1])

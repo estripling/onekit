@@ -86,6 +86,9 @@ class Population(UserList):
             individual.evaluate(func)
         return self
 
+    def copy(self) -> "Population":
+        return Population(self.data, generation=self.generation, key=self.key)
+
     def sort(self, *, key=None, reverse=False) -> "Population":
         key = self.key if key is None else key
         self.data.sort(key=key, reverse=reverse)
