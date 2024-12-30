@@ -336,6 +336,42 @@ class TestMutation:
         return 101
 
 
+class TestCrossover:
+    @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
+    def test_binomial_variant_1(self, seed: int):
+        n_dim = 2
+        target = dek.Individual(np.array([0, 0]))
+        mutant = dek.Individual(np.array([1, 1]))
+
+        crossover_strategy = dek.Crossover.binomial_variant_1(seed)
+
+        trial = crossover_strategy(target, mutant, 0.7)
+        assert isinstance(trial, Individual)
+        assert trial != target
+        assert trial != mutant
+        assert trial.x.dtype.kind in np.typecodes["AllInteger"]
+        assert trial.x.shape == (n_dim,)
+        assert list(trial.x) in [[0, 1], [1, 0], [1, 1]]
+        assert list(trial.x) != [0, 0]
+
+    @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
+    def test_binomial_variant_2(self, seed: int):
+        n_dim = 2
+        target = dek.Individual(np.array([0, 0]))
+        mutant = dek.Individual(np.array([1, 1]))
+
+        crossover_strategy = dek.Crossover.binomial_variant_2(seed)
+
+        trial = crossover_strategy(target, mutant, 0.7)
+        assert isinstance(trial, Individual)
+        assert trial != target
+        assert trial != mutant
+        assert trial.x.dtype.kind in np.typecodes["AllInteger"]
+        assert trial.x.shape == (n_dim,)
+        assert list(trial.x) in [[0, 1], [1, 0]]
+        assert list(trial.x) not in [[0, 0], [1, 1]]
+
+
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):
     if not isinstance(ind, dek.Individual):

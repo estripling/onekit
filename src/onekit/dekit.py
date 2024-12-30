@@ -17,6 +17,7 @@ Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
+CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 
 
 class Individual:
@@ -182,6 +183,46 @@ class Mutation:
             )
             ind_r1, ind_r2 = (population[i] for i in random_indices)
             return Individual(ind_best.x + scale_factor * (ind_r1.x - ind_r2.x))
+
+        return inner
+
+
+class Crossover:
+    @staticmethod
+    def binomial_variant_1(seed: Seed) -> CrossoverStrategy:
+        """Always for trail = mutant but never trail = target."""
+        rng = npk.check_random_state(seed)
+
+        def inner(target: Individual, mutant: Individual, prob: float, /) -> Individual:
+            n_dim = len(target.x)
+            xover_mask = rng.random(n_dim) <= prob
+
+            if not xover_mask.any():
+                j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
+                xover_mask[j_rand] = True
+
+            return Individual(np.where(xover_mask, mutant.x, target.x))
+
+        return inner
+
+    @staticmethod
+    def binomial_variant_2(seed: Seed) -> CrossoverStrategy:
+        """Makes sure trail != mutant and trail != target - always a mix."""
+        rng = npk.check_random_state(seed)
+
+        def inner(target: Individual, mutant: Individual, prob: float, /) -> Individual:
+            n_dim = len(target.x)
+            xover_mask = rng.random(n_dim) <= prob
+
+            if not xover_mask.any():
+                j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
+                xover_mask[j_rand] = True
+
+            if xover_mask.all():
+                j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
+                xover_mask[j_rand] = False
+
+            return Individual(np.where(xover_mask, mutant.x, target.x))
 
         return inner
 
