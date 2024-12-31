@@ -20,6 +20,7 @@ MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
 BoundRepairStrategy = Callable[["Individual"], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 SelectionStrategy = Callable[["Individual", "Individual"], "Individual"]
+TerminationStrategy = Callable[["Population"], bool]
 
 
 class Individual:
@@ -281,6 +282,35 @@ class Selection:
             /,
         ) -> Individual:
             return trial if trial.fx <= target.fx else target
+
+        return inner
+
+
+class Termination:
+    @staticmethod
+    def has_reached_max_generation(max_generation: int) -> TerminationStrategy:
+        def inner(population: Population, /) -> bool:
+            return bool(population.generation >= max_generation)
+
+        return inner
+
+    @staticmethod
+    def has_converged(
+        abs_tol: float = 0.0,
+        rel_tol: float = 0.01,
+    ) -> TerminationStrategy:
+        def inner(population: Population, /) -> bool:
+            fxs = np.array([ind.fx for ind in population])
+            return bool(fxs.std() <= abs_tol + rel_tol * np.abs(fxs.mean()))
+
+        return inner
+
+    @staticmethod
+    def has_met_any_strategy(
+        *termination_strategy: TerminationStrategy | Iterable[TerminationStrategy],
+    ) -> TerminationStrategy:
+        def inner(population: Population, /) -> bool:
+            return pk.are_predicates_true(any, termination_strategy)(population)
 
         return inner
 

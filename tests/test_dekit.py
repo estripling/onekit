@@ -530,6 +530,138 @@ class TestSelection:
         assert winner == trail
 
 
+class TestTermination:
+    def test_has_reached_max_generation(self):
+        termination_strategy = dek.Termination.has_reached_max_generation(1)
+
+        n_pop = 4
+        pop = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([1, 1])),
+            dek.Individual(np.array([2, 2])),
+            dek.Individual(np.array([3, 3])),
+            generation=0,
+        ).evaluate(ofk.sphere)
+        assert pop.size == n_pop
+        assert pop.generation == 0
+
+        actual = termination_strategy(pop)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert pop.size == n_pop
+        assert pop.generation == 0
+
+        actual = termination_strategy(pop.increment_generation_count())
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert pop.size == n_pop
+        assert pop.generation == 1
+
+    def test_has_converged(self):
+        termination_strategy = dek.Termination.has_converged(abs_tol=1)
+
+        n_pop = 4
+        pop1 = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([1, 1])),
+            dek.Individual(np.array([2, 2])),
+            dek.Individual(np.array([3, 3])),
+            generation=0,
+        ).evaluate(ofk.sphere)
+        assert pop1.size == n_pop
+        assert pop1.generation == 0
+
+        actual = termination_strategy(pop1)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert pop1.size == n_pop
+        assert pop1.generation == 0
+
+        pop2 = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([0.001, 0.001])),
+            dek.Individual(np.array([0.002, 0.002])),
+            dek.Individual(np.array([0.003, 0.003])),
+            generation=1,
+        ).evaluate(ofk.sphere)
+        assert pop2.size == n_pop
+        assert pop2.generation == 1
+
+        actual = termination_strategy(pop2)
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert pop2.size == n_pop
+        assert pop2.generation == 1
+
+    def test_has_met_any_strategy__max_generation(self):
+        termination_strategy = dek.Termination.has_met_any_strategy(
+            dek.Termination.has_reached_max_generation(1),
+            dek.Termination.has_converged(abs_tol=1),
+        )
+
+        n_pop = 4
+        pop = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([1, 1])),
+            dek.Individual(np.array([2, 2])),
+            dek.Individual(np.array([3, 3])),
+            generation=0,
+        ).evaluate(ofk.sphere)
+        assert pop.size == n_pop
+        assert pop.generation == 0
+
+        actual = termination_strategy(pop)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert pop.size == n_pop
+        assert pop.generation == 0
+
+        actual = termination_strategy(pop.increment_generation_count())
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert pop.size == n_pop
+        assert pop.generation == 1
+
+    def test_has_met_any_strategy__converged(self):
+        termination_strategy = dek.Termination.has_met_any_strategy(
+            dek.Termination.has_reached_max_generation(2),
+            dek.Termination.has_converged(abs_tol=1),
+        )
+
+        n_pop = 4
+        pop1 = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([1, 1])),
+            dek.Individual(np.array([2, 2])),
+            dek.Individual(np.array([3, 3])),
+            generation=0,
+        ).evaluate(ofk.sphere)
+        assert pop1.size == n_pop
+        assert pop1.generation == 0
+
+        actual = termination_strategy(pop1)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert pop1.size == n_pop
+        assert pop1.generation == 0
+
+        pop2 = Population(
+            dek.Individual(np.array([0, 0])),
+            dek.Individual(np.array([0.001, 0.001])),
+            dek.Individual(np.array([0.002, 0.002])),
+            dek.Individual(np.array([0.003, 0.003])),
+            generation=1,
+        ).evaluate(ofk.sphere)
+        assert pop2.size == n_pop
+        assert pop2.generation == 1
+
+        actual = termination_strategy(pop2)
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert pop2.size == n_pop
+        assert pop2.generation == 1
+
+
 @pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
 def test_check_individual_type(ind: dek.Individual):
     if not isinstance(ind, dek.Individual):
