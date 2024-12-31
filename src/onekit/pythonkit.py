@@ -17,6 +17,7 @@ from typing import (
     Any,
     Callable,
     Generator,
+    Iterable,
     Iterator,
     List,
     Optional,
@@ -135,7 +136,7 @@ def archive_files(
 def are_predicates_true(
     func: Callable[..., bool],
     /,
-    *predicates: Predicate,
+    *predicates: Predicate | Iterable[Predicate],
 ) -> Predicate:
     """Evaluate if predicates are true.
 
