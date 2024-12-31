@@ -469,7 +469,7 @@ class TestCrossover:
         target = dek.Individual(np.array([0, 0]))
         mutant = dek.Individual(np.array([1, 1]))
 
-        crossover_strategy = dek.Crossover.binomial_variant_1(seed)
+        crossover_strategy = dek.Crossover.binomial_v1(seed)
 
         trial = crossover_strategy(target, mutant, 0.7)
         assert isinstance(trial, Individual)
@@ -486,7 +486,7 @@ class TestCrossover:
         target = dek.Individual(np.array([0, 0]))
         mutant = dek.Individual(np.array([1, 1]))
 
-        crossover_strategy = dek.Crossover.binomial_variant_2(seed)
+        crossover_strategy = dek.Crossover.binomial_v2(seed)
 
         trial = crossover_strategy(target, mutant, 0.7)
         assert isinstance(trial, Individual)

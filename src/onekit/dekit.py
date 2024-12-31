@@ -233,7 +233,7 @@ class BoundRepair:
 
 class Crossover:
     @staticmethod
-    def binomial_variant_1(seed: Seed) -> CrossoverStrategy:
+    def binomial_v1(seed: Seed) -> CrossoverStrategy:
         """Always for trail = mutant but never trail = target."""
         rng = npk.check_random_state(seed)
 
@@ -250,7 +250,7 @@ class Crossover:
         return inner
 
     @staticmethod
-    def binomial_variant_2(seed: Seed) -> CrossoverStrategy:
+    def binomial_v2(seed: Seed) -> CrossoverStrategy:
         """Makes sure trail != mutant and trail != target - always a mix."""
         rng = npk.check_random_state(seed)
 
