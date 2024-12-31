@@ -67,6 +67,7 @@ class Population(UserList):
 
     @property
     def generation(self) -> int | None:
+        """Return the generation count of the population."""
         return self._generation
 
     @property
