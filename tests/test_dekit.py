@@ -535,11 +535,11 @@ class TestTermination:
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=termination_strategy,
             f_strategy=dek.Parameter.constant(0.8),
-            cr_strategy=dek.Parameter.constant(0.7),
+            cr_strategy=dek.Parameter.constant(0.9),
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -555,7 +555,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -584,11 +584,11 @@ class TestTermination:
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=termination_strategy,
             f_strategy=dek.Parameter.constant(0.8),
-            cr_strategy=dek.Parameter.constant(0.7),
+            cr_strategy=dek.Parameter.constant(0.9),
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -604,7 +604,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -637,7 +637,7 @@ class TestTermination:
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -653,7 +653,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -684,11 +684,11 @@ class TestTermination:
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=termination_strategy,
             f_strategy=dek.Parameter.constant(0.8),
-            cr_strategy=dek.Parameter.constant(0.7),
+            cr_strategy=dek.Parameter.constant(0.9),
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -704,7 +704,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -735,11 +735,11 @@ class TestTermination:
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=termination_strategy,
             f_strategy=dek.Parameter.constant(0.8),
-            cr_strategy=dek.Parameter.constant(0.7),
+            cr_strategy=dek.Parameter.constant(0.9),
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -755,7 +755,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -788,7 +788,7 @@ class TestTermination:
         )
         assert de.evaluation_count == 0
 
-        de = next(de)
+        next(de)
         assert de.population is pop
         assert de.population == pop
         assert de.population.size == pop.size
@@ -804,7 +804,7 @@ class TestTermination:
         assert de.generation_count == 0
         assert de.evaluation_count == 4
 
-        de = next(de)
+        next(de)
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
@@ -821,9 +821,9 @@ class TestTermination:
 
 class TestParameter:
     def test_constant(self):
-        parameter_strategy = dek.Parameter.constant(0.7)
+        parameter_strategy = dek.Parameter.constant(0.9)
         actual = parameter_strategy()
-        assert actual == 0.7
+        assert actual == 0.9
 
     def test_dither(self):
         parameter_strategy = dek.Parameter.dither(0.5, 1.0, seed=101)
@@ -945,7 +945,7 @@ class TestDifferentialEvolution:
                 max_generations=20
             ),
             f_strategy=dek.Parameter.dither(0.5, 1.0, rng),
-            cr_strategy=dek.Parameter.constant(0.7),
+            cr_strategy=dek.Parameter.constant(0.9),
         )
 
         for g, generation in enumerate(de):
