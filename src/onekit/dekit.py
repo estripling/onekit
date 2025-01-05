@@ -185,10 +185,10 @@ class Mutation:
         ) -> Individual:
             exclude = population.index(target)
             indices = tuple(i for i in range(population.size) if i != exclude)
-            ind_r0, ind_r1, ind_r2 = (
+            r0, r1, r2 = (
                 population[i] for i in rng.choice(indices, size=3, replace=False)
             )
-            return Individual(ind_r0.x + f * (ind_r1.x - ind_r2.x))
+            return Individual(r0.x + f * (r1.x - r2.x))
 
         return inner
 
@@ -202,13 +202,11 @@ class Mutation:
             f: float,
             /,
         ) -> Individual:
-            ind_best = population.min()
-            exclude = {population.index(target), population.index(ind_best)}
+            best = population.min()
+            exclude = {population.index(target), population.index(best)}
             indices = tuple(i for i in range(population.size) if i not in exclude)
-            ind_r1, ind_r2 = (
-                population[i] for i in rng.choice(indices, size=2, replace=False)
-            )
-            return Individual(ind_best.x + f * (ind_r1.x - ind_r2.x))
+            r1, r2 = (population[i] for i in rng.choice(indices, size=2, replace=False))
+            return Individual(best.x + f * (r1.x - r2.x))
 
         return inner
 
