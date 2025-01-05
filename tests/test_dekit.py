@@ -330,86 +330,17 @@ class TestInitialization:
 
 
 class TestMutation:
-    def test_rand_1(self, seed: int):
-        n_pop, n_dim = 6, 2
-        ind1 = Individual(np.array([0, 0]))
-        ind2 = Individual(np.array([1, 1]))
-        ind3 = Individual(np.array([2, 2]))
-        ind4 = Individual(np.array([3, 3]))
-        ind5 = Individual(np.array([4, 4]))
-        ind6 = Individual(np.array([5, 5]))
-        pop = Population(ind1, ind2, ind3, ind4, ind5, ind6)
+    @pytest.mark.parametrize(
+        "func",
+        [
+            dek.Mutation.rand_1,
+            dek.Mutation.best_1,
+            dek.Mutation.current_to_best,
+        ],
+    )
+    def test_mutation_strategies(self, func, seed: int):
+        mutation_strategy = func(seed)
 
-        mutation_strategy = dek.Mutation.rand_1(seed=seed)
-
-        # target = ind1
-        mutant1 = mutation_strategy(pop, ind1, 0.8)
-        assert pop.size == n_pop
-        assert not pop.is_evaluated
-        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
-        assert isinstance(mutant1, Individual)
-        assert mutant1 != ind1
-        assert all(mutant1 != ind for ind in pop)
-        assert not mutant1.is_evaluated
-        assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
-        assert mutant1.x.shape == (n_dim,)
-
-        # target = ind2
-        mutant2 = mutation_strategy(pop, ind2, 0.8)
-        assert pop.size == n_pop
-        assert not pop.is_evaluated
-        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
-        assert isinstance(mutant2, Individual)
-        assert mutant2 != ind2
-        assert all(mutant2 != ind for ind in pop)
-        assert not mutant2.is_evaluated
-        assert mutant2.x.dtype.kind in np.typecodes["AllFloat"]
-        assert mutant2.x.shape == (n_dim,)
-
-        assert mutant1 != mutant2
-        assert np.all(mutant1.x != mutant2.x)
-
-    def test_best_1(self, seed: int):
-        n_pop, n_dim = 6, 2
-        ind1 = Individual(np.array([0, 0]))
-        ind2 = Individual(np.array([1, 1]))
-        ind3 = Individual(np.array([2, 2]))
-        ind4 = Individual(np.array([3, 3]))
-        ind5 = Individual(np.array([4, 4]))
-        ind6 = Individual(np.array([5, 5]))
-        pop = dek.evaluate_population(
-            ofk.sphere, Population(ind1, ind2, ind3, ind4, ind5, ind6)
-        )
-        assert pop.is_evaluated
-
-        mutation_strategy = dek.Mutation.best_1(seed=seed)
-
-        # target = ind1
-        mutant1 = mutation_strategy(pop, ind1, 0.8)
-        assert pop.size == n_pop
-        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
-        assert isinstance(mutant1, Individual)
-        assert mutant1 != ind1
-        assert all(mutant1 != ind for ind in pop)
-        assert not mutant1.is_evaluated
-        assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
-        assert mutant1.x.shape == (n_dim,)
-
-        # target = ind2
-        mutant2 = mutation_strategy(pop, ind2, 0.8)
-        assert pop.size == n_pop
-        assert pop == [ind1, ind2, ind3, ind4, ind5, ind6]
-        assert isinstance(mutant2, Individual)
-        assert mutant2 != ind2
-        assert all(mutant2 != ind for ind in pop)
-        assert not mutant2.is_evaluated
-        assert mutant2.x.dtype.kind in np.typecodes["AllFloat"]
-        assert mutant2.x.shape == (n_dim,)
-
-        assert mutant1 != mutant2
-        assert np.all(mutant1.x != mutant2.x)
-
-    def test_current_to_best(self, seed: int):
         n_pop, n_dim = 6, 2
         ind1 = Individual(np.array([0, 0]))
         ind2 = Individual(np.array([1, 1]))
@@ -422,8 +353,6 @@ class TestMutation:
             Population(ind1, ind2, ind3, ind4, ind5, ind6),
         )
         assert pop.is_evaluated
-
-        mutation_strategy = dek.Mutation.current_to_best(seed=seed)
 
         # target = ind1
         mutant1 = mutation_strategy(pop, ind1, 0.8)
