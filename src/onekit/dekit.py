@@ -1,4 +1,8 @@
 import random
+from abc import (
+    ABC,
+    abstractmethod,
+)
 from collections import UserList
 from typing import (
     Any,
@@ -9,24 +13,27 @@ from typing import (
 )
 
 import numpy as np
+import toolz
 
 import onekit.numpykit as npk
 import onekit.pythonkit as pk
 
 Bounds = Sequence[Tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
+ObjectiveFunction = Callable[[Any], Any]
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
 BoundRepairStrategy = Callable[["Individual"], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
-SelectionStrategy = Callable[["Individual", "Individual"], "Individual"]
-TerminationStrategy = Callable[["Population"], bool]
+ReplacementStrategy = Callable[["Individual", "Individual"], "Individual"]
+TerminationStrategy = Callable[["DifferentialEvolution"], bool]
+ParameterStrategy = Callable[[], float]
 
 
 class Individual:
     def __init__(self, x: Any, /):
         self._x = x
-        self._fun = None
+        self._fx = None
 
     @property
     def x(self) -> Any:
@@ -34,42 +41,28 @@ class Individual:
 
     @property
     def fx(self) -> Any | None:
-        return self._fun
+        return self._fx
+
+    @fx.setter
+    def fx(self, value: Any) -> None:
+        if not self.is_evaluated:
+            self._fx = value
+        else:
+            raise AttributeError("property 'fx' of 'Individual' object is already set")
 
     @property
     def is_evaluated(self) -> bool:
-        return False if self._fun is None else True
-
-    def evaluate(self, func: Callable[[Any], Any]) -> "Individual":
-        if not self.is_evaluated:
-            self._fun = func(self._x)
-        return self
+        return False if self._fx is None else True
 
     def __repr__(self):
-        return f"{self.fx} <- {self.x}"
+        fx = f"{self._fx:g}" if isinstance(self._fx, float) else self._fx
+        return f"<{self.__class__.__name__} {id(self)}> {self._x} {fx}"
 
 
 class Population(UserList):
-    def __init__(
-        self,
-        *individuals: Individual | Iterable[Individual],
-        generation: int | None = None,
-        key=None,
-    ):
+    def __init__(self, *individuals: Individual | Iterable[Individual], key=None):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
-        self._generation = generation
-        self._key = (
-            lambda ind: -float("inf")
-            if ind.fx is None or not np.isfinite(ind.fx)
-            else ind.fx
-            if key is None
-            else key
-        )
-
-    @property
-    def generation(self) -> int | None:
-        """Return the generation count of the population."""
-        return self._generation
+        self._key = KeyFunction.ind_fx() if key is None else key
 
     @property
     def key(self) -> Callable:
@@ -83,18 +76,8 @@ class Population(UserList):
     def is_evaluated(self) -> bool:
         return self.size > 0 and all(individual.is_evaluated for individual in self)
 
-    def evaluate(self, func: Callable[[Any], Any]) -> "Population":
-        for individual in self:
-            individual.evaluate(func)
-        return self
-
-    def increment_generation_count(self) -> "Population":
-        if self.generation is not None:
-            self._generation += 1
-        return self
-
     def copy(self) -> "Population":
-        return Population(self.data, generation=self.generation, key=self.key)
+        return Population(self.data, key=self.key)
 
     def sort(self, *, key=None, reverse=False) -> "Population":
         key = self.key if key is None else key
@@ -108,6 +91,20 @@ class Population(UserList):
     def max(self, *, key=None) -> "Individual":
         key = self.key if key is None else key
         return max(self.data, key=key)
+
+
+class KeyFunction:
+    @staticmethod
+    def ind_fx():
+        return lambda ind: ind.fx
+
+    @staticmethod
+    def neg_inf():
+        return (
+            lambda ind: -float("inf")
+            if ind.fx is None or not np.isfinite(ind.fx)
+            else ind.fx
+        )
 
 
 class BoundsHandler:
@@ -141,15 +138,22 @@ class BoundsHandler:
 
 class Initialization:
     @staticmethod
+    def identity(population: Population) -> InitializationStrategy:
+        def inner() -> Population:
+            return population
+
+        return inner
+
+    @staticmethod
     def random__standard_uniform(
         n_pop: int,
         n_dim: int,
         random_state=Seed,
     ) -> InitializationStrategy:
-        def inner():
+        def inner() -> Population:
             rng = npk.check_random_state(random_state)
             x_mat = rng.random((n_pop, n_dim))
-            return Population((Individual(vec) for vec in x_mat), generation=0)
+            return Population((Individual(vec) for vec in x_mat))
 
         return inner
 
@@ -159,14 +163,11 @@ class Initialization:
         bounds: Bounds,
         random_state=Seed,
     ) -> InitializationStrategy:
-        def inner():
+        def inner() -> Population:
             rng = npk.check_random_state(random_state)
             bnd = check_bounds(bounds)
             x_mat = rng.random((n_pop, bnd.n_dim))
-            return Population(
-                (Individual(vec) for vec in bnd.x_min + bnd.x_diff * x_mat),
-                generation=0,
-            )
+            return Population(Individual(vec) for vec in bnd.x_min + bnd.x_diff * x_mat)
 
         return inner
 
@@ -179,16 +180,15 @@ class Mutation:
         def inner(
             population: Population,
             target: Individual,
-            scale_factor: float,
+            f: float,
             /,
         ) -> Individual:
-            random_indices = rng.choice(
-                [i for i in range(population.size) if i != population.index(target)],
-                size=3,
-                replace=False,
+            exclude = population.index(target)
+            indices = tuple(i for i in range(population.size) if i != exclude)
+            ind_r0, ind_r1, ind_r2 = (
+                population[i] for i in rng.choice(indices, size=3, replace=False)
             )
-            ind_r0, ind_r1, ind_r2 = (population[i] for i in random_indices)
-            return Individual(ind_r0.x + scale_factor * (ind_r1.x - ind_r2.x))
+            return Individual(ind_r0.x + f * (ind_r1.x - ind_r2.x))
 
         return inner
 
@@ -199,18 +199,16 @@ class Mutation:
         def inner(
             population: Population,
             target: Individual,
-            scale_factor: float,
+            f: float,
             /,
         ) -> Individual:
             ind_best = population.min()
-            exclude_indices = {population.index(target), population.index(ind_best)}
-            random_indices = rng.choice(
-                [i for i in range(population.size) if i not in exclude_indices],
-                size=2,
-                replace=False,
+            exclude = {population.index(target), population.index(ind_best)}
+            indices = tuple(i for i in range(population.size) if i not in exclude)
+            ind_r1, ind_r2 = (
+                population[i] for i in rng.choice(indices, size=2, replace=False)
             )
-            ind_r1, ind_r2 = (population[i] for i in random_indices)
-            return Individual(ind_best.x + scale_factor * (ind_r1.x - ind_r2.x))
+            return Individual(ind_best.x + f * (ind_r1.x - ind_r2.x))
 
         return inner
 
@@ -235,13 +233,13 @@ class BoundRepair:
 
 class Crossover:
     @staticmethod
-    def binomial_v1(seed: Seed) -> CrossoverStrategy:
-        """Always for trail = mutant but never trail = target."""
+    def binomial(seed: Seed) -> CrossoverStrategy:
+        """Trail is either a crossover between mutant and target or just the mutant."""
         rng = npk.check_random_state(seed)
 
-        def inner(target: Individual, mutant: Individual, prob: float, /) -> Individual:
+        def inner(target: Individual, mutant: Individual, cr: float, /) -> Individual:
             n_dim = len(target.x)
-            xover_mask = rng.random(n_dim) <= prob
+            xover_mask = rng.random(n_dim) < cr
 
             if not xover_mask.any():
                 j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
@@ -253,12 +251,12 @@ class Crossover:
 
     @staticmethod
     def binomial_v2(seed: Seed) -> CrossoverStrategy:
-        """Makes sure trail != mutant and trail != target - always a mix."""
+        """Always makes sure that trail is a crossover between mutant and target."""
         rng = npk.check_random_state(seed)
 
-        def inner(target: Individual, mutant: Individual, prob: float, /) -> Individual:
+        def inner(target: Individual, mutant: Individual, cr: float, /) -> Individual:
             n_dim = len(target.x)
-            xover_mask = rng.random(n_dim) <= prob
+            xover_mask = rng.random(n_dim) < cr
 
             if not xover_mask.any():
                 j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
@@ -273,14 +271,10 @@ class Crossover:
         return inner
 
 
-class Selection:
+class Replacement:
     @staticmethod
-    def smaller_function_value() -> SelectionStrategy:
-        def inner(
-            target: Individual,
-            trial: Individual,
-            /,
-        ) -> Individual:
+    def smaller_is_better() -> ReplacementStrategy:
+        def inner(target: Individual, trial: Individual, /) -> Individual:
             return trial if trial.fx <= target.fx else target
 
         return inner
@@ -288,19 +282,26 @@ class Selection:
 
 class Termination:
     @staticmethod
-    def has_reached_max_generation(max_generation: int) -> TerminationStrategy:
-        def inner(population: Population, /) -> bool:
-            return bool(population.generation >= max_generation)
+    def has_reached_max_generations(max_generations: int, /) -> TerminationStrategy:
+        def inner(de: DifferentialEvolution, /) -> bool:
+            return bool(de.generation_count >= max_generations)
 
         return inner
 
     @staticmethod
-    def has_converged(
+    def has_reached_max_evaluations(max_evaluations: int, /) -> TerminationStrategy:
+        def inner(de: DifferentialEvolution, /) -> bool:
+            return bool(de.evaluation_count >= max_evaluations)
+
+        return inner
+
+    @staticmethod
+    def have_fx_values_converged(
         abs_tol: float = 0.0,
         rel_tol: float = 0.01,
     ) -> TerminationStrategy:
-        def inner(population: Population, /) -> bool:
-            fxs = np.array([ind.fx for ind in population])
+        def inner(de: DifferentialEvolution, /) -> bool:
+            fxs = np.array([ind.fx for ind in de.population])
             return bool(fxs.std() <= abs_tol + rel_tol * np.abs(fxs.mean()))
 
         return inner
@@ -309,10 +310,87 @@ class Termination:
     def has_met_any_strategy(
         *termination_strategy: TerminationStrategy | Iterable[TerminationStrategy],
     ) -> TerminationStrategy:
-        def inner(population: Population, /) -> bool:
-            return pk.are_predicates_true(any, termination_strategy)(population)
+        def inner(de: DifferentialEvolution, /) -> bool:
+            return pk.are_predicates_true(any, termination_strategy)(de)
 
         return inner
+
+    @staticmethod
+    def has_met_any_basic_strategy(
+        max_generations: int | None = None,
+        max_evaluations: int | None = None,
+        abs_tol: float = 0.0,
+        rel_tol: float = 0.01,
+    ) -> TerminationStrategy:
+        max_generations = float("inf") if max_generations is None else max_generations
+        max_evaluations = float("inf") if max_evaluations is None else max_evaluations
+        termination_strategy = Termination.has_met_any_strategy(
+            Termination.has_reached_max_generations(max_generations),
+            Termination.has_reached_max_evaluations(max_evaluations),
+            Termination.have_fx_values_converged(abs_tol, rel_tol),
+        )
+
+        def inner(de: DifferentialEvolution, /) -> bool:
+            return termination_strategy(de)
+
+        return inner
+
+
+class Parameter:
+    @staticmethod
+    def constant(value: float) -> ParameterStrategy:
+        def inner() -> float:
+            return value
+
+        return inner
+
+    @staticmethod
+    def dither(low: float, high: float, seed: Seed) -> ParameterStrategy:
+        rng = npk.check_random_state(seed)
+
+        def inner() -> float:
+            return float(rng.uniform(low, high, size=1))
+
+        return inner
+
+
+def evaluate_individual(func: ObjectiveFunction, individual: Individual) -> Individual:
+    if not individual.is_evaluated:
+        individual.fx = func(individual.x)
+    return individual
+
+
+def evaluate_population(func: ObjectiveFunction, population: Population) -> Population:
+    for i, individual in enumerate(population):
+        population[i] = evaluate_individual(func, individual)
+    return population
+
+
+def evaluate(func: ObjectiveFunction, obj: Individual | Population) -> int:
+    """Evaluate individual or population object and return evaluation count.
+
+    Notes
+    -----
+    This is not a pure function.
+    If the 'Individual' object is not evaluated, the function return value is assigned
+    to its property 'fx' as a side effect.
+
+    Returns
+    -------
+    int
+        Evaluation count of non-evaluated individuals.
+    """
+    if isinstance(obj, Individual):
+        if not obj.is_evaluated:
+            obj.fx = func(obj.x)
+            return 1
+        return 0
+
+    elif isinstance(obj, Population):
+        return sum(evaluate(func, individual) for individual in obj)
+
+    else:
+        raise TypeError(f"{type(obj)=} - must be {Individual} or {Population}")
 
 
 def check_individual_type(individual: Individual) -> Individual:
@@ -331,3 +409,113 @@ def denormalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarr
 
 def normalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarray:
     return (x - x_min) / (x_max - x_min)
+
+
+class DifferentialEvolution(ABC):
+    def __init__(
+        self,
+        func: ObjectiveFunction,
+        init_strategy: InitializationStrategy,
+        mutation_strategy: MutationStrategy,
+        bound_repair_strategy: BoundRepairStrategy,
+        crossover_strategy: CrossoverStrategy,
+        replacement_strategy: ReplacementStrategy,
+        termination_strategy: TerminationStrategy,
+        f_strategy: ParameterStrategy,
+        cr_strategy: ParameterStrategy,
+    ):
+        self.func = func
+        self.init_strategy = init_strategy
+        self.mutation_strategy = mutation_strategy
+        self.bound_repair_strategy = bound_repair_strategy
+        self.crossover_strategy = crossover_strategy
+        self.replacement_strategy = replacement_strategy
+        self.termination_strategy = termination_strategy
+        self.f_strategy = f_strategy
+        self.cr_strategy = cr_strategy
+        self.population: Population | None = None
+        self.generation_count: int = 0
+        self.evaluation_count: int = 0
+
+    def __iter__(self) -> "DifferentialEvolution":
+        return self
+
+    @abstractmethod
+    def __next__(self) -> "DifferentialEvolution":
+        pass  # pragma: no cover
+
+    @property
+    def best(self) -> Individual:
+        """Returns the best solution in the current population."""
+        return self.population.min()
+
+    @property
+    def worst(self) -> Individual:
+        """Returns the worst solution in the current population."""
+        return self.population.max()
+
+    def _init_population(self) -> "DifferentialEvolution":
+        self.population = self.init_strategy()
+        self.evaluation_count += evaluate(self.func, self.population)
+        return self
+
+
+class DeV1(DifferentialEvolution):
+    """Differential Evolution Variant 1: Classic DE."""
+
+    def __next__(self) -> "DifferentialEvolution":
+        if self.population is None:
+            return self._init_population()
+
+        if self.termination_strategy(self):
+            raise StopIteration
+
+        new_population = Population()
+        f = self.f_strategy()
+        cr = self.cr_strategy()
+
+        for target in self.population:
+            trial = toolz.pipe(
+                self.mutation_strategy(self.population, target, f),
+                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.crossover_strategy(target, mutant, cr),
+            )
+            self.evaluation_count += evaluate(self.func, trial)
+            survivor = self.replacement_strategy(target, trial)
+            new_population.append(survivor)
+
+        self.population = new_population
+        self.generation_count += 1
+
+        return self
+
+
+class DeV2(DifferentialEvolution):
+    """Differential Evolution Variant 2:
+    - A small deviation from the classic DE.
+    - That is, fitter solutions are immediately updated within a single generation.
+    """
+
+    def __next__(self) -> "DifferentialEvolution":
+        if self.population is None:
+            return self._init_population()
+
+        if self.termination_strategy(self):
+            raise StopIteration
+
+        f = self.f_strategy()
+        cr = self.cr_strategy()
+
+        for i, target in enumerate(self.population):
+            trial = toolz.pipe(
+                self.mutation_strategy(self.population, target, f),
+                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.crossover_strategy(target, mutant, cr),
+            )
+            self.evaluation_count += evaluate(self.func, trial)
+            survivor = self.replacement_strategy(target, trial)
+            self.population[i] = survivor
+
+        self.generation_count += 1
+
+        return self

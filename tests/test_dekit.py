@@ -1,12 +1,16 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
+import toolz
 
 import onekit.dekit as dek
+import onekit.numpykit as npk
 import onekit.optfunckit as ofk
 from onekit.dekit import (
     Bounds,
+    DifferentialEvolution,
     Individual,
+    ObjectiveFunction,
     Population,
 )
 
@@ -19,76 +23,79 @@ class TestIndividual:
         assert ind.x == x
         assert ind.fx is None
         assert ind.is_evaluated is False
-        assert str(ind).startswith("None <-")
+        assert str(ind).startswith(f"<{Individual.__name__}")
 
     # noinspection PyPropertyAccess
-    def test_immutable_property(self):
-        ind = dek.Individual([1, 1])
+    def test_immutable_property__x(self):
+        ind = Individual([1, 1])
 
         with pytest.raises(AttributeError):
             ind.x = [2, 2]
 
+    # noinspection PyPropertyAccess
+    def test_immutable_property__fx(self):
+        ind = Individual([1, 1])
+        ind.fx = 3.0
+
         with pytest.raises(AttributeError):
             ind.fx = 3.0
 
-    @pytest.mark.parametrize(
-        "x, expected",
-        [
-            ([0], 0.0),
-            ([0, 0], 0.0),
-            ([1, 1], 3.6254),
-            ([2, 2], 6.5936),
-        ],
-    )
-    def test_evaluation(self, x: ofk.Vector, expected: float):
-        ind = dek.Individual(x)
 
-        assert np.all(ind.x == x)
-        assert ind.fx is None
-        assert ind.is_evaluated is False
+@pytest.mark.parametrize(
+    "x, expected",
+    [
+        ([0], 0.0),
+        ([0, 0], 0.0),
+        ([1, 1], 3.6254),
+        ([2, 2], 6.5936),
+    ],
+)
+def test_evaluate_individual(x: ofk.Vector, expected: float):
+    ind = Individual(x)
 
-        ind.evaluate(ofk.ackley)
-        assert ind.fx is not None
-        assert ind.is_evaluated is True
+    assert np.all(ind.x == x)
+    assert ind.fx is None
+    assert ind.is_evaluated is False
 
-        assert round(ind.fx, 4) == expected
+    ind = dek.evaluate_individual(ofk.ackley, ind)
+    assert ind.fx is not None
+    assert ind.is_evaluated is True
+
+    assert round(ind.fx, 4) == expected
 
 
 class TestPopulation:
     def test_init(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop = Population(ind1, ind2, ind3, generation=0)
+        pop = Population(ind1, ind2, ind3)
         assert pop == [ind1, ind2, ind3]
-        assert pop.generation == 0
 
     def test_init__empty(self):
         pop = Population()
         assert pop.size == 0
         assert not pop.is_evaluated
-        assert pop.generation is None
 
     def test_init__empty__generation_count(self):
-        pop = Population(generation=0)
+        pop = Population()
         assert pop.size == 0
         assert not pop.is_evaluated
-        assert pop.generation == 0
 
     @pytest.mark.parametrize("ind", [None, 1, "two"])
-    def test_init__failed(self, ind: dek.Individual):
+    def test_init__failed(self, ind: Individual):
         with pytest.raises(TypeError):
             Population(ind)
 
     def test_size(self):
-        pop = Population(dek.Individual(0), dek.Individual(1))
+        pop = Population(Individual(0), Individual(1))
         assert pop.size == 2
 
     def test_list_methods(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
         pop = Population(ind1, ind2, ind3)
         assert pop.size == 3
@@ -121,8 +128,8 @@ class TestPopulation:
         pop.reverse()
         assert pop == [ind1, ind2, ind3]
 
-        ind4 = dek.Individual([3, 3])
-        ind5 = dek.Individual([4, 4])
+        ind4 = Individual([3, 3])
+        ind5 = Individual([4, 4])
         pop.extend([ind4, ind5])
         assert pop.size == 5
         assert pop == [ind1, ind2, ind3, ind4, ind5]
@@ -135,80 +142,47 @@ class TestPopulation:
         assert pop == [ind1, ind1]
 
     def test_evaluate(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop = Population(ind1, ind2, ind3).evaluate(ofk.ackley)
+        pop = dek.evaluate_population(ofk.ackley, Population(ind1, ind2, ind3))
         assert pop.is_evaluated
 
         expected = [0.0, 3.6254, 6.5936]
         assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
-    def test_increment_generation_count(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
-
-        pop1 = Population(ind1, ind2, generation=0)
-        assert pop1 == [ind1, ind2]
-        assert pop1.size == 2
-        assert not pop1.is_evaluated
-        assert pop1.generation == 0
-
-        pop2 = pop1.copy().increment_generation_count()
-        assert isinstance(pop2, Population)
-        assert pop2 == [ind1, ind2]
-        assert pop2.size == 2
-        assert not pop2.is_evaluated
-        assert pop2.generation == 1
-
-        pop2.append(ind3)
-        assert pop1 == [ind1, ind2]
-        assert pop1.size == 2
-        assert not pop2.is_evaluated
-        assert pop1.generation == 0
-
-        assert pop2 == [ind1, ind2, ind3]
-        assert pop2.size == 3
-        assert not pop2.is_evaluated
-        assert pop2.generation == 1
-
     def test_overwritten_copy(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop1 = Population(ind1, ind2, generation=0)
+        pop1 = Population(ind1, ind2)
         assert pop1 == [ind1, ind2]
         assert pop1.size == 2
         assert not pop1.is_evaluated
-        assert pop1.generation == 0
 
         pop2 = pop1.copy()
         assert isinstance(pop2, Population)
         assert pop2 == [ind1, ind2]
         assert pop2.size == 2
         assert not pop2.is_evaluated
-        assert pop2.generation == 0
 
         pop2.append(ind3)
         assert pop1 == [ind1, ind2]
         assert pop1.size == 2
         assert not pop2.is_evaluated
-        assert pop1.generation == 0
 
         assert pop2 == [ind1, ind2, ind3]
         assert pop2.size == 3
         assert not pop2.is_evaluated
-        assert pop2.generation == 0
 
     def test_overwritten_sort(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = dek.evaluate_population(ofk.ackley, Population(ind3, ind1, ind2))
         assert pop.is_evaluated
 
         expected = [6.5936, 0.0, 3.6254]
@@ -223,11 +197,11 @@ class TestPopulation:
         assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
     def test_min(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = dek.evaluate_population(ofk.ackley, Population(ind3, ind1, ind2))
         assert pop.is_evaluated
 
         actual = pop.min()
@@ -235,11 +209,11 @@ class TestPopulation:
         assert actual == expected
 
     def test_max(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1])
-        ind3 = dek.Individual([2, 2])
+        ind1 = Individual([0, 0])
+        ind2 = Individual([1, 1])
+        ind3 = Individual([2, 2])
 
-        pop = Population(ind3, ind1, ind2).evaluate(ofk.ackley)
+        pop = dek.evaluate_population(ofk.ackley, Population(ind3, ind1, ind2))
         assert pop.is_evaluated
 
         actual = pop.max()
@@ -247,12 +221,12 @@ class TestPopulation:
         assert actual == expected
 
     def test_incomplete_evaluation(self):
-        ind1 = dek.Individual([0, 0])
-        ind2 = dek.Individual([1, 1]).evaluate(ofk.ackley)
-        ind3 = dek.Individual([2, 2]).evaluate(ofk.ackley)
-        ind4 = dek.Individual([3, 3])
+        ind1 = Individual([0, 0])
+        ind2 = dek.evaluate_individual(ofk.ackley, Individual([1, 1]))
+        ind3 = dek.evaluate_individual(ofk.ackley, Individual([2, 2]))
+        ind4 = Individual([3, 3])
 
-        pop = Population(ind1, ind2, ind3, ind4).sort()
+        pop = Population(ind1, ind2, ind3, ind4, key=dek.KeyFunction.neg_inf()).sort()
         assert not pop.is_evaluated
         assert pop == [ind1, ind4, ind2, ind3]
         assert pop.min() == ind1
@@ -260,10 +234,7 @@ class TestPopulation:
 
     # noinspection PyPropertyAccess
     def test_immutable_property(self):
-        pop = Population(dek.Individual([0, 0]), generation=0)
-
-        with pytest.raises(AttributeError):
-            pop.generation += 1
+        pop = Population(Individual([0, 0]))
 
         with pytest.raises(AttributeError):
             pop.key = None
@@ -285,6 +256,7 @@ class TestBoundsHandler:
         x_diff: np.ndarray,
     ):
         actual = dek.check_bounds(bounds)
+        assert actual.bounds == bounds
         npt.assert_array_equal(actual.x_bounds, x_bounds)
         npt.assert_array_equal(actual.x_min, x_min)
         npt.assert_array_equal(actual.x_max, x_max)
@@ -313,17 +285,27 @@ class TestBoundsHandler:
 
 
 class TestInitialization:
+    def test_identity(self):
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        init_strategy = dek.Initialization.identity(pop)
+        actual = init_strategy()
+        assert actual == pop
+
     def test_random__standard_uniform(self, seed: int):
         n_pop, n_dim = 10, 2
         init_strategy = dek.Initialization.random__standard_uniform(n_pop, n_dim, seed)
-        pop = init_strategy()
-        assert isinstance(pop, Population)
-        assert pop.size == n_pop
-        assert pop.generation == 0
-        assert not pop.is_evaluated
-        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
-        assert all(ind.x.shape == (n_dim,) for ind in pop)
-        mat = np.row_stack([ind.x for ind in pop])
+        actual = init_strategy()
+        assert isinstance(actual, Population)
+        assert actual.size == n_pop
+        assert not actual.is_evaluated
+        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in actual)
+        assert all(ind.x.shape == (n_dim,) for ind in actual)
+        mat = np.row_stack([ind.x for ind in actual])
         assert 0 <= mat.min() <= 1
         assert 0 <= mat.max() <= 1
         assert mat.min() < mat.max()
@@ -331,13 +313,12 @@ class TestInitialization:
     def test_random__uniform(self, bounds: Bounds, seed: int):
         n_pop = 10
         init_strategy = dek.Initialization.random__uniform(n_pop, bounds, seed)
-        pop = init_strategy()
-        assert isinstance(pop, Population)
-        assert pop.size == n_pop
-        assert pop.generation == 0
-        assert not pop.is_evaluated
-        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in pop)
-        assert all(ind.x.shape == (2,) for ind in pop)
+        actual = init_strategy()
+        assert isinstance(actual, Population)
+        assert actual.size == n_pop
+        assert not actual.is_evaluated
+        assert all(ind.x.dtype.kind in np.typecodes["AllFloat"] for ind in actual)
+        assert all(ind.x.shape == (2,) for ind in actual)
 
     @pytest.fixture(scope="class")
     def bounds(self) -> Bounds:
@@ -351,12 +332,12 @@ class TestInitialization:
 class TestMutation:
     def test_rand_1(self, seed: int):
         n_pop, n_dim = 6, 2
-        ind1 = dek.Individual(np.array([0, 0]))
-        ind2 = dek.Individual(np.array([1, 1]))
-        ind3 = dek.Individual(np.array([2, 2]))
-        ind4 = dek.Individual(np.array([3, 3]))
-        ind5 = dek.Individual(np.array([4, 4]))
-        ind6 = dek.Individual(np.array([5, 5]))
+        ind1 = Individual(np.array([0, 0]))
+        ind2 = Individual(np.array([1, 1]))
+        ind3 = Individual(np.array([2, 2]))
+        ind4 = Individual(np.array([3, 3]))
+        ind5 = Individual(np.array([4, 4]))
+        ind6 = Individual(np.array([5, 5]))
         pop = Population(ind1, ind2, ind3, ind4, ind5, ind6)
 
         mutation_strategy = dek.Mutation.rand_1(seed=seed)
@@ -390,13 +371,15 @@ class TestMutation:
 
     def test_best_1(self, seed: int):
         n_pop, n_dim = 6, 2
-        ind1 = dek.Individual(np.array([0, 0]))
-        ind2 = dek.Individual(np.array([1, 1]))
-        ind3 = dek.Individual(np.array([2, 2]))
-        ind4 = dek.Individual(np.array([3, 3]))
-        ind5 = dek.Individual(np.array([4, 4]))
-        ind6 = dek.Individual(np.array([5, 5]))
-        pop = Population(ind1, ind2, ind3, ind4, ind5, ind6).evaluate(ofk.sphere)
+        ind1 = Individual(np.array([0, 0]))
+        ind2 = Individual(np.array([1, 1]))
+        ind3 = Individual(np.array([2, 2]))
+        ind4 = Individual(np.array([3, 3]))
+        ind5 = Individual(np.array([4, 4]))
+        ind6 = Individual(np.array([5, 5]))
+        pop = dek.evaluate_population(
+            ofk.sphere, Population(ind1, ind2, ind3, ind4, ind5, ind6)
+        )
         assert pop.is_evaluated
 
         mutation_strategy = dek.Mutation.best_1(seed=seed)
@@ -433,16 +416,16 @@ class TestMutation:
 
 class TestBoundRepair:
     def test_identity(self):
-        ind = dek.Individual(0)
+        ind = Individual(0)
         bound_repair_strategy = dek.BoundRepair.identity()
         actual = bound_repair_strategy(ind)
         assert actual == ind
 
     def test_clip__standard_uniform(self):
-        ind1 = dek.Individual(np.array([0.1, 0.9]))
-        ind2 = dek.Individual(np.array([0.1, 1.1]))
-        ind3 = dek.Individual(np.array([-0.1, 0.9]))
-        ind4 = dek.Individual(np.array([-0.1, 1.1]))
+        ind1 = Individual(np.array([0.1, 0.9]))
+        ind2 = Individual(np.array([0.1, 1.1]))
+        ind3 = Individual(np.array([-0.1, 0.9]))
+        ind4 = Individual(np.array([-0.1, 1.1]))
 
         bound_repair_strategy = dek.BoundRepair.clip__standard_uniform()
 
@@ -463,15 +446,16 @@ class TestBoundRepair:
 
 
 class TestCrossover:
+    @pytest.mark.parametrize("cr", [0.0, 0.7, 1.0])
     @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
-    def test_binomial_variant_1(self, seed: int):
+    def test_binomial(self, cr: float, seed: int):
         n_dim = 2
-        target = dek.Individual(np.array([0, 0]))
-        mutant = dek.Individual(np.array([1, 1]))
+        target = Individual(np.array([0, 0]))
+        mutant = Individual(np.array([1, 1]))
 
-        crossover_strategy = dek.Crossover.binomial_v1(seed)
+        crossover_strategy = dek.Crossover.binomial(seed)
 
-        trial = crossover_strategy(target, mutant, 0.7)
+        trial = crossover_strategy(target, mutant, cr)
         assert isinstance(trial, Individual)
         assert trial != target
         assert trial != mutant
@@ -480,15 +464,16 @@ class TestCrossover:
         assert list(trial.x) in [[0, 1], [1, 0], [1, 1]]
         assert list(trial.x) != [0, 0]
 
+    @pytest.mark.parametrize("cr", [0.0, 0.7, 1.0])
     @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
-    def test_binomial_variant_2(self, seed: int):
+    def test_binomial_v2(self, cr: float, seed: int):
         n_dim = 2
-        target = dek.Individual(np.array([0, 0]))
-        mutant = dek.Individual(np.array([1, 1]))
+        target = Individual(np.array([0, 0]))
+        mutant = Individual(np.array([1, 1]))
 
         crossover_strategy = dek.Crossover.binomial_v2(seed)
 
-        trial = crossover_strategy(target, mutant, 0.7)
+        trial = crossover_strategy(target, mutant, cr)
         assert isinstance(trial, Individual)
         assert trial != target
         assert trial != mutant
@@ -498,173 +483,412 @@ class TestCrossover:
         assert list(trial.x) not in [[0, 0], [1, 1]]
 
 
-class TestSelection:
+class TestReplacement:
     def test_smaller_function_value__target_selected(self):
-        target = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
-        trail = dek.Individual(np.array([1, 1])).evaluate(ofk.sphere)
-        selection_strategy = dek.Selection.smaller_function_value()
+        target = dek.evaluate_individual(ofk.sphere, Individual(np.array([0, 0])))
+        trail = dek.evaluate_individual(ofk.sphere, Individual(np.array([1, 1])))
+        replacement_strategy = dek.Replacement.smaller_is_better()
 
-        winner = selection_strategy(target, trail)
-        assert isinstance(winner, Individual)
-        assert winner == target
-        assert winner != trail
+        actual = replacement_strategy(target, trail)
+        assert isinstance(actual, Individual)
+        assert actual == target
+        assert actual != trail
 
     def test_smaller_function_value__trail_selected(self):
-        target = dek.Individual(np.array([1, 1])).evaluate(ofk.sphere)
-        trail = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
-        selection_strategy = dek.Selection.smaller_function_value()
+        target = dek.evaluate_individual(ofk.sphere, Individual(np.array([1, 1])))
+        trail = dek.evaluate_individual(ofk.sphere, Individual(np.array([0, 0])))
+        replacement_strategy = dek.Replacement.smaller_is_better()
 
-        winner = selection_strategy(target, trail)
-        assert isinstance(winner, Individual)
-        assert winner != target
-        assert winner == trail
+        actual = replacement_strategy(target, trail)
+        assert isinstance(actual, Individual)
+        assert actual != target
+        assert actual == trail
 
     def test_smaller_function_value__trail_selected__equal_values(self):
-        target = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
-        trail = dek.Individual(np.array([0, 0])).evaluate(ofk.sphere)
-        selection_strategy = dek.Selection.smaller_function_value()
+        target = dek.evaluate_individual(ofk.sphere, Individual(np.array([0, 0])))
+        trail = dek.evaluate_individual(ofk.sphere, Individual(np.array([0, 0])))
+        replacement_strategy = dek.Replacement.smaller_is_better()
 
-        winner = selection_strategy(target, trail)
-        assert isinstance(winner, Individual)
-        assert winner != target
-        assert winner == trail
+        actual = replacement_strategy(target, trail)
+        assert isinstance(actual, Individual)
+        assert actual != target
+        assert actual == trail
 
 
 class TestTermination:
-    def test_has_reached_max_generation(self):
-        termination_strategy = dek.Termination.has_reached_max_generation(1)
+    def test_has_reached_max_generations(self, seed: int):
+        termination_strategy = dek.Termination.has_reached_max_generations(1)
 
-        n_pop = 4
+        rng = npk.check_random_state(seed)
         pop = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([1, 1])),
-            dek.Individual(np.array([2, 2])),
-            dek.Individual(np.array([3, 3])),
-            generation=0,
-        ).evaluate(ofk.sphere)
-        assert pop.size == n_pop
-        assert pop.generation == 0
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
 
-        actual = termination_strategy(pop)
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is False
-        assert pop.size == n_pop
-        assert pop.generation == 0
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
 
-        actual = termination_strategy(pop.increment_generation_count())
+        de = next(de)
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
-        assert pop.size == n_pop
-        assert pop.generation == 1
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
 
-    def test_has_converged(self):
-        termination_strategy = dek.Termination.has_converged(abs_tol=1)
+    def test_has_reached_max_evaluations(self, seed: int):
+        termination_strategy = dek.Termination.has_reached_max_evaluations(8)
 
-        n_pop = 4
-        pop1 = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([1, 1])),
-            dek.Individual(np.array([2, 2])),
-            dek.Individual(np.array([3, 3])),
-            generation=0,
-        ).evaluate(ofk.sphere)
-        assert pop1.size == n_pop
-        assert pop1.generation == 0
+        rng = npk.check_random_state(seed)
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
 
-        actual = termination_strategy(pop1)
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is False
-        assert pop1.size == n_pop
-        assert pop1.generation == 0
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
 
-        pop2 = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([0.001, 0.001])),
-            dek.Individual(np.array([0.002, 0.002])),
-            dek.Individual(np.array([0.003, 0.003])),
-            generation=1,
-        ).evaluate(ofk.sphere)
-        assert pop2.size == n_pop
-        assert pop2.generation == 1
-
-        actual = termination_strategy(pop2)
+        de = next(de)
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
-        assert pop2.size == n_pop
-        assert pop2.generation == 1
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
 
-    def test_has_met_any_strategy__max_generation(self):
-        termination_strategy = dek.Termination.has_met_any_strategy(
-            dek.Termination.has_reached_max_generation(1),
-            dek.Termination.has_converged(abs_tol=1),
+    def test_have_fx_values_converged(self, seed: int):
+        termination_strategy = dek.Termination.have_fx_values_converged(rel_tol=0.9)
+
+        rng = npk.check_random_state(seed)
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
+
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        de = next(de)
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
+
+    def test_has_met_any_basic_strategy__max_generations(self, seed: int):
+        termination_strategy = dek.Termination.has_met_any_basic_strategy(
+            max_generations=1
         )
 
-        n_pop = 4
+        rng = npk.check_random_state(seed)
         pop = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([1, 1])),
-            dek.Individual(np.array([2, 2])),
-            dek.Individual(np.array([3, 3])),
-            generation=0,
-        ).evaluate(ofk.sphere)
-        assert pop.size == n_pop
-        assert pop.generation == 0
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
 
-        actual = termination_strategy(pop)
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is False
-        assert pop.size == n_pop
-        assert pop.generation == 0
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
 
-        actual = termination_strategy(pop.increment_generation_count())
+        de = next(de)
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
-        assert pop.size == n_pop
-        assert pop.generation == 1
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
 
-    def test_has_met_any_strategy__converged(self):
-        termination_strategy = dek.Termination.has_met_any_strategy(
-            dek.Termination.has_reached_max_generation(2),
-            dek.Termination.has_converged(abs_tol=1),
+    def test_has_met_any_basic_strategy__max_evaluations(self, seed: int):
+        termination_strategy = dek.Termination.has_met_any_basic_strategy(
+            max_evaluations=8
         )
 
-        n_pop = 4
-        pop1 = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([1, 1])),
-            dek.Individual(np.array([2, 2])),
-            dek.Individual(np.array([3, 3])),
-            generation=0,
-        ).evaluate(ofk.sphere)
-        assert pop1.size == n_pop
-        assert pop1.generation == 0
+        rng = npk.check_random_state(seed)
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
 
-        actual = termination_strategy(pop1)
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is False
-        assert pop1.size == n_pop
-        assert pop1.generation == 0
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
 
-        pop2 = Population(
-            dek.Individual(np.array([0, 0])),
-            dek.Individual(np.array([0.001, 0.001])),
-            dek.Individual(np.array([0.002, 0.002])),
-            dek.Individual(np.array([0.003, 0.003])),
-            generation=1,
-        ).evaluate(ofk.sphere)
-        assert pop2.size == n_pop
-        assert pop2.generation == 1
-
-        actual = termination_strategy(pop2)
+        de = next(de)
+        actual = termination_strategy(de)
         assert isinstance(actual, bool)
         assert actual is True
-        assert pop2.size == n_pop
-        assert pop2.generation == 1
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
+
+    def test_has_met_any_basic_strategy__fx_values_converged(self, seed: int):
+        termination_strategy = dek.Termination.has_met_any_basic_strategy(rel_tol=0.9)
+
+        rng = npk.check_random_state(seed)
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+        assert de.evaluation_count == 0
+
+        de = next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+
+        de = next(de)
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
+
+    @pytest.fixture(scope="class")
+    def seed(self) -> int:
+        return 101
 
 
-@pytest.mark.parametrize("ind", [dek.Individual([0, 0]), None, 1, "two"])
-def test_check_individual_type(ind: dek.Individual):
-    if not isinstance(ind, dek.Individual):
+class TestParameter:
+    def test_constant(self):
+        parameter_strategy = dek.Parameter.constant(0.7)
+        actual = parameter_strategy()
+        assert actual == 0.7
+
+    def test_dither(self):
+        parameter_strategy = dek.Parameter.dither(0.5, 1.0, seed=101)
+        actual = parameter_strategy()
+        assert 0.5 <= actual < 1.0
+
+
+class TestEvaluation:
+    def test_evaluate_individual(self, func: ObjectiveFunction):
+        ind = Individual([1, 1])
+        assert not ind.is_evaluated
+
+        ind = dek.evaluate_individual(func, ind)
+        assert ind.fx == 2
+
+    def test_evaluate_population(self, func):
+        pop = Population(Individual([1, 1]), Individual([2, 2]))
+        assert not pop.is_evaluated
+
+        pop = dek.evaluate_population(func, pop)
+        assert sum(ind.fx for ind in pop) == 10
+
+    def test_evaluate__individual(self, func: ObjectiveFunction):
+        ind = Individual([1, 1])
+        assert not ind.is_evaluated
+
+        count = dek.evaluate(func, ind)
+        assert ind.fx == 2
+        assert count == 1
+
+        count = dek.evaluate(func, ind)
+        assert ind.fx == 2
+        assert count == 0
+
+    def test_evaluate__population(self, func: ObjectiveFunction):
+        pop = Population(Individual([1, 1]), Individual([2, 2]))
+        assert not pop.is_evaluated
+
+        count = dek.evaluate(func, pop)
+        assert sum(ind.fx for ind in pop) == 10
+        assert count == 2
+
+        count = dek.evaluate(func, pop)
+        assert sum(ind.fx for ind in pop) == 10
+        assert count == 0
+
+        pop.append(Individual([3, 3]))
+        count = dek.evaluate(func, pop)
+        assert sum(ind.fx for ind in pop) == 28
+        assert count == 1
+
+    # noinspection PyTypeChecker
+    @pytest.mark.parametrize("obj", [None, 0, 1.0, "two"])
+    def test_evaluate__invalid_input(self, func: ObjectiveFunction, obj: object):
+        with pytest.raises(TypeError):
+            dek.evaluate(func, obj)
+
+    @pytest.fixture(scope="class")
+    def func(self) -> ObjectiveFunction:
+        return ofk.sphere
+
+
+@pytest.mark.parametrize("ind", [Individual([0, 0]), None, 1, "two"])
+def test_check_individual_type(ind: Individual):
+    if not isinstance(ind, Individual):
         with pytest.raises(TypeError):
             dek.check_individual_type(ind)
 
@@ -693,3 +917,62 @@ def test_denormalize(x: np.ndarray, expected: np.ndarray):
 def test_normalize(x: np.ndarray, expected: np.ndarray):
     actual = dek.normalize(x, x_min=np.array([-5] * 2), x_max=np.array([5] * 2))
     npt.assert_array_equal(actual, expected)
+
+
+class TestDifferentialEvolution:
+    @pytest.mark.parametrize("cls", [dek.DeV1, dek.DeV2])
+    def test_dev1(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
+        rng = npk.check_random_state(seed)
+        bnh = dek.check_bounds(bounds)
+
+        def denorm(x: np.ndarray) -> np.ndarray:
+            return dek.denormalize(x, x_min=bnh.x_min, x_max=bnh.x_max)
+
+        def problem(x: np.ndarray) -> ObjectiveFunction:
+            return toolz.pipe(x, denorm, func)
+
+        d = bnh.n_dim
+        n = 10 * d
+
+        de = cls(
+            func=problem,
+            init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.clip__standard_uniform(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=dek.Termination.has_met_any_basic_strategy(
+                max_generations=20
+            ),
+            f_strategy=dek.Parameter.dither(0.5, 1.0, rng),
+            cr_strategy=dek.Parameter.constant(0.7),
+        )
+
+        for g, generation in enumerate(de):
+            assert isinstance(generation, DifferentialEvolution)
+            assert generation.generation_count == g
+            assert generation.evaluation_count == (g + 1) * n
+
+            assert isinstance(generation.population, Population)
+            assert generation.population.size == n
+
+            assert generation.best.fx < generation.worst.fx
+
+        solution = de.best
+        assert isinstance(solution, Individual)
+        x_best = denorm(solution.x)
+        fx_best = solution.fx
+        npt.assert_array_almost_equal(x_best, np.zeros(d), decimal=2)
+        npt.assert_almost_equal(fx_best, 0, decimal=2)
+
+    @pytest.fixture(scope="class")
+    def func(self) -> ObjectiveFunction:
+        return ofk.sphere
+
+    @pytest.fixture(scope="class")
+    def bounds(self) -> Bounds:
+        return [(-2, 2)] * 2
+
+    @pytest.fixture(scope="class")
+    def seed(self) -> int:
+        return 101
