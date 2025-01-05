@@ -284,14 +284,20 @@ class Termination:
     @staticmethod
     def has_reached_max_generations(max_generations: int, /) -> TerminationStrategy:
         def inner(de: DifferentialEvolution, /) -> bool:
-            return bool(de.generation_count >= max_generations)
+            if de.generation_count >= max_generations:
+                de.message = "reached max generations"
+                return True
+            return False
 
         return inner
 
     @staticmethod
     def has_reached_max_evaluations(max_evaluations: int, /) -> TerminationStrategy:
         def inner(de: DifferentialEvolution, /) -> bool:
-            return bool(de.evaluation_count >= max_evaluations)
+            if de.evaluation_count >= max_evaluations:
+                de.message = "reached max evaluations"
+                return True
+            return False
 
         return inner
 
@@ -302,7 +308,10 @@ class Termination:
     ) -> TerminationStrategy:
         def inner(de: DifferentialEvolution, /) -> bool:
             fxs = np.array([ind.fx for ind in de.population])
-            return bool(fxs.std() <= abs_tol + rel_tol * np.abs(fxs.mean()))
+            if fxs.std() <= abs_tol + rel_tol * np.abs(fxs.mean()):
+                de.message = "fx values converged"
+                return True
+            return False
 
         return inner
 
@@ -436,6 +445,7 @@ class DifferentialEvolution(ABC):
         self.population: Population | None = None
         self.generation_count: int = 0
         self.evaluation_count: int = 0
+        self.message: str | None = None
 
     def __iter__(self) -> "DifferentialEvolution":
         return self

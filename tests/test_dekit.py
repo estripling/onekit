@@ -545,6 +545,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
@@ -554,6 +555,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         next(de)
         actual = termination_strategy(de)
@@ -564,6 +566,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "reached max generations"
 
     def test_has_reached_max_evaluations(self, seed: int):
         termination_strategy = dek.Termination.has_reached_max_evaluations(8)
@@ -594,6 +597,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
@@ -603,6 +607,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         next(de)
         actual = termination_strategy(de)
@@ -613,6 +618,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "reached max evaluations"
 
     def test_have_fx_values_converged(self, seed: int):
         termination_strategy = dek.Termination.have_fx_values_converged(rel_tol=0.9)
@@ -643,6 +649,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         actual = termination_strategy(de)
         assert isinstance(actual, bool)
@@ -652,6 +659,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 0
         assert de.evaluation_count == 4
+        assert de.message is None
 
         next(de)
         actual = termination_strategy(de)
@@ -662,6 +670,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "fx values converged"
 
     def test_has_met_any_basic_strategy__max_generations(self, seed: int):
         termination_strategy = dek.Termination.has_met_any_basic_strategy(
@@ -713,6 +722,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "reached max generations"
 
     def test_has_met_any_basic_strategy__max_evaluations(self, seed: int):
         termination_strategy = dek.Termination.has_met_any_basic_strategy(
@@ -764,6 +774,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "reached max evaluations"
 
     def test_has_met_any_basic_strategy__fx_values_converged(self, seed: int):
         termination_strategy = dek.Termination.has_met_any_basic_strategy(rel_tol=0.9)
@@ -813,6 +824,7 @@ class TestTermination:
         assert de.population.size == pop.size
         assert de.generation_count == 1
         assert de.evaluation_count == 8
+        assert de.message == "fx values converged"
 
     @pytest.fixture(scope="class")
     def seed(self) -> int:
