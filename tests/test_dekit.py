@@ -335,6 +335,7 @@ class TestMutation:
         [
             dek.Mutation.rand_1,
             dek.Mutation.best_1,
+            dek.Mutation.rand_to_best,
             dek.Mutation.current_to_best,
         ],
     )

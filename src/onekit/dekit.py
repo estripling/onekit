@@ -213,6 +213,26 @@ class Mutation:
         return inner
 
     @staticmethod
+    def rand_to_best(seed: Seed) -> MutationStrategy:
+        rng = npk.check_random_state(seed)
+
+        def inner(
+            population: Population,
+            target: Individual,
+            f: float,
+            /,
+        ) -> Individual:
+            best = population.min()
+            exclude = {population.index(target), population.index(best)}
+            indices = tuple(i for i in range(population.size) if i not in exclude)
+            r0, r1, r2 = (
+                population[i] for i in rng.choice(indices, size=3, replace=False)
+            )
+            return Individual(r0.x + f * (best.x - target.x) + f * (r1.x - r2.x))
+
+        return inner
+
+    @staticmethod
     def current_to_best(seed: Seed) -> MutationStrategy:
         rng = npk.check_random_state(seed)
 
