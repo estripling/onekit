@@ -86,8 +86,9 @@ class Population(UserList):
         seed: Seed = None,
     ) -> "Population":
         rng = npk.check_random_state(seed)
-        filtered = tuple(ind for ind in self if ind not in exclude)
-        return Population(*rng.choice(filtered, size=size, replace=False))
+        exclude = {self.index(ind) for ind in exclude}
+        indices = tuple(i for i in range(self.size) if i not in exclude)
+        return Population(self[i] for i in rng.choice(indices, size, replace=False))
 
     def shuffle(self, seed: Seed = None) -> "Population":
         rng = npk.check_random_state(seed)
@@ -199,11 +200,7 @@ class Mutation:
             f: float,
             /,
         ) -> Individual:
-            exclude = population.index(target)
-            indices = tuple(i for i in range(population.size) if i != exclude)
-            r0, r1, r2 = (
-                population[i] for i in rng.choice(indices, size=3, replace=False)
-            )
+            r0, r1, r2 = population.sample(size=3, exclude=[target], seed=rng)
             return Individual(r0.x + f * (r1.x - r2.x))
 
         return inner
@@ -220,9 +217,7 @@ class Mutation:
             /,
         ) -> Individual:
             best = population.min()
-            exclude = {population.index(target), population.index(best)}
-            indices = tuple(i for i in range(population.size) if i not in exclude)
-            r1, r2 = (population[i] for i in rng.choice(indices, size=2, replace=False))
+            r1, r2 = population.sample(size=2, exclude=[target, best], seed=rng)
             return Individual(best.x + f * (r1.x - r2.x))
 
         return inner
@@ -239,11 +234,7 @@ class Mutation:
             /,
         ) -> Individual:
             best = population.min()
-            exclude = {population.index(target), population.index(best)}
-            indices = tuple(i for i in range(population.size) if i not in exclude)
-            r0, r1, r2 = (
-                population[i] for i in rng.choice(indices, size=3, replace=False)
-            )
+            r0, r1, r2 = population.sample(size=3, exclude=[target, best], seed=rng)
             return Individual(r0.x + f * (best.x - target.x) + f * (r1.x - r2.x))
 
         return inner
@@ -260,9 +251,7 @@ class Mutation:
             /,
         ) -> Individual:
             best = population.min()
-            exclude = {population.index(target), population.index(best)}
-            indices = tuple(i for i in range(population.size) if i not in exclude)
-            r1, r2 = (population[i] for i in rng.choice(indices, size=2, replace=False))
+            r1, r2 = population.sample(size=2, exclude=[target, best], seed=rng)
             return Individual(target.x + f * (best.x - target.x) + f * (r1.x - r2.x))
 
         return inner
