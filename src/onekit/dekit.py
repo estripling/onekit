@@ -79,6 +79,11 @@ class Population(UserList):
     def copy(self) -> "Population":
         return Population(self.data, key=self.key)
 
+    def shuffle(self, seed: Seed = None) -> "Population":
+        rng = npk.check_random_state(seed)
+        rng.shuffle(self)
+        return self
+
     def sort(self, *, key=None, reverse=False) -> "Population":
         key = self.key if key is None else key
         self.data.sort(key=key, reverse=reverse)

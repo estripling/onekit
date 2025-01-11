@@ -196,6 +196,18 @@ class TestPopulation:
         expected = [6.5936, 3.6254, 0.0]
         assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
+    def test_shuffle(self):
+        individuals = [Individual(1), Individual(2), Individual(3), Individual(4)]
+        pop = Population(individuals)
+
+        assert pop.size == len(individuals)
+        assert pop == individuals
+
+        pop.shuffle(101)
+        assert pop.size == len(individuals)
+        assert all(ind in pop for ind in individuals)
+        assert pop != individuals
+
     def test_min(self):
         ind1 = Individual([0, 0])
         ind2 = Individual([1, 1])
