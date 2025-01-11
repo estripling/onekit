@@ -205,7 +205,7 @@ class TestPopulation:
 
         pop.shuffle(101)
         assert pop.size == len(individuals)
-        assert all(ind in pop for ind in individuals)
+        assert all(ind in individuals for ind in pop)
         assert pop != individuals
 
     def test_min(self):
