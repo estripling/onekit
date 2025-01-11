@@ -175,6 +175,7 @@ class Initialization:
 class Mutation:
     @staticmethod
     def rand_1(seed: Seed) -> MutationStrategy:
+        """rand/1"""
         rng = npk.check_random_state(seed)
 
         def inner(
@@ -194,6 +195,7 @@ class Mutation:
 
     @staticmethod
     def best_1(seed: Seed) -> MutationStrategy:
+        """best/1"""
         rng = npk.check_random_state(seed)
 
         def inner(
@@ -212,6 +214,7 @@ class Mutation:
 
     @staticmethod
     def rand_to_best(seed: Seed) -> MutationStrategy:
+        """rand-to-best/1"""
         rng = npk.check_random_state(seed)
 
         def inner(
@@ -232,6 +235,7 @@ class Mutation:
 
     @staticmethod
     def current_to_best(seed: Seed) -> MutationStrategy:
+        """current-to-best/1"""
         rng = npk.check_random_state(seed)
 
         def inner(
