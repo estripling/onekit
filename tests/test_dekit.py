@@ -196,6 +196,27 @@ class TestPopulation:
         expected = [6.5936, 3.6254, 0.0]
         assert all(round(ind.fx, 4) == fx for ind, fx in zip(pop, expected))
 
+    @pytest.mark.parametrize("sample_size", [1, 2, 3])
+    def test_sample(self, sample_size: int):
+        ind1 = Individual(1)
+        ind2 = Individual(2)
+        ind3 = Individual(3)
+        ind4 = Individual(4)
+        individuals = [ind1, ind2, ind3, ind4]
+        pop = Population(individuals)
+
+        assert pop.size == len(individuals)
+        assert pop == individuals
+
+        actual = pop.sample(size=sample_size, exclude=[ind1], seed=101)
+        assert pop.size == len(individuals)
+        assert pop == individuals
+        assert isinstance(actual, Population)
+        assert actual.size == sample_size
+        assert ind1 not in actual
+        assert sum(ind in individuals for ind in actual) == sample_size
+        assert actual != [ind2, ind3, ind4]  # random order
+
     def test_shuffle(self):
         individuals = [Individual(1), Individual(2), Individual(3), Individual(4)]
         pop = Population(individuals)

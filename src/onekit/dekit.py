@@ -79,6 +79,16 @@ class Population(UserList):
     def copy(self) -> "Population":
         return Population(self.data, key=self.key)
 
+    def sample(
+        self,
+        size: int,
+        exclude: Iterable[Individual],
+        seed: Seed = None,
+    ) -> "Population":
+        rng = npk.check_random_state(seed)
+        filtered = tuple(ind for ind in self if ind not in exclude)
+        return Population(*rng.choice(filtered, size=size, replace=False))
+
     def shuffle(self, seed: Seed = None) -> "Population":
         rng = npk.check_random_state(seed)
         rng.shuffle(self)
