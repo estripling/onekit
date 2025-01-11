@@ -591,6 +591,65 @@ class TestTermination:
         assert de.evaluation_count == 8
         assert de.message == "reached max evaluations"
 
+    def test_has_reached_max_best_so_far(self, seed: int):
+        termination_strategy = dek.Termination.has_reached_max_best_so_far(1)
+
+        rng = npk.check_random_state(seed)
+        pop = Population(
+            Individual(np.array([0, 0])),
+            Individual(np.array([1, 1])),
+            Individual(np.array([2, 2])),
+            Individual(np.array([3, 3])),
+        )
+        de = dek.DeV1(
+            func=ofk.sphere,
+            init_strategy=dek.Initialization.identity(pop),
+            mutation_strategy=dek.Mutation.rand_1(rng),
+            bound_repair_strategy=dek.BoundRepair.identity(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=termination_strategy,
+            f_strategy=dek.Parameter.constant(0.8),
+            cr_strategy=dek.Parameter.constant(0.9),
+        )
+        assert de.evaluation_count == 0
+        assert de.best_so_far_count == 0
+
+        next(de)
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+        assert de.best_so_far_count == 0
+        assert np.isinf(de.best_so_far_value)
+        assert de.message is None
+
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is False
+        assert de.population is pop
+        assert de.population == pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 0
+        assert de.evaluation_count == 4
+        assert de.best_so_far_count == 0
+        assert np.isinf(de.best_so_far_value)
+        assert de.message is None
+
+        next(de)
+        actual = termination_strategy(de)
+        assert isinstance(actual, bool)
+        assert actual is True
+        assert de.population is not pop
+        assert de.population != pop
+        assert de.population.size == pop.size
+        assert de.generation_count == 1
+        assert de.evaluation_count == 8
+        assert de.best_so_far_count == 1
+        assert de.best_so_far_value == 0
+        assert de.message == "reached max best-so-far"
+
     def test_have_fx_values_converged(self, seed: int):
         termination_strategy = dek.Termination.have_fx_values_converged(rel_tol=0.9)
 

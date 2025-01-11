@@ -338,6 +338,16 @@ class Termination:
         return inner
 
     @staticmethod
+    def has_reached_max_best_so_far(max_best_so_far: int, /) -> TerminationStrategy:
+        def inner(de: DifferentialEvolution, /) -> bool:
+            if de.best_so_far_count >= max_best_so_far:
+                de.message = "reached max best-so-far"
+                return True
+            return False
+
+        return inner
+
+    @staticmethod
     def have_fx_values_converged(
         abs_tol: float = 0.0,
         rel_tol: float = 0.01,
@@ -364,14 +374,17 @@ class Termination:
     def has_met_any_basic_strategy(
         max_generations: int | None = None,
         max_evaluations: int | None = None,
+        max_best_so_far: int | None = None,
         abs_tol: float = 0.0,
         rel_tol: float = 0.01,
     ) -> TerminationStrategy:
         max_generations = float("inf") if max_generations is None else max_generations
         max_evaluations = float("inf") if max_evaluations is None else max_evaluations
+        max_best_so_far = float("inf") if max_best_so_far is None else max_best_so_far
         termination_strategy = Termination.has_met_any_strategy(
             Termination.has_reached_max_generations(max_generations),
             Termination.has_reached_max_evaluations(max_evaluations),
+            Termination.has_reached_max_best_so_far(max_best_so_far),
             Termination.have_fx_values_converged(abs_tol, rel_tol),
         )
 
@@ -481,6 +494,8 @@ class DifferentialEvolution(ABC):
         self.population: Population | None = None
         self.generation_count: int = 0
         self.evaluation_count: int = 0
+        self.best_so_far_count: int = 0
+        self.best_so_far_value: float = float("inf")
         self.message: str | None = None
 
     def __iter__(self) -> "DifferentialEvolution":
@@ -503,6 +518,15 @@ class DifferentialEvolution(ABC):
     def _init_population(self) -> "DifferentialEvolution":
         self.population = self.init_strategy()
         self.evaluation_count += evaluate(self.func, self.population)
+        return self
+
+    def _update_best_so_far(self) -> "DifferentialEvolution":
+        fx_best = self.best.fx
+        if fx_best < self.best_so_far_value:
+            self.best_so_far_value = fx_best
+            self.best_so_far_count = 1
+        else:
+            self.best_so_far_count += 1
         return self
 
 
@@ -532,6 +556,7 @@ class DeV1(DifferentialEvolution):
 
         self.population = new_population
         self.generation_count += 1
+        self._update_best_so_far()
 
         return self
 
@@ -563,5 +588,6 @@ class DeV2(DifferentialEvolution):
             self.population[i] = survivor
 
         self.generation_count += 1
+        self._update_best_so_far()
 
         return self
