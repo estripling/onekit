@@ -82,12 +82,13 @@ class Population(UserList):
     def sample(
         self,
         size: int,
-        exclude: Iterable[Individual],
+        exclude: Iterable[Individual] | None = None,
         seed: Seed = None,
     ) -> "Population":
         rng = npk.check_random_state(seed)
-        exclude = {self.index(ind) for ind in exclude}
-        indices = tuple(i for i in range(self.size) if i not in exclude)
+        exclude = set() if exclude is None else exclude
+        exclude_set = {self.index(ind) for ind in exclude}
+        indices = tuple(i for i in range(self.size) if i not in exclude_set)
         return Population(self[i] for i in rng.choice(indices, size, replace=False))
 
     def shuffle(self, seed: Seed = None) -> "Population":
