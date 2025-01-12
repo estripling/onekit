@@ -413,8 +413,15 @@ class TestMutation:
         assert mutant1 != mutant2
         assert np.all(mutant1.x != mutant2.x)
 
-    def test_current_to_pbest_1(self, seed: int):
-        mutation_strategy = dek.Mutation.current_to_pbest_1(seed)
+    @pytest.mark.parametrize(
+        "func",
+        [
+            dek.Mutation.rand_to_pbest_1,
+            dek.Mutation.current_to_pbest_1,
+        ],
+    )
+    def test_pbest_mutation_strategies(self, func, seed: int):
+        mutation_strategy = func(seed)
 
         n_pop, n_dim = 4, 2
         ind1 = Individual(np.array([0, 0]))
@@ -428,7 +435,8 @@ class TestMutation:
         assert pop.is_evaluated
         assert archive.is_evaluated
 
-        mutant1 = mutation_strategy(pop, ind1, 0.8)
+        f = 0.8
+        mutant1 = mutation_strategy(pop, ind1, f)
         assert isinstance(mutant1, Individual)
         assert pop.size == n_pop
         assert pop == [ind1, ind2, ind3, ind4]
@@ -439,7 +447,8 @@ class TestMutation:
         assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
         assert mutant1.x.shape == (n_dim,)
 
-        mutant2 = mutation_strategy(pop, ind2, 0.8, p=0.2, archive=archive)
+        p = 0.2
+        mutant2 = mutation_strategy(pop, ind2, f, p, archive)
         assert isinstance(mutant2, Individual)
         assert pop.size == n_pop
         assert pop == [ind1, ind2, ind3, ind4]

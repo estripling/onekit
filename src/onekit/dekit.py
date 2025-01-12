@@ -258,6 +258,37 @@ class Mutation:
         return inner
 
     @staticmethod
+    def rand_to_pbest_1(seed: Seed) -> MutationStrategy:
+        """rand-to-pbest/1"""
+        rng = npk.check_random_state(seed)
+
+        def inner(
+            population: Population,
+            target: Individual,
+            f: float,
+            p: float = 0.2,
+            archive: Population | None = None,
+            /,
+        ) -> Individual:
+            pbest = get_pbest(population, p).sample(size=1, seed=rng)[0]
+
+            if archive is None:
+                r0, r1, r2 = population.sample(
+                    size=3,
+                    exclude=[target, pbest],
+                    seed=rng,
+                )
+
+            else:
+                pool = population + archive
+                r0, r1 = population.sample(size=2, exclude=[target, pbest], seed=rng)
+                r2 = pool.sample(size=1, exclude=[target, pbest, r0, r1], seed=rng)[0]
+
+            return Individual(r0.x + f * (pbest.x - r0.x) + f * (r1.x - r2.x))
+
+        return inner
+
+    @staticmethod
     def current_to_pbest_1(seed: Seed) -> MutationStrategy:
         """current-to-pbest/1"""
         rng = npk.check_random_state(seed)
@@ -266,10 +297,9 @@ class Mutation:
             population: Population,
             target: Individual,
             f: float,
-            /,
-            *,
             p: float = 0.2,
             archive: Population | None = None,
+            /,
         ) -> Individual:
             pbest = get_pbest(population, p).sample(size=1, seed=rng)[0]
 
