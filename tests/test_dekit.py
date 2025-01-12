@@ -368,8 +368,8 @@ class TestMutation:
         [
             dek.Mutation.rand_1,
             dek.Mutation.best_1,
-            dek.Mutation.rand_to_best,
-            dek.Mutation.current_to_best,
+            dek.Mutation.rand_to_best_1,
+            dek.Mutation.current_to_best_1,
         ],
     )
     def test_mutation_strategies(self, func, seed: int):

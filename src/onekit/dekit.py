@@ -223,7 +223,7 @@ class Mutation:
         return inner
 
     @staticmethod
-    def rand_to_best(seed: Seed) -> MutationStrategy:
+    def rand_to_best_1(seed: Seed) -> MutationStrategy:
         """rand-to-best/1"""
         rng = npk.check_random_state(seed)
 
@@ -240,7 +240,7 @@ class Mutation:
         return inner
 
     @staticmethod
-    def current_to_best(seed: Seed) -> MutationStrategy:
+    def current_to_best_1(seed: Seed) -> MutationStrategy:
         """current-to-best/1"""
         rng = npk.check_random_state(seed)
 
