@@ -257,6 +257,34 @@ class Mutation:
 
         return inner
 
+    @staticmethod
+    def current_to_pbest_1(seed: Seed) -> MutationStrategy:
+        """current-to-pbest/1"""
+        rng = npk.check_random_state(seed)
+
+        def inner(
+            population: Population,
+            target: Individual,
+            f: float,
+            /,
+            *,
+            p: float = 0.2,
+            archive: Population | None = None,
+        ) -> Individual:
+            pbest = get_pbest(population, p).sample(size=1, seed=rng)[0]
+
+            if archive is None:
+                r1, r2 = population.sample(size=2, exclude=[target, pbest], seed=rng)
+
+            else:
+                pool = population + archive
+                r1 = population.sample(size=1, exclude=[target, pbest], seed=rng)[0]
+                r2 = pool.sample(size=1, exclude=[target, pbest, r1], seed=rng)[0]
+
+            return Individual(target.x + f * (pbest.x - target.x) + f * (r1.x - r2.x))
+
+        return inner
+
 
 class BoundRepair:
     @staticmethod
@@ -476,6 +504,18 @@ def denormalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarr
 
 def normalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarray:
     return (x - x_min) / (x_max - x_min)
+
+
+def get_pbest(
+    population: Population,
+    p: float = 0.2,
+    n_min: int = 1,
+    *,
+    key=None,
+    reverse=False,
+) -> Population:
+    n_best = max(n_min, int(p * population.size))
+    return population.copy().sort(key=key, reverse=reverse)[:n_best]
 
 
 class DifferentialEvolution(ABC):

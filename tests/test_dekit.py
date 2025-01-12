@@ -413,6 +413,43 @@ class TestMutation:
         assert mutant1 != mutant2
         assert np.all(mutant1.x != mutant2.x)
 
+    def test_current_to_pbest_1(self, seed: int):
+        mutation_strategy = dek.Mutation.current_to_pbest_1(seed)
+
+        n_pop, n_dim = 4, 2
+        ind1 = Individual(np.array([0, 0]))
+        ind2 = Individual(np.array([1, 1]))
+        ind3 = Individual(np.array([2, 2]))
+        ind4 = Individual(np.array([3, 3]))
+        ind5 = Individual(np.array([4, 4]))
+        ind6 = Individual(np.array([5, 5]))
+        pop = dek.evaluate_population(ofk.sphere, Population(ind1, ind2, ind3, ind4))
+        archive = dek.evaluate_population(ofk.sphere, Population(ind5, ind6))
+        assert pop.is_evaluated
+        assert archive.is_evaluated
+
+        mutant1 = mutation_strategy(pop, ind1, 0.8)
+        assert isinstance(mutant1, Individual)
+        assert pop.size == n_pop
+        assert pop == [ind1, ind2, ind3, ind4]
+        assert isinstance(mutant1, Individual)
+        assert mutant1 != ind1
+        assert all(mutant1 != ind for ind in pop)
+        assert not mutant1.is_evaluated
+        assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
+        assert mutant1.x.shape == (n_dim,)
+
+        mutant2 = mutation_strategy(pop, ind2, 0.8, p=0.2, archive=archive)
+        assert isinstance(mutant2, Individual)
+        assert pop.size == n_pop
+        assert pop == [ind1, ind2, ind3, ind4]
+        assert isinstance(mutant2, Individual)
+        assert mutant2 != ind1
+        assert all(mutant2 != ind for ind in pop)
+        assert not mutant2.is_evaluated
+        assert mutant2.x.dtype.kind in np.typecodes["AllFloat"]
+        assert mutant2.x.shape == (n_dim,)
+
     @pytest.fixture(scope="class")
     def seed(self) -> int:
         return 101
