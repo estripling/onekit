@@ -332,17 +332,17 @@ class Mutation:
 class BoundRepair:
     @staticmethod
     def identity() -> BoundRepairStrategy:
-        def inner(ind: Individual, /) -> Individual:
-            return ind
+        def inner(individual: Individual, /) -> Individual:
+            return individual
 
         return inner
 
     @staticmethod
     def clip__standard_uniform() -> BoundRepairStrategy:
-        def inner(ind: Individual, /) -> Individual:
-            if ((ind.x < 0) | (ind.x > 1)).any():
-                ind = Individual(np.clip(ind.x, 0, 1))
-            return ind
+        def inner(individual: Individual, /) -> Individual:
+            if ((individual.x < 0) | (individual.x > 1)).any():
+                individual = Individual(np.clip(individual.x, 0, 1))
+            return individual
 
         return inner
 
