@@ -8,8 +8,10 @@ from typing import (
     Any,
     Callable,
     Iterable,
+    Optional,
     Sequence,
     Tuple,
+    Union,
 )
 
 import numpy as np
@@ -19,7 +21,9 @@ import onekit.numpykit as npk
 import onekit.pythonkit as pk
 
 Bounds = Sequence[Tuple[float, float]]
-Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
+Seed = Union[
+    int, float, random.Random, np.random.RandomState, np.random.Generator, None
+]
 ObjectiveFunction = Callable[[Any], Any]
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
@@ -40,7 +44,7 @@ class Individual:
         return self._x
 
     @property
-    def fx(self) -> Any | None:
+    def fx(self) -> Optional[Any]:
         return self._fx
 
     @fx.setter
@@ -60,7 +64,7 @@ class Individual:
 
 
 class Population(UserList):
-    def __init__(self, *individuals: Individual | Iterable[Individual], key=None):
+    def __init__(self, *individuals: Union[Individual, Iterable[Individual]], key=None):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
         self._key = KeyFunction.ind_fx() if key is None else key
 
@@ -82,7 +86,7 @@ class Population(UserList):
     def sample(
         self,
         size: int,
-        exclude: Iterable[Individual] | None = None,
+        exclude: Optional[Iterable[Individual]] = None,
         seed: Seed = None,
     ) -> "Population":
         rng = npk.check_random_state(seed)
@@ -266,8 +270,8 @@ class Mutation:
             population: Population,
             target: Individual,
             f: float,
-            p: float = 0.2,
-            archive: Population | None = None,
+            p: float,
+            archive: Optional[Population],
             /,
         ) -> Individual:
             pbest = get_pbest(population, p).sample(size=1, seed=rng)[0]
@@ -297,8 +301,8 @@ class Mutation:
             population: Population,
             target: Individual,
             f: float,
-            p: float = 0.2,
-            archive: Population | None = None,
+            p: float,
+            archive: Optional[Population],
             /,
         ) -> Individual:
             pbest = get_pbest(population, p).sample(size=1, seed=rng)[0]
@@ -430,7 +434,9 @@ class Termination:
 
     @staticmethod
     def has_met_any_strategy(
-        *termination_strategy: TerminationStrategy | Iterable[TerminationStrategy],
+        *termination_strategy: Union[
+            TerminationStrategy, Iterable[TerminationStrategy]
+        ],
     ) -> TerminationStrategy:
         def inner(de: DifferentialEvolution, /) -> bool:
             return pk.are_predicates_true(any, termination_strategy)(de)
@@ -439,9 +445,9 @@ class Termination:
 
     @staticmethod
     def has_met_any_basic_strategy(
-        max_generations: int | None = None,
-        max_evaluations: int | None = None,
-        max_best_so_far: int | None = None,
+        max_generations: Optional[int] = None,
+        max_evaluations: Optional[int] = None,
+        max_best_so_far: Optional[int] = None,
         abs_tol: float = 0.0,
         rel_tol: float = 0.01,
     ) -> TerminationStrategy:
@@ -491,7 +497,7 @@ def evaluate_population(func: ObjectiveFunction, population: Population) -> Popu
     return population
 
 
-def evaluate(func: ObjectiveFunction, obj: Individual | Population) -> int:
+def evaluate(func: ObjectiveFunction, obj: Union[Individual, Population]) -> int:
     """Evaluate individual or population object and return evaluation count.
 
     Notes
@@ -548,6 +554,10 @@ def get_pbest(
     return population.copy().sort(key=key, reverse=reverse)[:n_best]
 
 
+def lehmer_mean(weights: np.ndarray, successes: np.ndarray) -> float:
+    return (weights * successes**2).sum() / (weights * successes).sum()
+
+
 class DifferentialEvolution(ABC):
     def __init__(
         self,
@@ -570,12 +580,12 @@ class DifferentialEvolution(ABC):
         self.termination_strategy = termination_strategy
         self.f_strategy = f_strategy
         self.cr_strategy = cr_strategy
-        self.population: Population | None = None
+        self.population: Optional[Population] = None
         self.generation_count: int = 0
         self.evaluation_count: int = 0
         self.best_so_far_count: int = 0
         self.best_so_far_value: float = float("inf")
-        self.message: str | None = None
+        self.message: Optional[str] = None
 
     def __iter__(self) -> "DifferentialEvolution":
         return self

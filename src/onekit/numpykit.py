@@ -1,4 +1,5 @@
 import random
+from typing import Union
 
 import numpy as np
 import numpy.typing as npt
@@ -14,7 +15,9 @@ __all__ = (
 
 
 ArrayLike = npt.ArrayLike
-Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
+Seed = Union[
+    int, float, random.Random, np.random.RandomState, np.random.Generator, None
+]
 Vector = npt.NDArray[np.float64]
 
 

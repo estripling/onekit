@@ -136,7 +136,7 @@ def archive_files(
 def are_predicates_true(
     func: Callable[..., bool],
     /,
-    *predicates: Predicate | Iterable[Predicate],
+    *predicates: Union[Predicate, Iterable[Predicate]],
 ) -> Predicate:
     """Evaluate if predicates are true.
 

@@ -5,7 +5,6 @@ import numpy.testing as npt
 import pytest
 
 import onekit.numpykit as npk
-from onekit.numpykit import Seed
 
 
 @pytest.mark.parametrize(
@@ -21,7 +20,14 @@ from onekit.numpykit import Seed
     ],
 )
 def test_check_random_state(seed):
-    if seed is None or isinstance(seed, Seed):
+    valid_types = (
+        int,
+        float,
+        random.Random,
+        np.random.RandomState,
+        np.random.Generator,
+    )
+    if seed is None or isinstance(seed, valid_types):
         assert isinstance(npk.check_random_state(seed), np.random.Generator)
     else:
         with pytest.raises(ValueError):
