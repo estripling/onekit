@@ -850,8 +850,8 @@ class DeV3(DifferentialEvolution):
 
     def get_cr_value(self, h: int) -> float:
         # Variance: 0.1
-        cr = self.memory["cr"][h] + np.sqrt(0.1) * self.rng.standard_normal(1)[0]
-        return float(np.clip(cr, 0, 1))
+        mcr = self.memory["cr"][h]
+        return float(np.clip(mcr + np.sqrt(0.1) * self.rng.standard_normal(1)[0], 0, 1))
 
     def get_p_value(self) -> float:
         return self.rng.uniform(2 / self.population.size, 0.2)
