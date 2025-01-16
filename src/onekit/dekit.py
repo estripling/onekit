@@ -753,7 +753,7 @@ class DeV2(DifferentialEvolution):
 
 
 class DeV3(DifferentialEvolution):
-    """Differential Evolution Variant 3: SHADE
+    """Differential Evolution Variant 3: SHADE 1.0
 
     Success-History based Adaptive Differential Evolution.
 
@@ -762,10 +762,6 @@ class DeV3(DifferentialEvolution):
       [1] Tanabe, R. & Fukunaga, A., 2013.
           Success-History Based Parameter Adaptation for Differential Evolution.
           In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
-      [2] Tanabe, R. & Fukunaga, A.S., 2014.
-          Improving the Search Performance of SHADE Using Linear Population Size
-          Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
-          pp. 1658–1665.
     """
 
     def __init__(
@@ -795,9 +791,10 @@ class DeV3(DifferentialEvolution):
             "size": memory_size,
             "f": [0.5] * memory_size,
             "cr": [0.5] * memory_size,
-            "i": 0,
+            "k": 0,
         }
 
+    # noinspection PyTypeChecker
     def __next__(self) -> "DifferentialEvolution":
         if self.population is None:
             return self.init_population()
@@ -807,6 +804,7 @@ class DeV3(DifferentialEvolution):
 
         new_population = Population()
         success = defaultdict(list)
+        success["any"] = False
 
         for target in self.population:
             h = self.get_h_value()
@@ -833,6 +831,7 @@ class DeV3(DifferentialEvolution):
                 success["f"].append(f)
                 success["cr"].append(cr)
                 success["fx_diff"].append(abs(trial.fx - target.fx))
+                success["any"] = True
 
         self.population = new_population
         self.generation_count += 1
@@ -858,11 +857,11 @@ class DeV3(DifferentialEvolution):
         return self.rng.uniform(2 / self.population.size, 0.2)
 
     def update_memory(self, success: Dict["str", List[float]]) -> None:
-        if len(success["f"]) > 0:
+        if success["any"]:
             fx_diff = np.array(success["fx_diff"])
             weights = fx_diff / fx_diff.sum()
 
-            i = self.memory["i"]
-            self.memory["f"][i] = lehmer_mean(weights, np.array(success["f"]))
-            self.memory["cr"][i] = (weights * np.array(success["cr"])).sum()
-            self.memory["i"] = 0 if (i + 1) >= self.memory["size"] else i + 1
+            k = self.memory["k"]
+            self.memory["f"][k] = lehmer_mean(weights, np.array(success["f"]))
+            self.memory["cr"][k] = (weights * np.array(success["cr"])).sum()
+            self.memory["k"] = 0 if (k + 1) >= self.memory["size"] else k + 1
