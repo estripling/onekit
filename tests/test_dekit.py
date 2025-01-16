@@ -436,7 +436,8 @@ class TestMutation:
         assert archive.is_evaluated
 
         f = 0.8
-        mutant1 = mutation_strategy(pop, ind1, f)
+        p = 0.2
+        mutant1 = mutation_strategy(pop, ind1, f, p, None)
         assert isinstance(mutant1, Individual)
         assert pop.size == n_pop
         assert pop == [ind1, ind2, ind3, ind4]
@@ -447,7 +448,6 @@ class TestMutation:
         assert mutant1.x.dtype.kind in np.typecodes["AllFloat"]
         assert mutant1.x.shape == (n_dim,)
 
-        p = 0.2
         mutant2 = mutation_strategy(pop, ind2, f, p, archive)
         assert isinstance(mutant2, Individual)
         assert pop.size == n_pop
@@ -1042,7 +1042,7 @@ def test_normalize(x: np.ndarray, expected: np.ndarray):
 
 class TestDifferentialEvolution:
     @pytest.mark.parametrize("cls", [dek.DeV1, dek.DeV2])
-    def test_dev1(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
+    def test_classic_de(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
         rng = npk.check_random_state(seed)
         bnh = dek.check_bounds(bounds)
 
@@ -1067,6 +1067,51 @@ class TestDifferentialEvolution:
             ),
             f_strategy=dek.Parameter.dither(0.5, 1.0, rng),
             cr_strategy=dek.Parameter.constant(0.9),
+        )
+
+        for g, generation in enumerate(de):
+            assert isinstance(generation, DifferentialEvolution)
+            assert generation.generation_count == g
+            assert generation.evaluation_count == (g + 1) * n
+
+            assert isinstance(generation.population, Population)
+            assert generation.population.size == n
+
+            assert generation.best.fx < generation.worst.fx
+
+        solution = de.best
+        assert isinstance(solution, Individual)
+        x_best = denorm(solution.x)
+        fx_best = solution.fx
+        npt.assert_array_almost_equal(x_best, np.zeros(d), decimal=2)
+        npt.assert_almost_equal(fx_best, 0, decimal=2)
+
+    @pytest.mark.parametrize("cls", [dek.DeV3])
+    def test_shade(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
+        rng = npk.check_random_state(seed)
+        bnh = dek.check_bounds(bounds)
+
+        def denorm(x: np.ndarray) -> np.ndarray:
+            return dek.denormalize(x, x_min=bnh.x_min, x_max=bnh.x_max)
+
+        def problem(x: np.ndarray) -> ObjectiveFunction:
+            return toolz.pipe(x, denorm, func)
+
+        d = bnh.n_dim
+        n = 10 * d
+
+        de = cls(
+            func=problem,
+            init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
+            mutation_strategy=dek.Mutation.current_to_pbest_1(rng),
+            bound_repair_strategy=dek.BoundRepair.clip__standard_uniform(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            termination_strategy=dek.Termination.has_met_any_basic_strategy(
+                max_generations=20
+            ),
+            memory_size=5,
+            seed=rng,
         )
 
         for g, generation in enumerate(de):

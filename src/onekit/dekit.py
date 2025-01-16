@@ -3,11 +3,16 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from collections import UserList
+from collections import (
+    UserList,
+    defaultdict,
+)
 from typing import (
     Any,
     Callable,
+    Dict,
     Iterable,
+    List,
     Optional,
     Sequence,
     Tuple,
@@ -27,6 +32,10 @@ Seed = Union[
 ObjectiveFunction = Callable[[Any], Any]
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
+PbestMutationStrategy = Callable[
+    ["Population", "Individual", float, float, Optional["Population"]],
+    "Individual",
+]
 BoundRepairStrategy = Callable[["Individual"], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 ReplacementStrategy = Callable[["Individual", "Individual"], "Individual"]
@@ -262,7 +271,7 @@ class Mutation:
         return inner
 
     @staticmethod
-    def rand_to_pbest_1(seed: Seed) -> MutationStrategy:
+    def rand_to_pbest_1(seed: Seed) -> PbestMutationStrategy:
         """rand-to-pbest/1"""
         rng = npk.check_random_state(seed)
 
@@ -293,7 +302,7 @@ class Mutation:
         return inner
 
     @staticmethod
-    def current_to_pbest_1(seed: Seed) -> MutationStrategy:
+    def current_to_pbest_1(seed: Seed) -> PbestMutationStrategy:
         """current-to-pbest/1"""
         rng = npk.check_random_state(seed)
 
@@ -558,18 +567,33 @@ def lehmer_mean(weights: np.ndarray, successes: np.ndarray) -> float:
     return (weights * successes**2).sum() / (weights * successes).sum()
 
 
+def update_archive(
+    archive: Population,
+    individual: Individual,
+    max_size: int,
+    seed: Seed,
+) -> Population:
+    rng = npk.check_random_state(seed)
+
+    if archive.size <= max_size:
+        archive.append(individual)
+    else:
+        rnd_idx = rng.integers(archive.size)
+        archive[rnd_idx] = individual
+
+    return archive
+
+
 class DifferentialEvolution(ABC):
     def __init__(
         self,
         func: ObjectiveFunction,
         init_strategy: InitializationStrategy,
-        mutation_strategy: MutationStrategy,
+        mutation_strategy: Union[MutationStrategy, PbestMutationStrategy],
         bound_repair_strategy: BoundRepairStrategy,
         crossover_strategy: CrossoverStrategy,
         replacement_strategy: ReplacementStrategy,
         termination_strategy: TerminationStrategy,
-        f_strategy: ParameterStrategy,
-        cr_strategy: ParameterStrategy,
     ):
         self.func = func
         self.init_strategy = init_strategy
@@ -578,8 +602,6 @@ class DifferentialEvolution(ABC):
         self.crossover_strategy = crossover_strategy
         self.replacement_strategy = replacement_strategy
         self.termination_strategy = termination_strategy
-        self.f_strategy = f_strategy
-        self.cr_strategy = cr_strategy
         self.population: Optional[Population] = None
         self.generation_count: int = 0
         self.evaluation_count: int = 0
@@ -604,12 +626,12 @@ class DifferentialEvolution(ABC):
         """Returns the worst solution in the current population."""
         return self.population.max()
 
-    def _init_population(self) -> "DifferentialEvolution":
+    def init_population(self) -> "DifferentialEvolution":
         self.population = self.init_strategy()
         self.evaluation_count += evaluate(self.func, self.population)
         return self
 
-    def _update_best_so_far(self) -> "DifferentialEvolution":
+    def update_best_so_far(self) -> "DifferentialEvolution":
         fx_best = self.best.fx
         if fx_best < self.best_so_far_value:
             self.best_so_far_value = fx_best
@@ -622,9 +644,33 @@ class DifferentialEvolution(ABC):
 class DeV1(DifferentialEvolution):
     """Differential Evolution Variant 1: Classic DE."""
 
+    def __init__(
+        self,
+        func: ObjectiveFunction,
+        init_strategy: InitializationStrategy,
+        mutation_strategy: MutationStrategy,
+        bound_repair_strategy: BoundRepairStrategy,
+        crossover_strategy: CrossoverStrategy,
+        replacement_strategy: ReplacementStrategy,
+        termination_strategy: TerminationStrategy,
+        f_strategy: Optional[ParameterStrategy],
+        cr_strategy: Optional[ParameterStrategy],
+    ):
+        super().__init__(
+            func=func,
+            init_strategy=init_strategy,
+            mutation_strategy=mutation_strategy,
+            bound_repair_strategy=bound_repair_strategy,
+            crossover_strategy=crossover_strategy,
+            replacement_strategy=replacement_strategy,
+            termination_strategy=termination_strategy,
+        )
+        self.f_strategy = f_strategy
+        self.cr_strategy = cr_strategy
+
     def __next__(self) -> "DifferentialEvolution":
         if self.population is None:
-            return self._init_population()
+            return self.init_population()
 
         if self.termination_strategy(self):
             raise StopIteration
@@ -645,7 +691,7 @@ class DeV1(DifferentialEvolution):
 
         self.population = new_population
         self.generation_count += 1
-        self._update_best_so_far()
+        self.update_best_so_far()
 
         return self
 
@@ -656,9 +702,33 @@ class DeV2(DifferentialEvolution):
     - That is, fitter solutions are immediately updated within a single generation.
     """
 
+    def __init__(
+        self,
+        func: ObjectiveFunction,
+        init_strategy: InitializationStrategy,
+        mutation_strategy: MutationStrategy,
+        bound_repair_strategy: BoundRepairStrategy,
+        crossover_strategy: CrossoverStrategy,
+        replacement_strategy: ReplacementStrategy,
+        termination_strategy: TerminationStrategy,
+        f_strategy: Optional[ParameterStrategy],
+        cr_strategy: Optional[ParameterStrategy],
+    ):
+        super().__init__(
+            func=func,
+            init_strategy=init_strategy,
+            mutation_strategy=mutation_strategy,
+            bound_repair_strategy=bound_repair_strategy,
+            crossover_strategy=crossover_strategy,
+            replacement_strategy=replacement_strategy,
+            termination_strategy=termination_strategy,
+        )
+        self.f_strategy = f_strategy
+        self.cr_strategy = cr_strategy
+
     def __next__(self) -> "DifferentialEvolution":
         if self.population is None:
-            return self._init_population()
+            return self.init_population()
 
         if self.termination_strategy(self):
             raise StopIteration
@@ -677,6 +747,122 @@ class DeV2(DifferentialEvolution):
             self.population[i] = survivor
 
         self.generation_count += 1
-        self._update_best_so_far()
+        self.update_best_so_far()
 
         return self
+
+
+class DeV3(DifferentialEvolution):
+    """Differential Evolution Variant 3: SHADE
+
+    Success-History based Adaptive Differential Evolution.
+
+    References
+    ----------
+      [1] Tanabe, R. & Fukunaga, A., 2013.
+          Success-History Based Parameter Adaptation for Differential Evolution.
+          In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
+      [2] Tanabe, R. & Fukunaga, A.S., 2014.
+          Improving the Search Performance of SHADE Using Linear Population Size
+          Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
+          pp. 1658–1665.
+    """
+
+    def __init__(
+        self,
+        func: ObjectiveFunction,
+        init_strategy: InitializationStrategy,
+        mutation_strategy: PbestMutationStrategy,
+        bound_repair_strategy: BoundRepairStrategy,
+        crossover_strategy: CrossoverStrategy,
+        replacement_strategy: ReplacementStrategy,
+        termination_strategy: TerminationStrategy,
+        memory_size: int,
+        seed: Seed = None,
+    ):
+        super().__init__(
+            func=func,
+            init_strategy=init_strategy,
+            mutation_strategy=mutation_strategy,
+            bound_repair_strategy=bound_repair_strategy,
+            crossover_strategy=crossover_strategy,
+            replacement_strategy=replacement_strategy,
+            termination_strategy=termination_strategy,
+        )
+        self.rng = npk.check_random_state(seed)
+        self.archive = Population()
+        self.memory = {
+            "size": memory_size,
+            "f": [0.5] * memory_size,
+            "cr": [0.5] * memory_size,
+            "i": 0,
+        }
+
+    def __next__(self) -> "DifferentialEvolution":
+        if self.population is None:
+            return self.init_population()
+
+        if self.termination_strategy(self):
+            raise StopIteration
+
+        new_population = Population()
+        success = defaultdict(list)
+
+        for target in self.population:
+            h = self.get_h_value()
+            f = self.get_f_value(h)
+            cr = self.get_cr_value(h)
+            p = self.get_p_value()
+
+            trial = toolz.pipe(
+                self.mutation_strategy(self.population, target, f, p, self.archive),
+                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.crossover_strategy(target, mutant, cr),
+            )
+            self.evaluation_count += evaluate(self.func, trial)
+            survivor = self.replacement_strategy(target, trial)
+            new_population.append(survivor)
+
+            if trial.fx < target.fx:
+                self.archive = update_archive(
+                    archive=self.archive,
+                    individual=target,
+                    max_size=self.population.size,
+                    seed=self.rng,
+                )
+                success["f"].append(f)
+                success["cr"].append(cr)
+                success["fx_diff"].append(abs(trial.fx - target.fx))
+
+        self.population = new_population
+        self.generation_count += 1
+        self.update_best_so_far()
+        self.update_memory(success)
+
+        return self
+
+    def get_h_value(self) -> int:
+        return self.rng.integers(self.memory["size"])
+
+    def get_f_value(self, h: int) -> float:
+        # Variance: 0.1
+        f = self.memory["f"][h] + np.sqrt(0.1) * self.rng.standard_cauchy(1)[0]
+        return float(f if 0 < f <= 1 else 1 if f > 1 else self.get_f_value(h))
+
+    def get_cr_value(self, h: int) -> float:
+        # Variance: 0.1
+        cr = self.memory["cr"][h] + np.sqrt(0.1) * self.rng.standard_normal(1)[0]
+        return float(np.clip(cr, 0, 1))
+
+    def get_p_value(self) -> float:
+        return self.rng.uniform(2 / self.population.size, 0.2)
+
+    def update_memory(self, success: Dict["str", List[float]]) -> None:
+        if len(success["f"]) > 0:
+            fx_diff = np.array(success["fx_diff"])
+            weights = fx_diff / fx_diff.sum()
+
+            i = self.memory["i"]
+            self.memory["f"][i] = lehmer_mean(weights, np.array(success["f"]))
+            self.memory["cr"][i] = (weights * np.array(success["cr"])).sum()
+            self.memory["i"] = 0 if (i + 1) >= self.memory["size"] else i + 1
