@@ -865,3 +865,43 @@ class DeV3(DifferentialEvolution):
             self.memory["f"][k] = lehmer_mean(weights, np.array(success["f"]))
             self.memory["cr"][k] = (weights * np.array(success["cr"])).sum()
             self.memory["k"] = 0 if (k + 1) >= self.memory["size"] else k + 1
+
+
+class DeV4(DeV3):
+    """Differential Evolution Variant 3: SHADE 1.1
+
+    Success-History based Adaptive Differential Evolution.
+
+    References
+    ----------
+      [1] Tanabe, R. & Fukunaga, A., 2013.
+          Success-History Based Parameter Adaptation for Differential Evolution.
+          In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
+      [2] Tanabe, R. & Fukunaga, A.S., 2014.
+          Improving the Search Performance of SHADE Using Linear Population Size
+          Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
+          pp. 1658–1665.
+    """
+
+    def get_cr_value(self, h: int) -> float:
+        # Variance: 0.1
+        mcr = self.memory["cr"][h]
+        return float(
+            0
+            if np.isnan(mcr)
+            else np.clip(mcr + np.sqrt(0.1) * self.rng.standard_normal(1)[0], 0, 1)
+        )
+
+    def update_memory(self, success: Dict["str", List[float]]) -> None:
+        if success["any"]:
+            fx_diff = np.array(success["fx_diff"])
+            weights = fx_diff / fx_diff.sum()
+
+            k = self.memory["k"]
+            self.memory["f"][k] = lehmer_mean(weights, np.array(success["f"]))
+            self.memory["cr"][k] = (
+                np.nan
+                if np.isnan(self.memory["cr"][k]) or np.isclose(max(success["cr"]), 0)
+                else lehmer_mean(weights, np.array(success["cr"]))
+            )
+            self.memory["k"] = 0 if (k + 1) >= self.memory["size"] else k + 1

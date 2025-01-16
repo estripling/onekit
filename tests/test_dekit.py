@@ -1086,7 +1086,7 @@ class TestDifferentialEvolution:
         npt.assert_array_almost_equal(x_best, np.zeros(d), decimal=2)
         npt.assert_almost_equal(fx_best, 0, decimal=2)
 
-    @pytest.mark.parametrize("cls", [dek.DeV3])
+    @pytest.mark.parametrize("cls", [dek.DeV3, dek.DeV4])
     def test_shade(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
         rng = npk.check_random_state(seed)
         bnh = dek.check_bounds(bounds)
