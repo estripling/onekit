@@ -871,6 +871,10 @@ class DeV4(DeV3):
     """Differential Evolution Variant 3: SHADE 1.1
 
     Success-History based Adaptive Differential Evolution.
+    If memory CR at selected index has terminal value NaN, individual CR values are
+    locked to have value 0 until the end of the search. As a result, the algorithm
+    enforces a "change-one-parameter-at-a-time" policy, which slows down convergence
+    and is effective on multimodal problems.
 
     References
     ----------
