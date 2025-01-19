@@ -36,7 +36,7 @@ PbestMutationStrategy = Callable[
     ["Population", "Individual", float, float, Optional["Population"]],
     "Individual",
 ]
-BoundRepairStrategy = Callable[["Individual"], "Individual"]
+BoundRepairStrategy = Callable[["Individual", "Individual"], "Individual"]
 CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 ReplacementStrategy = Callable[["Individual", "Individual"], "Individual"]
 TerminationStrategy = Callable[["DifferentialEvolution"], bool]
@@ -332,17 +332,17 @@ class Mutation:
 class BoundRepair:
     @staticmethod
     def identity() -> BoundRepairStrategy:
-        def inner(individual: Individual, /) -> Individual:
-            return individual
+        def inner(target: Individual, mutant: Individual, /) -> Individual:
+            return mutant
 
         return inner
 
     @staticmethod
     def clip__standard_uniform() -> BoundRepairStrategy:
-        def inner(individual: Individual, /) -> Individual:
-            if ((individual.x < 0) | (individual.x > 1)).any():
-                individual = Individual(np.clip(individual.x, 0, 1))
-            return individual
+        def inner(target: Individual, mutant: Individual, /) -> Individual:
+            if ((mutant.x < 0) | (mutant.x > 1)).any():
+                mutant = Individual(np.clip(mutant.x, 0, 1))
+            return mutant
 
         return inner
 
@@ -682,7 +682,7 @@ class DeV1(DifferentialEvolution):
         for target in self.population:
             trial = toolz.pipe(
                 self.mutation_strategy(self.population, target, f),
-                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.bound_repair_strategy(target, mutant),
                 lambda mutant: self.crossover_strategy(target, mutant, cr),
             )
             self.evaluation_count += evaluate(self.func, trial)
@@ -739,7 +739,7 @@ class DeV2(DifferentialEvolution):
         for i, target in enumerate(self.population):
             trial = toolz.pipe(
                 self.mutation_strategy(self.population, target, f),
-                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.bound_repair_strategy(target, mutant),
                 lambda mutant: self.crossover_strategy(target, mutant, cr),
             )
             self.evaluation_count += evaluate(self.func, trial)
@@ -814,7 +814,7 @@ class DeV3(DifferentialEvolution):
 
             trial = toolz.pipe(
                 self.mutation_strategy(self.population, target, f, p, self.archive),
-                lambda mutant: self.bound_repair_strategy(mutant),
+                lambda mutant: self.bound_repair_strategy(target, mutant),
                 lambda mutant: self.crossover_strategy(target, mutant, cr),
             )
             self.evaluation_count += evaluate(self.func, trial)

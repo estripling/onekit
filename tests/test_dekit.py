@@ -466,32 +466,34 @@ class TestMutation:
 
 class TestBoundRepair:
     def test_identity(self):
-        ind = Individual(0)
+        target = Individual(0)
+        mutant = Individual(1)
         bound_repair_strategy = dek.BoundRepair.identity()
-        actual = bound_repair_strategy(ind)
-        assert actual == ind
+        actual = bound_repair_strategy(target, mutant)
+        assert actual == mutant
 
     def test_clip__standard_uniform(self):
-        ind1 = Individual(np.array([0.1, 0.9]))
-        ind2 = Individual(np.array([0.1, 1.1]))
-        ind3 = Individual(np.array([-0.1, 0.9]))
-        ind4 = Individual(np.array([-0.1, 1.1]))
+        target = Individual(np.array([0.5, 0.5]))
+        mutant1 = Individual(np.array([0.1, 0.9]))
+        mutant2 = Individual(np.array([0.1, 1.1]))
+        mutant3 = Individual(np.array([-0.1, 0.9]))
+        mutant4 = Individual(np.array([-0.1, 1.1]))
 
         bound_repair_strategy = dek.BoundRepair.clip__standard_uniform()
 
-        actual = bound_repair_strategy(ind1)
-        assert actual == ind1
+        actual = bound_repair_strategy(target, mutant1)
+        assert actual == mutant1
 
-        actual = bound_repair_strategy(ind2)
-        assert actual != ind2
+        actual = bound_repair_strategy(target, mutant2)
+        assert actual != mutant2
         npt.assert_array_equal(actual.x, np.array([0.1, 1.0]))
 
-        actual = bound_repair_strategy(ind3)
-        assert actual != ind3
+        actual = bound_repair_strategy(target, mutant3)
+        assert actual != mutant3
         npt.assert_array_equal(actual.x, np.array([0.0, 0.9]))
 
-        actual = bound_repair_strategy(ind4)
-        assert actual != ind4
+        actual = bound_repair_strategy(target, mutant4)
+        assert actual != mutant4
         npt.assert_array_equal(actual.x, np.array([0.0, 1.0]))
 
 
