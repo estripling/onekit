@@ -549,6 +549,35 @@ class TestBoundRepair:
         assert actual != mutant5
         npt.assert_array_almost_equal(actual.x, np.array([0.2, 0.6]))
 
+    def test_hypersphere_universe(self):
+        target = Individual(np.array([0.5, 0.5]))
+        mutant1 = Individual(np.array([0.1, 0.9]))
+        mutant2 = Individual(np.array([0.1, 1.1]))
+        mutant3 = Individual(np.array([-0.1, 0.9]))
+        mutant4 = Individual(np.array([-0.1, 1.1]))
+        mutant5 = Individual(np.array([-2.2, 2.4]))
+
+        bound_repair_strategy = dek.BoundRepair.hypersphere_universe()
+
+        actual = bound_repair_strategy(target, mutant1)
+        assert actual == mutant1
+
+        actual = bound_repair_strategy(target, mutant2)
+        assert actual != mutant2
+        npt.assert_array_almost_equal(actual.x, np.array([0.1, 0.1]))
+
+        actual = bound_repair_strategy(target, mutant3)
+        assert actual != mutant3
+        npt.assert_array_almost_equal(actual.x, np.array([0.9, 0.9]))
+
+        actual = bound_repair_strategy(target, mutant4)
+        assert actual != mutant4
+        npt.assert_array_almost_equal(actual.x, np.array([0.9, 0.1]))
+
+        actual = bound_repair_strategy(target, mutant5)
+        assert actual != mutant5
+        npt.assert_array_almost_equal(actual.x, np.array([0.8, 0.4]))
+
 
 class TestCrossover:
     @pytest.mark.parametrize("cr", [0.0, 0.7, 1.0])

@@ -378,6 +378,21 @@ class BoundRepair:
 
         return inner
 
+    @staticmethod
+    def hypersphere_universe() -> BoundRepairStrategy:
+        def inner(target: Individual, mutant: Individual, /) -> Individual:
+            if ((mutant.x < 0) | (mutant.x > 1)).any():
+                excess, _ = np.modf(mutant.x)
+                mutant = toolz.pipe(
+                    mutant.x,
+                    lambda v: np.where(v < 0, np.ones_like(v) - (-excess), v),
+                    lambda v: np.where(v > 1, np.zeros_like(v) + excess, v),
+                    Individual,
+                )
+            return mutant
+
+        return inner
+
 
 class Crossover:
     @staticmethod
