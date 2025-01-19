@@ -806,9 +806,9 @@ class DeV3(DifferentialEvolution):
 
     References
     ----------
-      [1] Tanabe, R. & Fukunaga, A., 2013.
-          Success-History Based Parameter Adaptation for Differential Evolution.
-          In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
+    .. [1] Tanabe, R. & Fukunaga, A., 2013.
+        Success-History Based Parameter Adaptation for Differential Evolution.
+        In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
     """
 
     def __init__(
@@ -925,13 +925,13 @@ class DeV4(DeV3):
 
     References
     ----------
-      [1] Tanabe, R. & Fukunaga, A., 2013.
-          Success-History Based Parameter Adaptation for Differential Evolution.
-          In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
-      [2] Tanabe, R. & Fukunaga, A.S., 2014.
-          Improving the Search Performance of SHADE Using Linear Population Size
-          Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
-          pp. 1658–1665.
+    .. [1] Tanabe, R. & Fukunaga, A., 2013.
+        Success-History Based Parameter Adaptation for Differential Evolution.
+        In 2013 IEEE Congress on Evolutionary Computation (CEC). pp. 71–78.
+    .. [2] Tanabe, R. & Fukunaga, A.S., 2014.
+        Improving the Search Performance of SHADE Using Linear Population Size
+        Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
+        pp. 1658–1665.
     """
 
     def get_cr_value(self, h: int) -> float:
