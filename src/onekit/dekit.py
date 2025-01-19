@@ -7,6 +7,7 @@ from collections import (
     UserList,
     defaultdict,
 )
+from functools import partial
 from typing import (
     Any,
     Callable,
@@ -342,6 +343,22 @@ class BoundRepair:
         def inner(target: Individual, mutant: Individual, /) -> Individual:
             if ((mutant.x < 0) | (mutant.x > 1)).any():
                 mutant = Individual(np.clip(mutant.x, 0, 1))
+            return mutant
+
+        return inner
+
+    @staticmethod
+    def mean_target_bound() -> BoundRepairStrategy:
+        def inner(target: Individual, mutant: Individual, /) -> Individual:
+            if ((mutant.x < 0) | (mutant.x > 1)).any():
+                avg = partial(np.mean, axis=0)
+                x = target.x
+                mutant = toolz.pipe(
+                    mutant.x,
+                    lambda v: np.where(v < 0, avg([np.zeros_like(x), x]), v),
+                    lambda v: np.where(v > 1, avg([np.ones_like(x), x]), v),
+                    Individual,
+                )
             return mutant
 
         return inner
