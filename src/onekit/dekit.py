@@ -42,6 +42,7 @@ CrossoverStrategy = Callable[["Individual", "Individual", float], "Individual"]
 ReplacementStrategy = Callable[["Individual", "Individual"], "Individual"]
 TerminationStrategy = Callable[["DifferentialEvolution"], bool]
 ParameterStrategy = Callable[[], float]
+PopulationSizeAdaptionStrategy = Callable[[Any], Any]
 
 
 class Individual:
@@ -537,6 +538,22 @@ class Parameter:
 
         def inner() -> float:
             return float(rng.uniform(low, high, size=1))
+
+        return inner
+
+
+class PopulationSizeAdaption:
+    @staticmethod
+    def reduce_population_size_linearly(
+        max_fev: int,
+        n_pop_init: int,
+        n_pop_min: int,
+    ) -> PopulationSizeAdaptionStrategy:
+        """Compute new population size using linear population size reduction (LPSR)."""
+
+        def inner(n_fev: int, /) -> int:
+            n_pop_new = n_pop_init + ((n_pop_min - n_pop_init) / max_fev) * n_fev
+            return int(max(round(n_pop_new, 0), n_pop_min))
 
         return inner
 

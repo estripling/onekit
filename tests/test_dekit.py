@@ -1036,6 +1036,31 @@ class TestParameter:
         assert 0.5 <= actual < 1.0
 
 
+class TestPopulationSizeAdaption:
+    @pytest.mark.parametrize(
+        "n_fev, expected",
+        [
+            (0, 10),
+            (1, 9),
+            (2, 9),
+            (3, 8),
+            (4, 8),
+            (5, 7),
+            (6, 6),
+            (7, 6),
+            (8, 5),
+            (9, 5),
+            (10, 4),
+        ],
+    )
+    def test_reduce_population_size_linearly(self, n_fev: int, expected: int):
+        population_size_adaption_strategy = (
+            dek.PopulationSizeAdaption.reduce_population_size_linearly(10, 10, 4)
+        )
+        actual = population_size_adaption_strategy(n_fev)
+        assert actual == expected
+
+
 class TestEvaluation:
     def test_evaluate_individual(self, func: ObjectiveFunction):
         ind = Individual([1, 1])
