@@ -615,9 +615,16 @@ def normalize(x: np.ndarray, x_min: np.ndarray, x_max: np.ndarray) -> np.ndarray
     return (x - x_min) / (x_max - x_min)
 
 
+def get_p_value(low: float, high: float, seed: Seed = None) -> float:
+    rng = npk.check_random_state(seed)
+    if low > high:
+        low, high = high, low
+    return rng.uniform(low, high)
+
+
 def get_pbest(
     population: Population,
-    p: float = 0.2,
+    p: float,
     n_min: int = 1,
     *,
     key=None,
@@ -838,6 +845,7 @@ class DeV3(DifferentialEvolution):
         replacement_strategy: ReplacementStrategy,
         termination_strategy: TerminationStrategy,
         memory_size: int,
+        p_max: float = 0.2,
         seed: Seed = None,
     ):
         super().__init__(
@@ -851,6 +859,7 @@ class DeV3(DifferentialEvolution):
         )
         self.rng = npk.check_random_state(seed)
         self.archive = Population()
+        self.p_max = p_max
         self.memory = {
             "size": memory_size,
             "f": [0.5] * memory_size,
@@ -874,7 +883,7 @@ class DeV3(DifferentialEvolution):
             h = self.get_h_value()
             f = self.get_f_value(h)
             cr = self.get_cr_value(h)
-            p = self.get_p_value()
+            p = get_p_value(2 / self.population.size, self.p_max, seed=self.rng)
 
             trial = toolz.pipe(
                 self.mutation_strategy(self.population, target, f, p, self.archive),
@@ -916,9 +925,6 @@ class DeV3(DifferentialEvolution):
         # Variance: 0.1
         mcr = self.memory["cr"][h]
         return float(np.clip(mcr + np.sqrt(0.1) * self.rng.standard_normal(1)[0], 0, 1))
-
-    def get_p_value(self) -> float:
-        return self.rng.uniform(2 / self.population.size, 0.2)
 
     def update_memory(self, success: Dict["str", List[float]]) -> None:
         if success["any"]:
@@ -973,3 +979,62 @@ class DeV4(DeV3):
                 else lehmer_mean(weights, np.array(success["cr"]))
             )
             self.memory["k"] = 0 if (k + 1) >= self.memory["size"] else k + 1
+
+
+class DeV5(DeV4):
+    """Differential Evolution Variant 3: LSHADE
+
+    SHADE 1.1 with Linear Population Size Reduction.
+
+    References
+    ----------
+    .. [1] Tanabe, R. & Fukunaga, A.S., 2014.
+        Improving the Search Performance of SHADE Using Linear Population Size
+        Reduction. In 2014 IEEE Congress on Evolutionary Computation (CEC).
+        pp. 1658–1665.
+    """
+
+    def __init__(
+        self,
+        func: ObjectiveFunction,
+        init_strategy: InitializationStrategy,
+        mutation_strategy: PbestMutationStrategy,
+        bound_repair_strategy: BoundRepairStrategy,
+        crossover_strategy: CrossoverStrategy,
+        replacement_strategy: ReplacementStrategy,
+        population_size_adaption_strategy: PopulationSizeAdaptionStrategy,
+        termination_strategy: TerminationStrategy,
+        memory_size: int,
+        p_max: float = 0.2,
+        seed: Seed = None,
+    ):
+        super().__init__(
+            func=func,
+            init_strategy=init_strategy,
+            mutation_strategy=mutation_strategy,
+            bound_repair_strategy=bound_repair_strategy,
+            crossover_strategy=crossover_strategy,
+            replacement_strategy=replacement_strategy,
+            termination_strategy=termination_strategy,
+            memory_size=memory_size,
+            p_max=p_max,
+            seed=seed,
+        )
+        self.population_size_adaption_strategy = population_size_adaption_strategy
+
+    def __next__(self) -> "DifferentialEvolution":
+        super().__next__()
+
+        n_pop_new = self.population_size_adaption_strategy(self.evaluation_count)
+        n_excess = self.population.size - n_pop_new
+
+        if n_excess > 0:
+            individuals_to_remove = self.population.copy().sort()[-n_excess:]
+            for individual in individuals_to_remove:
+                self.population.remove(individual)
+
+            while self.archive.size > n_pop_new:
+                rnd_idx = self.rng.integers(self.archive.size)
+                self.archive.pop(rnd_idx)
+
+        return self

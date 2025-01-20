@@ -1263,6 +1263,57 @@ class TestDifferentialEvolution:
         npt.assert_array_almost_equal(x_best, np.zeros(d), decimal=2)
         npt.assert_almost_equal(fx_best, 0, decimal=2)
 
+    @pytest.mark.parametrize("cls", [dek.DeV5])
+    def test_lshade(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
+        rng = npk.check_random_state(seed)
+        bnh = dek.check_bounds(bounds)
+
+        def denorm(x: np.ndarray) -> np.ndarray:
+            return dek.denormalize(x, x_min=bnh.x_min, x_max=bnh.x_max)
+
+        def problem(x: np.ndarray) -> ObjectiveFunction:
+            return toolz.pipe(x, denorm, func)
+
+        d = bnh.n_dim
+        n = 10 * d
+        max_fev = 1_000 * d
+
+        psa_strategy = dek.PopulationSizeAdaption.reduce_population_size_linearly(
+            max_fev=max_fev,
+            n_pop_init=n,
+            n_pop_min=4,  # required by current_to_pbest_1
+        )
+
+        de = cls(
+            func=problem,
+            init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
+            mutation_strategy=dek.Mutation.current_to_pbest_1(rng),
+            bound_repair_strategy=dek.BoundRepair.mean_target_bound(),
+            crossover_strategy=dek.Crossover.binomial(rng),
+            replacement_strategy=dek.Replacement.smaller_is_better(),
+            population_size_adaption_strategy=psa_strategy,
+            termination_strategy=dek.Termination.has_reached_max_evaluations(max_fev),
+            memory_size=5,
+            seed=rng,
+        )
+
+        for g, generation in enumerate(de):
+            assert isinstance(generation, DifferentialEvolution)
+            assert generation.generation_count == g
+            assert generation.evaluation_count <= (g + 1) * n
+
+            assert isinstance(generation.population, Population)
+            assert generation.population.size <= n
+
+            assert generation.best.fx < generation.worst.fx
+
+        solution = de.best
+        assert isinstance(solution, Individual)
+        x_best = denorm(solution.x)
+        fx_best = solution.fx
+        npt.assert_array_almost_equal(x_best, np.zeros(d), decimal=2)
+        npt.assert_almost_equal(fx_best, 0, decimal=2)
+
     @pytest.fixture(scope="class")
     def func(self) -> ObjectiveFunction:
         return ofk.sphere
