@@ -938,7 +938,7 @@ class DeV3(DifferentialEvolution):
 
 
 class DeV4(DeV3):
-    """Differential Evolution Variant 3: SHADE 1.1
+    """Differential Evolution Variant 4: SHADE 1.1
 
     Success-History based Adaptive Differential Evolution.
     If memory CR at selected index has terminal value NaN, individual CR values are
@@ -982,7 +982,7 @@ class DeV4(DeV3):
 
 
 class DeV5(DeV4):
-    """Differential Evolution Variant 3: LSHADE
+    """Differential Evolution Variant 5: LSHADE
 
     SHADE 1.1 with Linear Population Size Reduction.
 
