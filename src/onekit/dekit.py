@@ -622,7 +622,7 @@ def update_archive(
 ) -> Population:
     rng = npk.check_random_state(seed)
 
-    if archive.size <= max_size:
+    if archive.size < max_size:
         archive.append(individual)
     else:
         rnd_idx = rng.integers(archive.size)
