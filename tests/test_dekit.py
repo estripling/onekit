@@ -1149,6 +1149,29 @@ def test_normalize(x: np.ndarray, expected: np.ndarray):
     npt.assert_array_equal(actual, expected)
 
 
+def test_update_archive():
+    rng = npk.check_random_state(101)
+    ind1 = Individual(1)
+    ind2 = Individual(2)
+    ind3 = Individual(3)
+
+    archive = Population()
+    assert archive.size == 0
+
+    archive = dek.update_archive(archive, ind1, max_size=2, seed=rng)
+    assert archive.size == 1
+    assert archive == [ind1]
+
+    archive = dek.update_archive(archive, ind2, max_size=2, seed=rng)
+    assert archive.size == 2
+    assert archive == [ind1, ind2]
+
+    archive = dek.update_archive(archive, ind3, max_size=2, seed=rng)
+    assert archive.size == 2
+    assert set(archive) != {ind1, ind2}
+    assert set(archive) == {ind1, ind3} or set(archive) == {ind2, ind3}
+
+
 class TestDifferentialEvolution:
     @pytest.mark.parametrize("cls", [dek.DeV1, dek.DeV2])
     def test_classic_de(self, cls, func: ObjectiveFunction, bounds: Bounds, seed: int):
