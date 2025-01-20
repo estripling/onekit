@@ -1236,7 +1236,7 @@ class TestDifferentialEvolution:
             func=problem,
             init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
             mutation_strategy=dek.Mutation.current_to_pbest_1(rng),
-            bound_repair_strategy=dek.BoundRepair.clip__standard_uniform(),
+            bound_repair_strategy=dek.BoundRepair.mean_target_bound(),
             crossover_strategy=dek.Crossover.binomial(rng),
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=dek.Termination.has_met_any_basic_strategy(
