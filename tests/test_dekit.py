@@ -616,6 +616,24 @@ class TestCrossover:
         assert list(trial.x) in [[0, 1], [1, 0]]
         assert list(trial.x) not in [[0, 0], [1, 1]]
 
+    def test_exponential(self):
+        n_dim = 10
+        target = Individual(np.array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]))
+        mutant = Individual(np.array([20, 21, 22, 23, 24, 25, 26, 27, 28, 29]))
+
+        crossover_strategy = dek.Crossover.exponential(seed=101)
+
+        trial = crossover_strategy(target, mutant, 0.8)
+        assert isinstance(trial, Individual)
+        assert trial != target
+        assert trial != mutant
+        assert trial.x.dtype.kind in np.typecodes["AllInteger"]
+        assert trial.x.shape == (n_dim,)
+        npt.assert_array_equal(trial.x, [10, 11, 12, 23, 24, 25, 26, 17, 18, 19])
+
+        trial = crossover_strategy(target, mutant, 0.8)
+        npt.assert_array_equal(trial.x, [20, 11, 12, 13, 14, 15, 16, 17, 18, 29])
+
 
 class TestReplacement:
     def test_smaller_function_value__target_selected(self):

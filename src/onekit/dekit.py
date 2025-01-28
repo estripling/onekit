@@ -434,6 +434,26 @@ class Crossover:
 
         return inner
 
+    @staticmethod
+    def exponential(seed: Seed) -> CrossoverStrategy:
+        rng = npk.check_random_state(seed)
+
+        def inner(target: Individual, mutant: Individual, cr: float, /) -> Individual:
+            n_dim = len(target.x)
+            j_rand = rng.integers(n_dim, size=1, dtype=np.uint32)
+            xover_mask = np.zeros(n_dim, dtype=bool)
+
+            for i in range(n_dim):
+                j = (j_rand + i) % n_dim
+                if rng.random() < cr or j == j_rand:
+                    xover_mask[j] = True
+                else:
+                    break
+
+            return Individual(np.where(xover_mask, mutant.x, target.x))
+
+        return inner
+
 
 class Replacement:
     @staticmethod
