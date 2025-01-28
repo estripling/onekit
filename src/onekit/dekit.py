@@ -349,7 +349,7 @@ class BoundRepair:
         return inner
 
     @staticmethod
-    def mean_target_bound() -> BoundRepairStrategy:
+    def midway() -> BoundRepairStrategy:
         def inner(target: Individual, mutant: Individual, /) -> Individual:
             if ((mutant.x < 0) | (mutant.x > 1)).any():
                 avg = partial(np.mean, axis=0)

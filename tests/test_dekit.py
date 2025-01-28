@@ -496,14 +496,14 @@ class TestBoundRepair:
         assert actual != mutant4
         npt.assert_array_equal(actual.x, np.array([0.0, 1.0]))
 
-    def test_mean_target_bound(self):
+    def test_midway(self):
         target = Individual(np.array([0.5, 0.5]))
         mutant1 = Individual(np.array([0.1, 0.9]))
         mutant2 = Individual(np.array([0.1, 1.1]))
         mutant3 = Individual(np.array([-0.1, 0.9]))
         mutant4 = Individual(np.array([-0.1, 1.1]))
 
-        bound_repair_strategy = dek.BoundRepair.mean_target_bound()
+        bound_repair_strategy = dek.BoundRepair.midway()
 
         actual = bound_repair_strategy(target, mutant1)
         assert actual == mutant1
@@ -1236,7 +1236,7 @@ class TestDifferentialEvolution:
             func=problem,
             init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
             mutation_strategy=dek.Mutation.current_to_pbest_1(rng),
-            bound_repair_strategy=dek.BoundRepair.mean_target_bound(),
+            bound_repair_strategy=dek.BoundRepair.midway(),
             crossover_strategy=dek.Crossover.binomial(rng),
             replacement_strategy=dek.Replacement.smaller_is_better(),
             termination_strategy=dek.Termination.has_met_any_basic_strategy(
@@ -1288,7 +1288,7 @@ class TestDifferentialEvolution:
             func=problem,
             init_strategy=dek.Initialization.random__standard_uniform(n, d, rng),
             mutation_strategy=dek.Mutation.current_to_pbest_1(rng),
-            bound_repair_strategy=dek.BoundRepair.mean_target_bound(),
+            bound_repair_strategy=dek.BoundRepair.midway(),
             crossover_strategy=dek.Crossover.binomial(rng),
             replacement_strategy=dek.Replacement.smaller_is_better(),
             population_size_adaption_strategy=psa_strategy,
