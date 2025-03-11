@@ -36,7 +36,7 @@ def main() -> None:
 
     elif args.create_venv:
         print(" create - venv")
-        run_create_venv(poetry_version="1.8.3")
+        run_create_venv(poetry_version="2.1.1")
 
     else:
         functions = [

@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # configurations
 ENV PYTHONUNBUFFERED=on \
@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=on \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=120 \
     # poetry:
-    POETRY_VERSION=1.8.3 \
+    POETRY_VERSION=2.1.1 \
     POETRY_NO_ANSI=on \
     POETRY_NO_INTERACTION=on \
     POETRY_VIRTUALENVS_CREATE=false \

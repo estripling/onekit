@@ -21,10 +21,10 @@ jobs:
     - name: 📥 check out repository
       uses: actions/checkout@v4
 
-    - name: 🐍 set up Python 3.9
+    - name: 🐍 set up Python 3.11
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.11'
 
     - name: ☕ set up Java
       uses: actions/setup-java@v4
@@ -35,13 +35,13 @@ jobs:
     - name: ✨ set up Spark
       uses: vemonet/setup-spark@v1
       with:
-        spark-version: '3.5.5'
+        spark-version: '3.5.3'
         hadoop-version: '3'
 
     - name: 💻 install Poetry
       uses: snok/install-poetry@v1
       with:
-        version: '1.8.3'
+        version: '2.1.1'
 
     - name: 💻 install onekit
       run: poetry install --without docs,packaging

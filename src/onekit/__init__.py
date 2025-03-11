@@ -1,6 +1,6 @@
 from importlib import metadata
 
-__version__ = metadata.version("onekit")
+__version__ = metadata.version(__name__)
 
 
 del metadata
