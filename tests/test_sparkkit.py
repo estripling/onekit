@@ -783,8 +783,7 @@ class TestSparkKit:
     @pytest.fixture(scope="class")
     def spark(self, request: pytest.FixtureRequest) -> SparkSession:
         spark = (
-            SparkSession.builder.master("local[*]")
-            .appName("spark-session-for-testing")
+            SparkSession.builder.appName("spark-session-for-testing")
             .config("spark.executor.instances", 1)
             .config("spark.executor.cores", 4)
             .config("spark.default.parallelism", 4)
