@@ -21,7 +21,7 @@ Seed = Union[
 Vector = npt.NDArray[np.float64]
 
 
-def check_random_state(seed: Seed = None, /) -> np.random.Generator:
+def check_random_state(seed: Seed = None) -> np.random.Generator:
     """Turn seed into np.random.Generator instance.
 
     Examples
