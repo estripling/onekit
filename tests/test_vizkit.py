@@ -1,7 +1,4 @@
-from typing import (
-    Callable,
-    List,
-)
+from typing import Callable
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -16,7 +13,7 @@ import onekit.vizkit as vk
 
 
 class TestFunctionPlotter:
-    def test_init(self, func: Callable, bounds1n: List[vk.Pair]):
+    def test_init(self, func: Callable, bounds1n: list[vk.Pair]):
         actual = vk.FunctionPlotter(func, bounds1n)
         assert isinstance(actual.func, Callable)
         assert actual.bounds == bounds1n
@@ -28,46 +25,46 @@ class TestFunctionPlotter:
         with pytest.raises(TypeError):
             vk.FunctionPlotter(func, bounds=[(-5, 5)] * 3)
 
-    def test_init_with_invalid_bool_args(self, func: Callable, bounds2n: List[vk.Pair]):
+    def test_init_with_invalid_bool_args(self, func: Callable, bounds2n: list[vk.Pair]):
         with pytest.raises(ValueError):
             vk.FunctionPlotter(func, bounds2n, with_surface=False, with_contour=False)
 
-    def test_default_plot__1d(self, func: Callable, bounds1n: List[vk.Pair]):
+    def test_default_plot__1d(self, func: Callable, bounds1n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds1n)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
         assert ax3d is None
 
-    def test_default_plot__2d(self, func: Callable, bounds2n: List[vk.Pair]):
+    def test_default_plot__2d(self, func: Callable, bounds2n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
         assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
-    def test_surface_plot(self, func: Callable, bounds2n: List[vk.Pair]):
+    def test_surface_plot(self, func: Callable, bounds2n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n, with_contour=False)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert ax is None
         assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
-    def test_contour_plot(self, func: Callable, bounds2n: List[vk.Pair]):
+    def test_contour_plot(self, func: Callable, bounds2n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n, with_surface=False)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
         assert ax3d is None
 
-    def test_plot_with_points(self, func: Callable, bounds2n: List[vk.Pair]):
+    def test_plot_with_points(self, func: Callable, bounds2n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(func, bounds2n, points=[vk.Point(0, 0, 0)])
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
         assert isinstance(ax, matplotlib.axes.Axes)
         assert isinstance(ax3d, mpl_toolkits.mplot3d.axes3d.Axes3D)
 
-    def test_default_plot__ackley(self, bounds2n: List[vk.Pair]):
+    def test_default_plot__ackley(self, bounds2n: list[vk.Pair]):
         plotter = vk.FunctionPlotter(ofk.ackley, bounds2n)
         fig, ax, ax3d = plotter.plot()
         assert isinstance(fig, matplotlib.figure.Figure)
@@ -79,11 +76,11 @@ class TestFunctionPlotter:
         return lambda x: (x**2).sum()
 
     @pytest.fixture
-    def bounds1n(self) -> List[vk.Pair]:
+    def bounds1n(self) -> list[vk.Pair]:
         return [(-5.0, 5.0)]
 
     @pytest.fixture
-    def bounds2n(self) -> List[vk.Pair]:
+    def bounds2n(self) -> list[vk.Pair]:
         return [(-5.0, 5.0)] * 2
 
 

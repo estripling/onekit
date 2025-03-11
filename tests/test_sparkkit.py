@@ -1,9 +1,6 @@
 import datetime as dt
 import math
-from typing import (
-    Callable,
-    List,
-)
+from typing import Callable
 
 import pytest
 import toolz
@@ -443,7 +440,7 @@ class TestSparkKit:
         self,
         spark: SparkSession,
         col_type: T.DataType,
-        expected: List[str],
+        expected: list[str],
     ):
         df = spark.createDataFrame(
             [

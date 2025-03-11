@@ -1,8 +1,5 @@
 import math
-from typing import (
-    Generator,
-    Union,
-)
+from typing import Generator
 
 import toolz
 
@@ -83,7 +80,7 @@ def collatz(n: int, /) -> Generator:
 
 
 @toolz.curry
-def digitscale(x: Union[int, float], /, *, kind: str = "log") -> Union[int, float]:
+def digitscale(x: int | float, /, *, kind: str = "log") -> int | float:
     """Scale :math:`x` such that its mapped integer part is its number of digits.
 
     Given a number :math:`x \\in \\mathbb{R}`, the following function
@@ -216,7 +213,7 @@ def fibonacci() -> Generator:
 
 
 @toolz.curry
-def isdivisible(x: Union[int, float], /, n: int) -> bool:
+def isdivisible(x: int | float, /, n: int) -> bool:
     """Evaluate if :math:`x` is evenly divisible by :math:`n`.
 
     Examples
@@ -240,7 +237,7 @@ def isdivisible(x: Union[int, float], /, n: int) -> bool:
     return x % n == 0
 
 
-def iseven(x: Union[int, float], /) -> bool:
+def iseven(x: int | float, /) -> bool:
     """Evaluate if :math:`x` is even.
 
     Examples
@@ -258,7 +255,7 @@ def iseven(x: Union[int, float], /) -> bool:
     return isdivisible(x, n=2)
 
 
-def isodd(x: Union[int, float], /) -> bool:
+def isodd(x: int | float, /) -> bool:
     """Evaluate if :math:`x` is odd.
 
     Examples
@@ -276,7 +273,7 @@ def isodd(x: Union[int, float], /) -> bool:
     return toolz.complement(iseven)(x)
 
 
-def sign(x: Union[int, float], /) -> int:
+def sign(x: int | float, /) -> int:
     """Sign function.
 
     .. math::

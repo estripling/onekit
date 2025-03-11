@@ -4,9 +4,7 @@ import math
 import os
 from typing import (
     Callable,
-    List,
-    Sequence,
-    Union,
+    Iterable,
 )
 
 import toolz
@@ -72,7 +70,7 @@ class SparkkitError(Exception):
 class ColumnNotFoundError(SparkkitError):
     """Exception if columns are not found in dataframe."""
 
-    def __init__(self, missing_cols: Sequence[str]):
+    def __init__(self, missing_cols: list[str]):
         self.missing_cols = missing_cols
         self.message = f"following columns not found: {missing_cols}"
         super().__init__(self.message)
@@ -715,8 +713,8 @@ def date_range(
 
 def filter_date(
     date_col: str,
-    d0: Union[str, dt.date],
-    n: Union[int, float],
+    d0: str | dt.date,
+    n: int | float,
 ) -> SparkDFTransformFunc:
     """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
 
@@ -789,7 +787,7 @@ def filter_date(
 
 
 @toolz.curry
-def has_column(df: SparkDF, /, *, cols: Sequence[str]) -> bool:
+def has_column(df: SparkDF, /, *, cols: list[str]) -> bool:
     """Evaluate if all columns are present in dataframe.
 
     Examples
@@ -943,7 +941,7 @@ def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
 
 def join(
     *dataframes: SparkDF,
-    on: Union[str, List[str]],
+    on: str | list[str],
     how: str = "inner",
 ) -> SparkDF:
     """Join iterable of Spark dataframes.
@@ -1048,7 +1046,11 @@ def peek(
     return inner
 
 
-def select_col_types(df: SparkDF, /, *col_types: SparkColType) -> List[str]:
+def select_col_types(
+    df: SparkDF,
+    /,
+    *col_types: SparkColType | Iterable[SparkColType],
+) -> list[str]:
     """Identify columns of specified data type.
 
     Examples
@@ -1104,7 +1106,7 @@ def str_to_col(x: str, /) -> SparkCol:
     return F.col(x) if isinstance(x, str) else x
 
 
-def union(*dataframes: SparkDF) -> SparkDF:
+def union(*dataframes: SparkDF | Iterable[SparkDF]) -> SparkDF:
     """Union iterable of Spark dataframes by name.
 
     Examples
@@ -1133,7 +1135,7 @@ def union(*dataframes: SparkDF) -> SparkDF:
 
 def with_date_diff_ago(
     date_col: str,
-    d0: Union[str, dt.date],
+    d0: str | dt.date,
     new_col: str,
 ) -> SparkDFTransformFunc:
     """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
@@ -1182,7 +1184,7 @@ def with_date_diff_ago(
 
 def with_date_diff_ahead(
     date_col: str,
-    d0: Union[str, dt.date],
+    d0: str | dt.date,
     new_col: str,
 ) -> SparkDFTransformFunc:
     """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
