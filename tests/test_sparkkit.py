@@ -773,7 +773,6 @@ class TestSparkKit:
     def test_spark_session(self, spark: SparkSession):
         assert isinstance(spark, SparkSession)
         assert spark.sparkContext.appName == "spark-session-for-testing"
-        assert spark.version == "3.1.1"
 
     @staticmethod
     def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF) -> None:

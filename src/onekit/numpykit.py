@@ -1,9 +1,13 @@
+import random
+from typing import Union
+
 import numpy as np
 import numpy.typing as npt
 
 import onekit.mathkit as mk
 
 __all__ = (
+    "check_random_state",
     "check_vector",
     "digitscale",
     "stderr",
@@ -11,7 +15,45 @@ __all__ = (
 
 
 ArrayLike = npt.ArrayLike
+Seed = Union[
+    int, float, random.Random, np.random.RandomState, np.random.Generator, None
+]
 Vector = npt.NDArray[np.float64]
+
+
+def check_random_state(seed: Seed = None) -> np.random.Generator:
+    """Turn seed into np.random.Generator instance.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import onekit.numpykit as npk
+    >>> rng = npk.check_random_state()
+    >>> isinstance(rng, np.random.Generator)
+    True
+    """
+    if isinstance(seed, np.random.Generator):
+        return seed
+
+    elif seed is None:
+        return np.random.default_rng()
+
+    elif isinstance(seed, int):
+        return np.random.default_rng(seed)
+
+    elif isinstance(seed, float):
+        return np.random.default_rng(int(abs(seed)))
+
+    elif isinstance(seed, random.Random):
+        seed = seed.randint(1, np.iinfo(np.int32).max)
+        return np.random.default_rng(seed)
+
+    elif isinstance(seed, np.random.RandomState):
+        seed = seed.random_integers(1, np.iinfo(np.int32).max, size=1)
+        return np.random.default_rng(seed)
+
+    else:
+        raise ValueError(f"{seed=} - cannot be used to seed Generator instance")
 
 
 def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vector:

@@ -113,6 +113,12 @@ python-semantic-release
 ```
 
 ```shell
+poetry add --group dekit \
+"numpy==1.26.4" \
+tqdm
+```
+
+```shell
 poetry add --group pandaskit \
 "pandas>=0.23.2"
 ```
