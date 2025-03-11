@@ -30,7 +30,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         java-version: '11'
-        distribution: 'tem'
+        distribution: 'temurin'
 
     - name: ✨ set up Spark
       uses: vemonet/setup-spark@v1
