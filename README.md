@@ -22,7 +22,7 @@ All-in-One Python Kit:
 
 ## Installation
 
-`onekit` is available on [PyPI](https://pypi.org/project/onekit/) for Python 3.9+:
+`onekit` is available on [PyPI](https://pypi.org/project/onekit/) for Python 3.11+:
 
 ```console
 pip install onekit

@@ -130,7 +130,7 @@ poetry add --group sklearnkit \
 
 ```shell
 poetry add --group sparkkit \
-pyspark==3.1.1
+pyspark==3.5.3
 ```
 
 ```shell

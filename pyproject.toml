@@ -1,8 +1,10 @@
-[tool.poetry]
+[project]
 name = "onekit"
-version = "1.5.0"
+dynamic = ["version"]
 description = "All-in-One Python Kit."
-authors = ["Eugen Stripling <estripling042@gmail.com>"]
+authors = [
+    { name = "Eugen Stripling", email = "estripling042@gmail.com" },
+]
 license = "BSD 3-Clause"
 readme = "README.md"
 repository = "https://github.com/estripling/onekit"
@@ -11,22 +13,22 @@ keywords = ["onekit"]
 packages = [
     { include = "onekit", from = "src" },
 ]
+requires-python = ">=3.11"
+dependencies = [
+    "toolz (>=1.0.0,<2.0.0)",
+    "pytz (>=2025.1,<2026.0)",
+]
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.9"
-toolz = "^0.12.0"
-pytz = "^2024.1"
+[tool.poetry]
+version = "1.5.0"
 
 [tool.poetry.group.precommit.dependencies]
 autoflake = "^2.2.1"
-black = {extras = ["jupyter"], version = "^23.11.0"}
+black = { extras = ["jupyter"], version = "^23.11.0" }
 isort = "^5.12.0"
 flake8 = ">=5.0.4"
 pre-commit = "^3.5.0"
@@ -60,14 +62,13 @@ pandas = ">=0.23.2"
 scikit-learn = ">=1.3"
 
 [tool.poetry.group.sparkkit.dependencies]
-pyspark = "3.1.1"
+pyspark = "3.5.3"
 
 [tool.poetry.group.vizkit.dependencies]
 matplotlib = ">=3.7.1"
 
 [tool.black]
 line-length = 88
-target-version = ["py38"]
 
 [tool.isort]
 py_version = "auto"
