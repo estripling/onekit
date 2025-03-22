@@ -79,7 +79,6 @@ def collatz(n: int, /) -> Generator:
         n = n // 2 if iseven(n) else 3 * n + 1
 
 
-@toolz.curry
 def digitscale(x: int | float, /, *, kind: str = "log") -> int | float:
     """Scale :math:`x` such that its mapped integer part is its number of digits.
 
@@ -136,15 +135,14 @@ def digitscale(x: int | float, /, *, kind: str = "log") -> int | float:
     >>> list(map(mk.digitscale, [-0.5, -5, -50, -500]))
     [0.6989700043360187, 1.6989700043360187, 2.6989700043360187, 3.6989700043360187]
 
-    >>> # function is curried
-    >>> list(map(mk.digitscale(kind="int"), [-0.5, -5, -50, -500]))
+    >>> list(map(lambda x: mk.digitscale(x, kind="int"), [-0.5, -5, -50, -500]))
     [0, 1, 2, 3]
 
-    >>> list(map(mk.digitscale(kind="linear"), [0.1, 1, 10, 100, 1_000, 10_000]))
-    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
-    >>> list(map(mk.digitscale(kind="linear"), [0.2, 2, 20, 200]))
+    >>> list(map(lambda x: mk.digitscale(x, kind="linear"), [0.1, 1, 10, 100, 1_000]))
+    [0.0, 1.0, 2.0, 3.0, 4.0]
+    >>> list(map(lambda x: mk.digitscale(x, kind="linear"), [0.2, 2, 20, 200]))
     [0.11111111111111112, 1.1111111111111112, 2.111111111111111, 3.111111111111111]
-    >>> list(map(mk.digitscale(kind="linear"), [-0.5, -5, -50, -500]))
+    >>> list(map(lambda x: mk.digitscale(x, kind="linear"), [-0.5, -5, -50, -500]))
     [0.4444444444444445, 1.4444444444444444, 2.4444444444444446, 3.4444444444444446]
     """
     valid_kind = ["log", "int", "linear"]
@@ -212,23 +210,20 @@ def fibonacci() -> Generator:
         lag2, lag1 = lag1, lag0
 
 
-@toolz.curry
 def isdivisible(x: int | float, /, n: int) -> bool:
     """Evaluate if :math:`x` is evenly divisible by :math:`n`.
 
     Examples
     --------
+    >>> from functools import partial
     >>> import onekit.mathkit as mk
     >>> mk.isdivisible(49, 7)
     True
 
-    >>> # function is curried
-    >>> mk.isdivisible(10)(5)
-    True
-    >>> is_10_divisible_by = mk.isdivisible(10)
+    >>> is_10_divisible_by = partial(mk.isdivisible, 10)
     >>> is_10_divisible_by(5)
     True
-    >>> is_x_divisible_by_5 = mk.isdivisible(n=5)
+    >>> is_x_divisible_by_5 = partial(mk.isdivisible, n=5)
     >>> is_x_divisible_by_5(10)
     True
     >>> is_x_divisible_by_5(11.0)

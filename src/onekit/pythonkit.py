@@ -156,8 +156,8 @@ def are_predicates_true(
 
     >>> is_x_divisible_by_3_and_5 = pk.are_predicates_true(
     ...     all,
-    ...     mk.isdivisible(n=3),
-    ...     mk.isdivisible(n=5),
+    ...     lambda x: mk.isdivisible(x, n=3),
+    ...     lambda x: mk.isdivisible(x, n=5),
     ... )
     >>> type(is_x_divisible_by_3_and_5)
     <class 'function'>
@@ -168,8 +168,8 @@ def are_predicates_true(
 
     >>> is_x_divisible_by_3_or_5 = pk.are_predicates_true(
     ...     any,
-    ...     mk.isdivisible(n=3),
-    ...     mk.isdivisible(n=5),
+    ...     lambda x: mk.isdivisible(x, n=3),
+    ...     lambda x: mk.isdivisible(x, n=5),
     ... )
     >>> type(is_x_divisible_by_3_or_5)
     <class 'function'>
