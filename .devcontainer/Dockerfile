@@ -29,7 +29,7 @@ RUN apt-get update \
     && apt-get autoremove --purge  -y \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /workspaces/arena
+WORKDIR /workspaces/onekit
 
 COPY . .
 

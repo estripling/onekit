@@ -1,12 +1,7 @@
 from enum import Enum
 from typing import (
     Callable,
-    Dict,
-    List,
     NamedTuple,
-    Optional,
-    Tuple,
-    Union,
 )
 
 import matplotlib.pyplot as plt
@@ -34,8 +29,8 @@ __all__ = (
 
 ArrayLike = npt.ArrayLike
 Matrix = npt.NDArray[npt.NDArray[np.float64]]
-Pair = Tuple[float, float]
-RGBA = Tuple[float, float, float, float]
+Pair = tuple[float, float]
+RGBA = tuple[float, float, float, float]
 Vector = npt.NDArray[np.float64]
 
 Func1n = Callable[[float], float]
@@ -46,7 +41,7 @@ class Config(Enum):
     """Configurations for visualization."""
 
     @classmethod
-    def get_kws_contour__base(cls) -> Dict:
+    def get_kws_contour__base(cls) -> dict:
         """Returns kwargs for ``.contour()``: base configuration."""
         return dict(
             levels=12,
@@ -58,7 +53,7 @@ class Config(Enum):
         )
 
     @classmethod
-    def get_kws_contourf__base(cls) -> Dict:
+    def get_kws_contourf__base(cls) -> dict:
         """Returns kwargs for ``.contourf()``: base configuration."""
         return dict(
             levels=100,
@@ -68,7 +63,7 @@ class Config(Enum):
         )
 
     @classmethod
-    def get_kws_contourf__YlOrBr(cls) -> Dict:
+    def get_kws_contourf__YlOrBr(cls) -> dict:
         """Returns kwargs for ``.contourf()``:
         ``YlOrBr`` configuration for dark max.
         """
@@ -80,7 +75,7 @@ class Config(Enum):
         return kws
 
     @classmethod
-    def get_kws_contourf__YlOrBr_r(cls) -> Dict:
+    def get_kws_contourf__YlOrBr_r(cls) -> dict:
         """Returns kwargs for ``.contourf()``:
         ``YlOrBr_r`` configuration for dark min.
         """
@@ -92,7 +87,7 @@ class Config(Enum):
         return kws
 
     @classmethod
-    def get_kws_plot__base(cls) -> Dict:
+    def get_kws_plot__base(cls) -> dict:
         """Returns kwargs for ``.plot()``: base configuration."""
         return dict(
             linewidth=2,
@@ -100,7 +95,7 @@ class Config(Enum):
         )
 
     @classmethod
-    def get_kws_scatter__base(cls) -> Dict:
+    def get_kws_scatter__base(cls) -> dict:
         """Returns kwargs for ``.scatter()``: base configuration."""
         return dict(
             s=60,
@@ -109,7 +104,7 @@ class Config(Enum):
         )
 
     @classmethod
-    def get_kws_surface__base(cls) -> Dict:
+    def get_kws_surface__base(cls) -> dict:
         """Returns kwargs for ``.plot_surface()``: base configuration."""
         return dict(
             rstride=2,
@@ -122,7 +117,7 @@ class Config(Enum):
         )
 
     @classmethod
-    def get_kws_surface__YlOrBr(cls) -> Dict:
+    def get_kws_surface__YlOrBr(cls) -> dict:
         """Returns kwargs for ``.plot_surface()``:
         ``YlOrBr`` configuration for dark max.
         """
@@ -134,7 +129,7 @@ class Config(Enum):
         return kws
 
     @classmethod
-    def get_kws_surface__YlOrBr_r(cls) -> Dict:
+    def get_kws_surface__YlOrBr_r(cls) -> dict:
         """Returns kwargs for ``.plot_surface()``:
         ``YlOrBr_r`` configuration for dark min.
         """
@@ -151,7 +146,7 @@ class Point(NamedTuple):
 
     x: float
     y: float
-    z: Optional[float] = None
+    z: float | None = None
 
 
 class XyPoints(NamedTuple):
@@ -164,9 +159,9 @@ class XyPoints(NamedTuple):
 class XyzPoints(NamedTuple):
     """(x, y, z) coordinate points."""
 
-    x: Union[Vector, Matrix]
-    y: Union[Vector, Matrix]
-    z: Union[Vector, Matrix]
+    x: Vector | Matrix
+    y: Vector | Matrix
+    z: Vector | Matrix
 
 
 class FunctionPlotter:
@@ -184,15 +179,15 @@ class FunctionPlotter:
 
     def __init__(
         self,
-        func: Union[Func1n, Func2n],
-        bounds: List[Pair],
+        func: Func1n | Func2n,
+        bounds: list[Pair],
         *,
         with_contour: bool = True,
         with_surface: bool = True,
         n_xvalues: int = 101,
-        x1_values: Optional[ArrayLike] = None,
-        x2_values: Optional[ArrayLike] = None,
-        points: Optional[List[Point]] = None,
+        x1_values: ArrayLike | None = None,
+        x2_values: ArrayLike | None = None,
+        points: list[Point] | None = None,
         kws_contour=None,
         kws_contourf=None,
         kws_plot=None,
@@ -226,16 +221,16 @@ class FunctionPlotter:
         return f"{type(self).__name__}(func={self.func.__name__}, bounds={self.bounds})"
 
     @property
-    def func(self) -> Union[Func1n, Func2n]:
+    def func(self) -> Func1n | Func2n:
         """Function to plot."""
         return self._func
 
     @property
-    def bounds(self) -> List[Pair]:
+    def bounds(self) -> list[Pair]:
         """Bounds to use in the plot."""
         return self._bounds
 
-    def plot(self, fig=None, ax=None, ax3d=None) -> Tuple[Figure, Axes, Axes3D]:
+    def plot(self, fig=None, ax=None, ax3d=None) -> tuple[Figure, Axes, Axes3D]:
         """Make plot.
 
         Notes
@@ -386,7 +381,7 @@ def create_xy_points(func: Func1n, x_values: ArrayLike, /) -> XyPoints:
 def create_xyz_points(
     func: Func2n,
     x_values: ArrayLike,
-    y_values: Optional[ArrayLike] = None,
+    y_values: ArrayLike | None = None,
     /,
 ) -> XyzPoints:
     """Compute :math:`(x, y, z)` coordinate points.
@@ -418,7 +413,7 @@ def discrete_cmap(
     name: str = "viridis_r",
     lower_bound: float = 0.05,
     upper_bound: float = 0.9,
-) -> List[RGBA]:
+) -> list[RGBA]:
     """Create discrete colormap values.
 
     Examples

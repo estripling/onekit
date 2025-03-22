@@ -11,13 +11,8 @@ from functools import partial
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterable,
-    List,
     Optional,
-    Sequence,
-    Tuple,
-    Union,
 )
 
 import numpy as np
@@ -26,10 +21,8 @@ import toolz
 import onekit.numpykit as npk
 import onekit.pythonkit as pk
 
-Bounds = Sequence[Tuple[float, float]]
-Seed = Union[
-    int, float, random.Random, np.random.RandomState, np.random.Generator, None
-]
+Bounds = list[tuple[float, float]]
+Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None
 ObjectiveFunction = Callable[[Any], Any]
 InitializationStrategy = Callable[[], "Population"]
 MutationStrategy = Callable[["Population", "Individual", float], "Individual"]
@@ -75,7 +68,7 @@ class Individual:
 
 
 class Population(UserList):
-    def __init__(self, *individuals: Union[Individual, Iterable[Individual]], key=None):
+    def __init__(self, *individuals: Individual | Iterable[Individual], key=None):
         super().__init__(check_individual_type(i) for i in pk.flatten(individuals))
         self._key = KeyFunction.ind_fx() if key is None else key
 
@@ -511,9 +504,7 @@ class Termination:
 
     @staticmethod
     def has_met_any_strategy(
-        *termination_strategy: Union[
-            TerminationStrategy, Iterable[TerminationStrategy]
-        ],
+        *termination_strategy: TerminationStrategy | Iterable[TerminationStrategy],
     ) -> TerminationStrategy:
         def inner(de: DifferentialEvolution, /) -> bool:
             return pk.are_predicates_true(any, termination_strategy)(de)
@@ -590,7 +581,7 @@ def evaluate_population(func: ObjectiveFunction, population: Population) -> Popu
     return population
 
 
-def evaluate(func: ObjectiveFunction, obj: Union[Individual, Population]) -> int:
+def evaluate(func: ObjectiveFunction, obj: Individual | Population) -> int:
     """Evaluate individual or population object and return evaluation count.
 
     Notes
@@ -680,7 +671,7 @@ class DifferentialEvolution(ABC):
         self,
         func: ObjectiveFunction,
         init_strategy: InitializationStrategy,
-        mutation_strategy: Union[MutationStrategy, PbestMutationStrategy],
+        mutation_strategy: MutationStrategy | PbestMutationStrategy,
         bound_repair_strategy: BoundRepairStrategy,
         crossover_strategy: CrossoverStrategy,
         replacement_strategy: ReplacementStrategy,
@@ -946,7 +937,7 @@ class DeV3(DifferentialEvolution):
         mcr = self.memory["cr"][h]
         return float(np.clip(mcr + np.sqrt(0.1) * self.rng.standard_normal(1)[0], 0, 1))
 
-    def update_memory(self, success: Dict["str", List[float]]) -> None:
+    def update_memory(self, success: dict["str", list[float]]) -> None:
         if success["any"]:
             fx_diff = np.array(success["fx_diff"])
             weights = fx_diff / fx_diff.sum()
@@ -986,7 +977,7 @@ class DeV4(DeV3):
             else np.clip(mcr + np.sqrt(0.1) * self.rng.standard_normal(1)[0], 0, 1)
         )
 
-    def update_memory(self, success: Dict["str", List[float]]) -> None:
+    def update_memory(self, success: dict["str", list[float]]) -> None:
         if success["any"]:
             fx_diff = np.array(success["fx_diff"])
             weights = fx_diff / fx_diff.sum()

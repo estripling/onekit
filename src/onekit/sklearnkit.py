@@ -1,8 +1,3 @@
-from typing import (
-    Optional,
-    Union,
-)
-
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -25,7 +20,7 @@ def precision_given_recall(
     y_score: ArrayLike,
     *,
     min_recall: float,
-    pos_label: Optional[Union[int, str]] = None,
+    pos_label: int | str | None = None,
 ) -> PandasDF:
     """Compute precision given a desired recall level.
 
@@ -59,7 +54,7 @@ def precision_given_recall_score(
     y_score: ArrayLike,
     *,
     min_recall: float,
-    pos_label: Optional[Union[int, str]] = None,
+    pos_label: int | str | None = None,
 ) -> float:
     """Compute precision score given a desired recall level.
 
@@ -84,7 +79,7 @@ def precision_given_recall_summary(
     y_score: ArrayLike,
     *,
     min_recall: float,
-    pos_label: Optional[Union[int, str]] = None,
+    pos_label: int | str | None = None,
 ) -> PandasDF:
     """Extend `precision_given_recall` with additional performance metrics.
 
@@ -151,7 +146,7 @@ def precision_recall_values(
     y_true: ArrayLike,
     y_score: ArrayLike,
     *,
-    pos_label: Optional[Union[int, str]] = None,
+    pos_label: int | str | None = None,
 ) -> PandasDF:
     """Compute precision-recall pairs for all thresholds.
 

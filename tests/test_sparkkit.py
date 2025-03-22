@@ -1,9 +1,6 @@
 import datetime as dt
 import math
-from typing import (
-    Callable,
-    List,
-)
+from typing import Callable
 
 import pytest
 import toolz
@@ -26,23 +23,22 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = df.transform(sk.add_prefix("pfx_"))
+        actual = sk.add_prefix(df, "pfx_")
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = df.transform(sk.add_prefix("pfx_", subset=["a"]))
+        actual = sk.add_prefix(df, "pfx_", subset=["a"])
         expected = spark.createDataFrame([Row(pfx_a=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function
-        actual = df.transform(sk.add_prefix("pfx_"))
+        actual = df.transform(lambda df: sk.add_prefix(df, "pfx_"))
         expected = spark.createDataFrame([Row(pfx_a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function with column selection
-        add_prefix__pfx = sk.add_prefix("pfx_", subset=["b"])
-        actual = df.transform(add_prefix__pfx)
+        actual = df.transform(lambda df: sk.add_prefix(df, "pfx_", subset=["b"]))
         expected = spark.createDataFrame([Row(a=1, pfx_b=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -50,23 +46,22 @@ class TestSparkKit:
         df = spark.createDataFrame([Row(a=1, b=2)])
 
         # all columns
-        actual = df.transform(sk.add_suffix("_sfx"))
+        actual = sk.add_suffix(df, "_sfx")
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # with column selection
-        actual = df.transform(sk.add_suffix("_sfx", subset=["a"]))
+        actual = sk.add_suffix(df, "_sfx", subset=["a"])
         expected = spark.createDataFrame([Row(a_sfx=1, b=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function
-        actual = df.transform(sk.add_suffix("_sfx"))
+        actual = df.transform(lambda df: sk.add_suffix(df, "_sfx"))
         expected = spark.createDataFrame([Row(a_sfx=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
         # used as transformation function with column selection
-        add_suffix__sfx = sk.add_suffix("_sfx", subset=["b"])
-        actual = df.transform(add_suffix__sfx)
+        actual = df.transform(lambda df: sk.add_suffix(df, "_sfx", subset=["b"]))
         expected = spark.createDataFrame([Row(a=1, b_sfx=2)])
         self.assert_dataframe_equal(actual, expected)
 
@@ -166,7 +161,7 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.bool_to_int()).select("i", F.col("x").alias("fx"))
+        actual = sk.bool_to_int(df).select("i", F.col("x").alias("fx"))
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -185,7 +180,7 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.bool_to_str()).select("i", F.col("x").alias("fx"))
+        actual = sk.bool_to_str(df).select("i", F.col("x").alias("fx"))
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -193,17 +188,17 @@ class TestSparkKit:
 
     def test_check_column_present(self, spark: SparkSession):
         df = spark.createDataFrame([Row(x=1, y=2)])
-        actual = df.transform(sk.check_column_present("x"))
+        actual = sk.check_column_present(df, "x")
         assert actual is df
 
-        actual = df.transform(sk.check_column_present("x", "y"))
+        actual = sk.check_column_present(df, "x", "y")
         assert actual is df
 
         with pytest.raises(sk.ColumnNotFoundError):
-            df.transform(sk.check_column_present("z"))
+            sk.check_column_present(df, "z")
 
         with pytest.raises(sk.ColumnNotFoundError):
-            df.transform(sk.check_column_present("x", "y", "z"))
+            sk.check_column_present(df, "x", "y", "z")
 
     def test_count_nulls(self, spark: SparkSession):
         df = spark.createDataFrame(
@@ -226,14 +221,14 @@ class TestSparkKit:
         expected = spark.createDataFrame([Row(x=0, z=3)])
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.count_nulls(subset=["x", "z"]))
+        actual = sk.count_nulls(df, subset=["x", "z"])
         self.assert_dataframe_equal(actual, expected)
 
     def test_cvf(self, spark: SparkSession):
         # single column
         counts = {"a": 3, "b": 1, "c": 1, "g": 2, "h": 1}
         df = spark.createDataFrame(
-            [dict(x=v) for v, c in counts.items() for _ in range(c)]
+            [Row(x=v) for v, c in counts.items() for _ in range(c)]
         )
 
         expected_rows = [
@@ -246,7 +241,7 @@ class TestSparkKit:
         expected = spark.createDataFrame(expected_rows)
 
         for cols in ["x", ["x"], F.col("x")]:
-            actual = df.transform(sk.cvf(cols))
+            actual = sk.cvf(df, cols)
             self.assert_dataframe_equal(actual, expected)
 
         # multiple columns
@@ -262,10 +257,10 @@ class TestSparkKit:
                 Row(x="a", y=2),
             ]
         )
-        actual = df.transform(sk.cvf("x"))  # check single column check first
+        actual = sk.cvf(df, "x")  # check single column check first
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.cvf("x", "y"))
+        actual = sk.cvf(df, "x", "y")
 
         expected_rows = [
             Row(x="a", y=1, count=2, percent=25.0, cumul_count=2, cumul_percent=25.0),
@@ -278,16 +273,16 @@ class TestSparkKit:
         expected = spark.createDataFrame(expected_rows)
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.cvf(["x", "y"]))
+        actual = sk.cvf(df, ["x", "y"])
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.cvf("x", F.col("y")))
+        actual = sk.cvf(df, "x", F.col("y"))
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.cvf(F.col("x"), F.col("y")))
+        actual = sk.cvf(df, F.col("x"), F.col("y"))
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.cvf([F.col("x"), F.col("y")]))
+        actual = sk.cvf(df, [F.col("x"), F.col("y")])
         self.assert_dataframe_equal(actual, expected)
 
     def test_date_range(self, spark: SparkSession):
@@ -331,25 +326,26 @@ class TestSparkKit:
             (float("inf"), "n_inf"),
             (math.inf, "n_inf"),
         ]:
-            actual = df.transform(sk.filter_date("d", d0=d0, n=n)).select("d")
+            actual = sk.filter_date(df, "d", d0=d0, n=n).select("d")
             expected = df.where(col).select("d")
             self.assert_dataframe_equal(actual, expected)
 
         for n in [None, "0", "a_string"]:
             with pytest.raises(TypeError):
-                df.transform(sk.filter_date("d", d0=d0, n=n))
+                # noinspection PyTypeChecker
+                sk.filter_date(df, "d", d0=d0, n=n)
 
         for n in [0, -1, 1.0, 1.5]:
             with pytest.raises(ValueError):
-                df.transform(sk.filter_date("d", d0=d0, n=n))
+                sk.filter_date(df, "d", d0=d0, n=n)
 
     def test_has_column(self, spark: SparkSession):
         df = spark.createDataFrame([Row(x=1, y=2)])
-        assert sk.has_column(df, cols=["x"])
-        assert sk.has_column(df, cols=["x", "y"])
-        assert not sk.has_column(df, cols=["x", "y", "z"])
-        assert not sk.has_column(df, cols=["z"])
-        assert not sk.has_column(df, cols=["x", "z"])
+        assert sk.has_column(df, ["x"])
+        assert sk.has_column(df, ["x", "y"])
+        assert not sk.has_column(df, ["x", "y", "z"])
+        assert not sk.has_column(df, "z")
+        assert not sk.has_column(df, "x", "z")
 
     def test_is_dataframe_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -383,7 +379,10 @@ class TestSparkKit:
 
         rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df__different_type = spark.createDataFrame(
-            [Row(x=1, y="2"), Row(x=3, y="4")]
+            [
+                Row(x=1, y="2"),
+                Row(x=3, y="4"),
+            ]
         )
         rgt_df__different_size = spark.createDataFrame([Row(x=1), Row(x=3)])
 
@@ -392,9 +391,9 @@ class TestSparkKit:
         assert not sk.is_schema_equal(lft_df, rgt_df__different_size)
 
     def test_join(self, spark: SparkSession):
-        df1 = spark.createDataFrame([dict(id=1, x="a"), dict(id=2, x="b")])
-        df2 = spark.createDataFrame([dict(id=1, y="c"), dict(id=2, y="d")])
-        df3 = spark.createDataFrame([dict(id=1, z="e"), dict(id=2, z="f")])
+        df1 = spark.createDataFrame([Row(id=1, x="a"), Row(id=2, x="b")])
+        df2 = spark.createDataFrame([Row(id=1, y="c"), Row(id=2, y="d")])
+        df3 = spark.createDataFrame([Row(id=1, z="e"), Row(id=2, z="f")])
 
         actual = sk.join(df1, df2, df3, on="id")
         expected = df1.join(df2, "id").join(df3, "id")
@@ -403,9 +402,9 @@ class TestSparkKit:
     def test_peek(self, spark: SparkSession):
         df = spark.createDataFrame(
             [
-                dict(x=1, y="a", z=True),
-                dict(x=3, y=None, z=False),
-                dict(x=None, y="c", z=True),
+                Row(x=1, y="a", z=True),
+                Row(x=3, y=None, z=False),
+                Row(x=None, y="c", z=True),
             ]
         )
         actual = (
@@ -443,7 +442,7 @@ class TestSparkKit:
         self,
         spark: SparkSession,
         col_type: T.DataType,
-        expected: List[str],
+        expected: list[str],
     ):
         df = spark.createDataFrame(
             [
@@ -485,9 +484,9 @@ class TestSparkKit:
         assert isinstance(actual, SparkCol)
 
     def test_union(self, spark: SparkSession):
-        df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-        df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])
-        df3 = spark.createDataFrame([dict(x=0, y=1), dict(x=2, y=3)])
+        df1 = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+        df2 = spark.createDataFrame([Row(x=5, y=6), Row(x=7, y=8)])
+        df3 = spark.createDataFrame([Row(x=0, y=1), Row(x=2, y=3)])
 
         actual = sk.union(df1, df2, df3)
         expected = df1.unionByName(df2).unionByName(df3)
@@ -511,7 +510,7 @@ class TestSparkKit:
             ]
         )
 
-        actual = df.transform(sk.with_date_diff_ago("d", d0, "fx")).select("i", "fx")
+        actual = sk.with_date_diff_ago(df, "d", d0, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -533,7 +532,7 @@ class TestSparkKit:
             ]
         )
 
-        actual = df.transform(sk.with_date_diff_ahead("d", d0, "fx")).select("i", "fx")
+        actual = sk.with_date_diff_ahead(df, "d", d0, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -558,7 +557,7 @@ class TestSparkKit:
                 Row(i=16, x=None, expect=None),
             ],
         )
-        actual = df.transform(sk.with_digitscale("x", "fx")).select("i", "fx")
+        actual = sk.with_digitscale(df, "x", "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -590,9 +589,7 @@ class TestSparkKit:
                 ]
             ),
         )
-        actual = df.transform(sk.with_digitscale("x", "fx", kind="int")).select(
-            "i", "fx"
-        )
+        actual = sk.with_digitscale(df, "x", "fx", kind="int").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -617,16 +614,15 @@ class TestSparkKit:
                 Row(i=16, x=None, expect=None),
             ],
         )
-        actual = df.transform(sk.with_digitscale("x", "fx", kind="linear")).select(
-            "i", "fx"
-        )
+        actual = sk.with_digitscale(df, "x", "fx", kind="linear").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
     @pytest.mark.parametrize("kind", [None, "LOG", 1, 2.0, "invalid_kind"])
-    def test_with_digitscale_invalid_kind(self, kind: str):
+    def test_with_digitscale_invalid_kind(self, spark: SparkSession, kind: str):
+        df = spark.createDataFrame([Row(x=1)])
         with pytest.raises(ValueError):
-            sk.with_digitscale("x", "fx", kind=kind)
+            sk.with_digitscale(df, "x", "fx", kind=kind)
 
     @pytest.mark.parametrize("f", [toolz.identity, pk.str_to_date])
     def test_with_endofweek_date(self, spark: SparkSession, f: Callable):
@@ -654,13 +650,11 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.with_endofweek_date("d", "fx")).select("i", "fx")
+        actual = sk.with_endofweek_date(df, "d", "fx").select("i", "fx")
         expected = df.select("i", F.col("expect_sun").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.with_endofweek_date("d", "fx", "Sat")).select(
-            "i", "fx"
-        )
+        actual = sk.with_endofweek_date(df, "d", "fx", "Sat").select("i", "fx")
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -686,7 +680,7 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.with_increasing_id("fx")).select("i", "fx")
+        actual = sk.with_increasing_id(df, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -711,7 +705,7 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.with_index("fx")).select("i", "fx")
+        actual = sk.with_index(df, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -742,13 +736,11 @@ class TestSparkKit:
             ),
         )
 
-        actual = df.transform(sk.with_startofweek_date("d", "fx")).select("i", "fx")
+        actual = sk.with_startofweek_date(df, "d", "fx").select("i", "fx")
         expected = df.select("i", F.col("expect_sun").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-        actual = df.transform(sk.with_startofweek_date("d", "fx", "Sat")).select(
-            "i", "fx"
-        )
+        actual = sk.with_startofweek_date(df, "d", "fx", "Sat").select("i", "fx")
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
@@ -766,7 +758,7 @@ class TestSparkKit:
                 Row(i=8, d=None, expect=None),
             ]
         )
-        actual = df.transform(sk.with_weekday("d", "fx")).select("i", "fx")
+        actual = sk.with_weekday(df, "d", "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 

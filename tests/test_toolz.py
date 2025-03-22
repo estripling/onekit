@@ -2,7 +2,6 @@ import itertools
 import operator
 import random
 import statistics
-from typing import Tuple
 
 import pytest
 from toolz import (
@@ -27,25 +26,25 @@ class TestToolzAPI:
         expected = (1, 2, 3, 4, 5, 6)
         assert actual == expected
 
-    def test_first(self, n10: Tuple[int]):
+    def test_first(self, n10: tuple[int]):
         """Take the first element."""
         actual = itertoolz.first(n10)
         expected = 1
         assert actual == expected
 
-    def test_last(self, n10: Tuple[int]):
+    def test_last(self, n10: tuple[int]):
         """Take the last element."""
         actual = itertoolz.last(n10)
         expected = 10
         assert actual == expected
 
-    def test_rest(self, n10: Tuple[int]):
+    def test_rest(self, n10: tuple[int]):
         """Drop the first element and return the remaining elements."""
         actual = tuple(itertoolz.rest(n10))
         expected = (2, 3, 4, 5, 6, 7, 8, 9, 10)
         assert actual == expected
 
-    def test_second(self, n10: Tuple[int]):
+    def test_second(self, n10: tuple[int]):
         """Take the second element."""
         actual = itertoolz.second(n10)
         expected = 2
@@ -97,19 +96,19 @@ class TestToolzAPI:
         assert actual == expected
         assert log == [1, 11]
 
-    def test_drop(self, n10: Tuple[int]):
+    def test_drop(self, n10: tuple[int]):
         """Drop the first three elements and return the rest."""
         actual = tuple(curried.drop(3, n10))
         expected = (4, 5, 6, 7, 8, 9, 10)
         assert actual == expected
 
-    def test_filter(self, n10: Tuple[int]):
+    def test_filter(self, n10: tuple[int]):
         """Filter even numbers."""
         actual = tuple(filter(mk.iseven, n10))
         expected = (2, 4, 6, 8, 10)
         assert actual == expected
 
-    def test_get(self, n10: Tuple[int]):
+    def test_get(self, n10: tuple[int]):
         """Get element in a sequence or dict."""
         actual = curried.get(1, n10)
         expected = 2
@@ -136,7 +135,7 @@ class TestToolzAPI:
         expected = ("555-1234", "555-5678")
         assert actual == expected
 
-    def test_groupby(self, n10: Tuple[int]):
+    def test_groupby(self, n10: tuple[int]):
         """Group an iterable by a key function."""
         actual = curried.groupby(mk.iseven, n10)
         expected = {False: [1, 3, 5, 7, 9], True: [2, 4, 6, 8, 10]}
@@ -163,7 +162,7 @@ class TestToolzAPI:
         expected = ("A", "B", "C", "D", "E")
         assert actual == expected
 
-    def test_nth(self, n10: Tuple[int]):
+    def test_nth(self, n10: tuple[int]):
         """Take the nth element."""
         actual = curried.nth(4, n10)
         expected = 5
@@ -211,7 +210,7 @@ class TestToolzAPI:
         expected = ((1, 2), (4, 5))
         assert actual == expected
 
-    def test_random_sample(self, n10: Tuple[int]):
+    def test_random_sample(self, n10: tuple[int]):
         """Return elements from a sequence with probability of prob.
 
         It considers each item independently and without replacement.
@@ -258,7 +257,7 @@ class TestToolzAPI:
         expected = (1.5, 2.5, 3.5)
         assert actual == expected
 
-    def test_tail(self, n10: Tuple[int]):
+    def test_tail(self, n10: tuple[int]):
         """Take the last nth elements."""
         actual = tuple(curried.tail(3, n10))
         expected = (8, 9, 10)
@@ -270,7 +269,7 @@ class TestToolzAPI:
         expected = (1, 2, 3)
         assert actual == expected
 
-    def test_take_nth(self, n10: Tuple[int]):
+    def test_take_nth(self, n10: tuple[int]):
         """Take every nth element."""
         actual = tuple(curried.take_nth(2, n10))
         expected = (1, 3, 5, 7, 9)
@@ -459,5 +458,5 @@ class TestToolzAPI:
         return n + 1
 
     @pytest.fixture(scope="class")
-    def n10(self) -> Tuple[int]:
+    def n10(self) -> tuple[int]:
         return 1, 2, 3, 4, 5, 6, 7, 8, 9, 10

@@ -9,10 +9,7 @@ References
 """
 from typing import (
     Callable,
-    Dict,
-    List,
     NamedTuple,
-    Optional,
 )
 
 import numpy as np
@@ -38,7 +35,7 @@ __all__ = (
     "sphere",
 )
 
-Vector = npt.NDArray[np.float64]
+Vector = list[int] | list[float] | npt.NDArray[np.float64]
 
 
 class Minimum(NamedTuple):
@@ -171,7 +168,7 @@ def bump(x: Vector, /) -> float:
 
 
 @toolz.curry
-def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
+def fetch_minima(func: Callable, /, n: int) -> list[Minimum] | None:
     """Get minima for defined functions.
 
     Examples
@@ -203,7 +200,7 @@ def fetch_minima(func: Callable, /, n: int) -> Optional[List[Minimum]]:
     return minima.get(func, None)
 
 
-def get_plotters__func1n() -> Dict[str, vk.FunctionPlotter]:
+def get_plotters__func1n() -> dict[str, vk.FunctionPlotter]:
     """Get FunctionPlotter instances for functions with 1-vector input."""
     return {
         "ackley": vk.FunctionPlotter(
@@ -233,7 +230,7 @@ def get_plotters__func1n() -> Dict[str, vk.FunctionPlotter]:
     }
 
 
-def get_plotters__func2n() -> Dict[str, vk.FunctionPlotter]:
+def get_plotters__func2n() -> dict[str, vk.FunctionPlotter]:
     """Get FunctionPlotter instances for functions with 2-vector input."""
     return {
         "ackley": vk.FunctionPlotter(

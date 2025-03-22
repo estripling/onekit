@@ -19,11 +19,7 @@ from typing import (
     Generator,
     Iterable,
     Iterator,
-    List,
-    Optional,
     Sequence,
-    Tuple,
-    Union,
 )
 
 import pytz
@@ -68,18 +64,18 @@ __all__ = (
 )
 
 
-Pair = Tuple[float, float]
+Pair = tuple[float, float]
 Predicate = Callable[[Any], bool]
-Seed = Optional[Union[int, random.Random]]
+Seed = int | random.Random | None
 
 
 def archive_files(
     target: str,
     /,
     *,
-    wildcards: Optional[List[str]] = None,
-    name: Optional[str] = None,
-    timezone: Optional[str] = None,
+    wildcards: list[str] | None = None,
+    name: str | None = None,
+    timezone: str | None = None,
     kind: str = "zip",
 ) -> None:
     """Archive files in target directory.
@@ -136,7 +132,7 @@ def archive_files(
 def are_predicates_true(
     func: Callable[..., bool],
     /,
-    *predicates: Union[Predicate, Iterable[Predicate]],
+    *predicates: Predicate | Iterable[Predicate],
 ) -> Predicate:
     """Evaluate if predicates are true.
 
@@ -192,7 +188,7 @@ def are_predicates_true(
     return inner
 
 
-def check_random_state(seed: Seed = None, /) -> random.Random:
+def check_random_state(seed: Seed = None) -> random.Random:
     """Turn seed into random.Random instance.
 
     Examples
@@ -582,7 +578,12 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     return new_xmin, new_xmax
 
 
-def filter_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
+def filter_regex(
+    pattern: str,
+    /,
+    *strings: str | Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
     """Filter iterable of strings with regex.
 
     Examples
@@ -608,7 +609,7 @@ def filter_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generat
     return filter(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
-def flatten(*items: Any) -> Generator:
+def flatten(*items: Any | Iterable[Any]) -> Generator:
     """Flatten iterable of items.
 
     Examples
@@ -692,7 +693,7 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
     )
 
 
-def humantime(seconds: Union[int, float], /) -> str:
+def humantime(seconds: int | float, /) -> str:
     """Convert seconds to human-readable time.
 
     Examples
@@ -766,9 +767,9 @@ def lazy_read_lines(
     path: str,
     /,
     *,
-    encoding: Optional[str] = None,
-    errors: Optional[str] = None,
-    newline: Optional[str] = None,
+    encoding: str | None = None,
+    errors: str | None = None,
+    newline: str | None = None,
 ) -> Generator:
     """Lazily read text file line by line.
 
@@ -796,7 +797,12 @@ def lazy_read_lines(
             yield line
 
 
-def map_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
+def map_regex(
+    pattern: str,
+    /,
+    *strings: str | Iterable[str],
+    flags=re.IGNORECASE,
+) -> Generator:
     """Match regex to iterable of strings.
 
     Examples
@@ -822,7 +828,7 @@ def map_regex(pattern: str, /, *strings: str, flags=re.IGNORECASE) -> Generator:
     return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
-def num_to_str(x: Union[int, float], /) -> str:
+def num_to_str(x: int | float, /) -> str:
     """Cast number to string with underscores as thousands separator.
 
     Examples
@@ -886,7 +892,7 @@ def op(func: Callable, a: Any, x: Any, /) -> Any:
     return func(x, a)
 
 
-def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
+def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
     """Prompt yes-no question.
 
     Examples
@@ -956,7 +962,7 @@ def prompt_yes_no(question: str, /, *, default: Optional[str] = None) -> bool:
 
 
 @toolz.curry
-def reduce_sets(func: Callable[[set, set], set], /, *sets: set) -> set:
+def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) -> set:
     """Apply function of two set arguments to reduce iterable of sets.
 
     Examples
@@ -998,7 +1004,7 @@ def remove_punctuation(text: str, /) -> str:
 
 
 @toolz.curry
-def signif(x: Union[int, float], /, n: int) -> Union[int, float]:
+def signif(x: int | float, /, n: int) -> int | float:
     """Round :math:`x` to its :math:`n` significant digits.
 
     Examples
@@ -1131,12 +1137,12 @@ class stopwatch(ContextDecorator):
 
     def __init__(
         self,
-        label: Optional[Union[str, int]] = None,
+        label: str | int | None = None,
         /,
         *,
         flush: bool = False,
-        timezone: Optional[str] = None,
-        fmt: Optional[str] = None,
+        timezone: str | None = None,
+        fmt: str | None = None,
     ):
         if isinstance(label, bool) or (
             label is not None and not isinstance(label, (str, int))
@@ -1333,7 +1339,7 @@ def str_to_date(string: str, /) -> dt.date:
     return dt.datetime.strptime(string, "%Y-%m-%d").date()
 
 
-def timestamp(zone: Optional[str] = None, fmt: Optional[str] = None) -> str:
+def timestamp(zone: str | None = None, fmt: str | None = None) -> str:
     """Get timezone-dependent timestamp.
 
     Parameters
