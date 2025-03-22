@@ -3,6 +3,7 @@ import functools
 import math
 import os
 from typing import (
+    Any,
     Callable,
     Iterable,
 )
@@ -1040,15 +1041,26 @@ def select_col_types(
     >>> sk.select_col_types(df, T.IntegerType, T.LongType)
     ['int', 'long']
     """
-    valid_types = {
-        v.typeName()
-        for k, v in T.__dict__.items()
-        if k.endswith("Type") and hasattr(v, "typeName")
-    }
+
+    def get_valid_column_data_types() -> set[str]:
+        # noinspection PyTypeChecker
+        all_column_data_types: dict[str, Any] = SparkColType.__dict__
+        valid_column_data_types = set()
+        for k, v in all_column_data_types.items():
+            try:
+                if k.endswith("Type") and hasattr(v, "typeName"):
+                    valid_column_data_types.add(v.typeName())
+            except AttributeError:  # pragma: no cover
+                continue  # pragma: no cover
+        return valid_column_data_types
+
     col_types = tuple(pk.flatten(col_types))
+    valid_types = get_valid_column_data_types()
+
     for col_type in col_types:
         if not hasattr(col_type, "typeName") or col_type.typeName() not in valid_types:
             raise TypeError(f"{col_type=} - must be a valid data type: {valid_types}")
+
     return [c for c in df.columns if isinstance(df.schema[c].dataType, col_types)]
 
 
