@@ -210,23 +210,20 @@ def fibonacci() -> Generator:
         lag2, lag1 = lag1, lag0
 
 
-@toolz.curry
 def isdivisible(x: int | float, /, n: int) -> bool:
     """Evaluate if :math:`x` is evenly divisible by :math:`n`.
 
     Examples
     --------
+    >>> from functools import partial
     >>> import onekit.mathkit as mk
     >>> mk.isdivisible(49, 7)
     True
 
-    >>> # function is curried
-    >>> mk.isdivisible(10)(5)
-    True
-    >>> is_10_divisible_by = mk.isdivisible(10)
+    >>> is_10_divisible_by = partial(mk.isdivisible, 10)
     >>> is_10_divisible_by(5)
     True
-    >>> is_x_divisible_by_5 = mk.isdivisible(n=5)
+    >>> is_x_divisible_by_5 = partial(mk.isdivisible, n=5)
     >>> is_x_divisible_by_5(10)
     True
     >>> is_x_divisible_by_5(11.0)
