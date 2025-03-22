@@ -13,11 +13,6 @@ from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Callable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
 )
 
 import pytest
@@ -261,7 +256,7 @@ def test_date_count_forward():
         (dt.date(2022, 1, 1), dt.date(2022, 1, 1), (dt.date(2022, 1, 1),)),
     ],
 )
-def test_daterange(start: dt.date, end: dt.date, expected: Tuple[dt.date]):
+def test_daterange(start: dt.date, end: dt.date, expected: tuple[dt.date]):
     actual = tuple(pk.date_range(start, end))
     assert actual == expected
 
@@ -305,7 +300,7 @@ def test_extend_range(
     xmin: float,
     xmax: float,
     factor: float,
-    expected: Tuple[float, float],
+    expected: tuple[float, float],
 ):
     extend_range = functools.partial(pk.extend_range, factor=factor)
     if factor >= 0:
@@ -349,7 +344,7 @@ def test_extend_range(
         (([-1], filter(lambda x: x % 2 == 0, range(1, 7))), [-1, 2, 4, 6]),
     ],
 )
-def test_flatten(items: Any, expected: List[Any]):
+def test_flatten(items: Any, expected: list[Any]):
     actual = list(pk.flatten(items))
     assert actual == expected
 
@@ -417,7 +412,7 @@ def test_highlight_string_differences(lft_str: str, rgt_str: str, expected: str)
         (60 * 60 * 24 + 123456, "2d 10h 17m 36s"),
     ],
 )
-def test_humantime(seconds: Union[int, float], expected: Optional[str]):
+def test_humantime(seconds: int | float, expected: str | None):
     if seconds >= 0:
         actual = pk.humantime(seconds)
         assert actual == expected
@@ -491,7 +486,7 @@ def test_lazy_read_lines():
         (100000.0, "100_000.0"),
     ],
 )
-def test_num_to_str(x: Union[int, float], expected: str):
+def test_num_to_str(x: int | float, expected: str):
     actual = pk.num_to_str(x)
     assert actual == expected
 
@@ -519,7 +514,7 @@ def test_number_of_days(d1: dt.date, d2: dt.date, expected: int):
         (set.symmetric_difference, {0, 1, 2, 3, 4, 8}),
     ],
 )
-def test_reduce_sets(func: Callable, expected: Set[int]):
+def test_reduce_sets(func: Callable, expected: set[int]):
     x = {0, 1, 2, 3}
     y = {2, 4, 6}
     z = {2, 6, 8}
@@ -621,7 +616,7 @@ def test_remove_punctuation(text: str, expected: str):
         (14393237.76, 4, 14390000.0),
     ],
 )
-def test_signif(x: Union[int, float], n: int, expected: Union[int, float]):
+def test_signif(x: int | float, n: int, expected: int | float):
     f = functools.partial(pk.signif, n=n)
     if n > 0:
         actual = f(x)
@@ -683,7 +678,7 @@ class TestPromptYesNo:
     def test_default_call(
         self,
         monkeypatch,
-        default: Optional[str],
+        default: str | None,
         answer: str,
         expected: bool,
     ):
@@ -692,7 +687,7 @@ class TestPromptYesNo:
         assert actual == expected
 
     @pytest.mark.parametrize("default", [1, "noo", "yeah"])
-    def test_invalid_default_value(self, default: Optional[str]):
+    def test_invalid_default_value(self, default: str | None):
         with pytest.raises(ValueError):
             pk.prompt_yes_no("Do you like onekit?", default=default)
 
@@ -703,7 +698,7 @@ class TestPromptYesNo:
 
 
 class TestRegexFunctions:
-    def test_filter_regex(self, zen_of_python: Tuple[str]):
+    def test_filter_regex(self, zen_of_python: tuple[str]):
         actual = list(pk.filter_regex("python", zen_of_python))
         expected = ["The Zen of Python, by Tim Peters"]
         assert actual == expected
@@ -722,7 +717,7 @@ class TestRegexFunctions:
         ]
         assert actual == expected
 
-    def test_map_regex(self, zen_of_python: Tuple[str]):
+    def test_map_regex(self, zen_of_python: tuple[str]):
         actual = list(pk.map_regex("python", zen_of_python))
         expected = [["Python"]] + [[] for _ in range(19)]
         assert actual == expected
@@ -739,7 +734,7 @@ class TestRegexFunctions:
         assert actual == expected
 
     @pytest.fixture(scope="class")
-    def zen_of_python(self) -> Tuple[str]:
+    def zen_of_python(self) -> tuple[str]:
         return (
             "The Zen of Python, by Tim Peters",
             "Beautiful is better than ugly.",

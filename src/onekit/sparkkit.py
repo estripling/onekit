@@ -4,9 +4,7 @@ import math
 import os
 from typing import (
     Callable,
-    List,
-    Sequence,
-    Union,
+    Iterable,
 )
 
 import toolz
@@ -62,7 +60,6 @@ __all__ = (
 )
 
 SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
-SparkDFTransformFunc = Callable[[SparkDF], SparkDF]
 
 
 class SparkkitError(Exception):
@@ -72,7 +69,7 @@ class SparkkitError(Exception):
 class ColumnNotFoundError(SparkkitError):
     """Exception if columns are not found in dataframe."""
 
-    def __init__(self, missing_cols: Sequence[str]):
+    def __init__(self, missing_cols: list[str]):
         self.missing_cols = missing_cols
         self.message = f"following columns not found: {missing_cols}"
         super().__init__(self.message)
@@ -114,16 +111,16 @@ class SchemaMismatchError(SparkkitError):
         super().__init__(self.message)
 
 
-def add_prefix(prefix: str, /, *, subset=None) -> SparkDFTransformFunc:
+def add_prefix(df: SparkDF, prefix: str, subset: list[str] | None = None) -> SparkDF:
     """Add prefix to column names.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> df.transform(sk.add_prefix("pfx_")).show()
+    >>> df = spark.createDataFrame([Row(x=1, y=2)])
+    >>> sk.add_prefix(df, "pfx_").show()
     +-----+-----+
     |pfx_x|pfx_y|
     +-----+-----+
@@ -131,26 +128,22 @@ def add_prefix(prefix: str, /, *, subset=None) -> SparkDFTransformFunc:
     +-----+-----+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        cols = subset or df.columns
-        for col in cols:
-            df = df.withColumnRenamed(col, f"{prefix}{col}")
-        return df
-
-    return inner
+    cols = subset or df.columns
+    for col in cols:
+        df = df.withColumnRenamed(col, f"{prefix}{col}")
+    return df
 
 
-def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
+def add_suffix(df: SparkDF, suffix: str, subset: list[str] | None = None) -> SparkDF:
     """Add suffix to column names.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x=1, y=2)])
-    >>> df.transform(sk.add_suffix("_sfx")).show()
+    >>> df = spark.createDataFrame([Row(x=1, y=2)])
+    >>> sk.add_suffix(df, "_sfx").show()
     +-----+-----+
     |x_sfx|y_sfx|
     +-----+-----+
@@ -158,35 +151,31 @@ def add_suffix(suffix: str, /, *, subset=None) -> SparkDFTransformFunc:
     +-----+-----+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        cols = subset or df.columns
-        for col in cols:
-            df = df.withColumnRenamed(col, f"{col}{suffix}")
-        return df
-
-    return inner
+    cols = subset or df.columns
+    for col in cols:
+        df = df.withColumnRenamed(col, f"{col}{suffix}")
+    return df
 
 
-def all_col(*cols: str) -> SparkCol:
+def all_col(*cols: str | Iterable[str]) -> SparkCol:
     """Evaluate if all columns are true.
 
     Notes
     -----
-    A null value is considered false.
+    A NULL value is considered false.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=True, y=True),
-    ...         dict(x=True, y=False),
-    ...         dict(x=True, y=None),
-    ...         dict(x=None, y=False),
-    ...         dict(x=None, y=None),
+    ...         Row(x=True, y=True),
+    ...         Row(x=True, y=False),
+    ...         Row(x=True, y=None),
+    ...         Row(x=None, y=False),
+    ...         Row(x=None, y=None),
     ...     ]
     ... )
     >>> df.withColumn("all_cols_true", sk.all_col("x", "y")).show()
@@ -195,9 +184,9 @@ def all_col(*cols: str) -> SparkCol:
     +----+-----+-------------+
     |true| true|         true|
     |true|false|        false|
-    |true| null|        false|
-    |null|false|        false|
-    |null| null|        false|
+    |true| NULL|        false|
+    |NULL|false|        false|
+    |NULL| NULL|        false|
     +----+-----+-------------+
     <BLANKLINE>
     """
@@ -211,25 +200,25 @@ def all_col(*cols: str) -> SparkCol:
     )
 
 
-def any_col(*cols: str) -> SparkCol:
+def any_col(*cols: str | Iterable[str]) -> SparkCol:
     """Evaluate if any column is true.
 
     Notes
     -----
-    A null value is considered false.
+    A NULL value is considered false.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=True, y=True),
-    ...         dict(x=True, y=False),
-    ...         dict(x=True, y=None),
-    ...         dict(x=None, y=False),
-    ...         dict(x=None, y=None),
+    ...         Row(x=True, y=True),
+    ...         Row(x=True, y=False),
+    ...         Row(x=True, y=None),
+    ...         Row(x=None, y=False),
+    ...         Row(x=None, y=None),
     ...     ]
     ... )
     >>> df.withColumn("any_col_true", sk.any_col("x", "y")).show()
@@ -238,9 +227,9 @@ def any_col(*cols: str) -> SparkCol:
     +----+-----+------------+
     |true| true|        true|
     |true|false|        true|
-    |true| null|        true|
-    |null|false|       false|
-    |null| null|       false|
+    |true| NULL|        true|
+    |NULL|false|       false|
+    |NULL| NULL|       false|
     +----+-----+------------+
     <BLANKLINE>
     """
@@ -331,16 +320,16 @@ def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> sk.assert_row_count_equal(lft_df, rgt_df) is None
     True
 
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=1)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1)])
     >>> try:
     ...     sk.assert_row_count_equal(lft_df, rgt_df)
     ... except sk.RowCountMismatchError as error:
@@ -369,16 +358,16 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> sk.assert_row_equal(lft_df, rgt_df) is None
     True
 
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=3, y=4), dict(x=5, y=6), dict(x=7, y=8)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6), Row(x=7, y=8)])
     >>> try:
     ...     sk.assert_row_equal(lft_df, rgt_df)
     ... except sk.RowMismatchError as error:
@@ -412,16 +401,16 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> sk.assert_schema_equal(lft_df, rgt_df) is None
     True
 
-    >>> lft_df = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> rgt_df = spark.createDataFrame([dict(x=1), dict(x=3)])
+    >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> rgt_df = spark.createDataFrame([Row(x=1), Row(x=3)])
     >>> try:
     ...     sk.assert_schema_equal(lft_df, rgt_df)
     ... except sk.SchemaMismatchError as error:
@@ -440,40 +429,38 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         raise SchemaMismatchError(lft_schema, rgt_schema)
 
 
-@toolz.curry
-def bool_to_int(df: SparkDF, /, *, subset=None) -> SparkDF:
+def bool_to_int(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     """Cast values of Boolean columns to 0/1 integer values.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=True, y=False, z=None),
-    ...         dict(x=False, y=None, z=True),
-    ...         dict(x=True, y=None, z=None),
+    ...         Row(x=True, y=False, z=None),
+    ...         Row(x=False, y=None, z=True),
+    ...         Row(x=True, y=None, z=None),
     ...     ]
     ... )
     >>> sk.bool_to_int(df).show()
     +---+----+----+
     |  x|   y|   z|
     +---+----+----+
-    |  1|   0|null|
-    |  0|null|   1|
-    |  1|null|null|
+    |  1|   0|NULL|
+    |  0|NULL|   1|
+    |  1|NULL|NULL|
     +---+----+----+
     <BLANKLINE>
 
-    >>> # function is curried
-    >>> df.transform(sk.bool_to_int(subset=["y", "z"])).show()
+    >>> sk.bool_to_int(df, subset=["y", "z"]).show()
     +-----+----+----+
     |    x|   y|   z|
     +-----+----+----+
-    | true|   0|null|
-    |false|null|   1|
-    | true|null|null|
+    | true|   0|NULL|
+    |false|NULL|   1|
+    | true|NULL|NULL|
     +-----+----+----+
     <BLANKLINE>
     """
@@ -484,34 +471,32 @@ def bool_to_int(df: SparkDF, /, *, subset=None) -> SparkDF:
     return df
 
 
-@toolz.curry
-def bool_to_str(df: SparkDF, /, *, subset=None) -> SparkDF:
+def bool_to_str(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     """Cast values of Boolean columns to string values.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=True, y=False, z=None),
-    ...         dict(x=False, y=None, z=True),
-    ...         dict(x=True, y=None, z=None),
+    ...         Row(x=True, y=False, z=None),
+    ...         Row(x=False, y=None, z=True),
+    ...         Row(x=True, y=None, z=None),
     ...     ]
     ... )
     >>> sk.bool_to_str(df).show()
     +-----+-----+----+
     |    x|    y|   z|
     +-----+-----+----+
-    | true|false|null|
-    |false| null|true|
-    | true| null|null|
+    | true|false|NULL|
+    |false| NULL|true|
+    | true| NULL|NULL|
     +-----+-----+----+
     <BLANKLINE>
 
-    >>> # function is curried
-    >>> df.transform(sk.bool_to_str(subset=["y", "z"])).printSchema()
+    >>> sk.bool_to_str(df, subset=["y", "z"]).printSchema()
     root
      |-- x: boolean (nullable = true)
      |-- y: string (nullable = true)
@@ -525,7 +510,7 @@ def bool_to_str(df: SparkDF, /, *, subset=None) -> SparkDF:
     return df
 
 
-def check_column_present(*cols: str) -> SparkDFTransformFunc:
+def check_column_present(df: SparkDF, *cols: str | Iterable[str]) -> SparkDF:
     """Check if columns are present in dataframe.
 
     Raises
@@ -535,11 +520,11 @@ def check_column_present(*cols: str) -> SparkDFTransformFunc:
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x=1), dict(x=2), dict(x=3)])
-    >>> df.transform(sk.check_column_present("x")).show()
+    >>> df = spark.createDataFrame([Row(x=1), Row(x=2), Row(x=3)])
+    >>> sk.check_column_present(df, "x").show()
     +---+
     |  x|
     +---+
@@ -550,38 +535,31 @@ def check_column_present(*cols: str) -> SparkDFTransformFunc:
     <BLANKLINE>
 
     >>> try:
-    ...     df.transform(sk.check_column_present("y")).show()
+    ...     sk.check_column_present(df, "y").show()
     ... except sk.ColumnNotFoundError as error:
     ...     print(error)
     ...
     following columns not found: ['y']
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        missing_cols = [col for col in pk.flatten(cols) if col not in df.columns]
-
-        if len(missing_cols) > 0:
-            raise ColumnNotFoundError(missing_cols)
-
-        return df
-
-    return inner
+    missing_cols = [col for col in pk.flatten(cols) if col not in df.columns]
+    if len(missing_cols) > 0:
+        raise ColumnNotFoundError(missing_cols)
+    return df
 
 
-@toolz.curry
-def count_nulls(df: SparkDF, /, *, subset=None) -> SparkDF:
-    """Count null values in Spark dataframe.
+def count_nulls(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
+    """Count NULL values in Spark dataframe.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=1, y=2, z=None),
-    ...         dict(x=4, y=None, z=6),
-    ...         dict(x=10, y=None, z=None),
+    ...         Row(x=1, y=2, z=None),
+    ...         Row(x=4, y=None, z=6),
+    ...         Row(x=10, y=None, z=None),
     ...     ]
     ... )
     >>> sk.count_nulls(df).show()
@@ -591,41 +569,32 @@ def count_nulls(df: SparkDF, /, *, subset=None) -> SparkDF:
     |  0|  2|  2|
     +---+---+---+
     <BLANKLINE>
-
-    >>> # function is curried
-    >>> df.transform(sk.count_nulls(subset=["x", "z"])).show()
-    +---+---+
-    |  x|  z|
-    +---+---+
-    |  0|  2|
-    +---+---+
-    <BLANKLINE>
     """
     cols = subset or df.columns
     return df.agg(*[F.sum(F.isnull(c).cast(T.LongType())).alias(c) for c in cols])
 
 
-def cvf(*cols: str) -> SparkDFTransformFunc:
+def cvf(df: SparkDF, *cols: str | SparkCol | Iterable[str | SparkCol]) -> SparkDF:
     """Count value frequency.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x="a"),
-    ...         dict(x="c"),
-    ...         dict(x="b"),
-    ...         dict(x="g"),
-    ...         dict(x="h"),
-    ...         dict(x="a"),
-    ...         dict(x="g"),
-    ...         dict(x="a"),
+    ...         Row(x="a"),
+    ...         Row(x="c"),
+    ...         Row(x="b"),
+    ...         Row(x="g"),
+    ...         Row(x="h"),
+    ...         Row(x="a"),
+    ...         Row(x="g"),
+    ...         Row(x="a"),
     ...     ]
     ... )
-    >>> df.transform(sk.cvf("x")).show()
+    >>> sk.cvf(df, "x").show()
     +---+-----+-------+-----------+-------------+
     |  x|count|percent|cumul_count|cumul_percent|
     +---+-----+-------+-----------+-------------+
@@ -637,29 +606,23 @@ def cvf(*cols: str) -> SparkDFTransformFunc:
     +---+-----+-------+-----------+-------------+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        columns = toolz.pipe(cols, pk.flatten, curried.map(str_to_col), list)
-        w0 = Window.partitionBy(F.lit(1))
-        w1 = w0.orderBy(F.desc("count"), *columns)
-
-        return (
-            df.groupby(columns)
-            .count()
-            .withColumn("percent", 100 * F.col("count") / F.sum("count").over(w0))
-            .withColumn("cumul_count", F.sum("count").over(w1))
-            .withColumn("cumul_percent", F.sum("percent").over(w1))
-            .orderBy("cumul_count")
-        )
-
-    return inner
+    columns = toolz.pipe(cols, pk.flatten, curried.map(str_to_col), list)
+    w0 = Window.partitionBy(F.lit(True))
+    w1 = w0.orderBy(F.desc("count"), *columns)
+    return (
+        df.groupby(columns)
+        .count()
+        .withColumn("percent", 100 * F.col("count") / F.sum("count").over(w0))
+        .withColumn("cumul_count", F.sum("count").over(w1))
+        .withColumn("cumul_percent", F.sum("percent").over(w1))
+        .orderBy("cumul_count")
+    )
 
 
 def date_range(
     df: SparkDF,
-    /,
-    min_date: str,
-    max_date: str,
+    min_date: str | dt.date,
+    max_date: str | dt.date,
     id_col: str,
     new_col: str,
 ) -> SparkDF:
@@ -667,17 +630,17 @@ def date_range(
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(id=1),
-    ...         dict(id=1),
-    ...         dict(id=3),
-    ...         dict(id=2),
-    ...         dict(id=2),
-    ...         dict(id=3),
+    ...         Row(id=1),
+    ...         Row(id=1),
+    ...         Row(id=3),
+    ...         Row(id=2),
+    ...         Row(id=2),
+    ...         Row(id=3),
     ...     ]
     ... )
     >>> (
@@ -714,10 +677,11 @@ def date_range(
 
 
 def filter_date(
+    df: SparkDF,
     date_col: str,
-    d0: Union[str, dt.date],
-    n: Union[int, float],
-) -> SparkDFTransformFunc:
+    d0: str | dt.date,
+    n: int | float,
+) -> SparkDF:
     """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
 
     Notes
@@ -729,22 +693,22 @@ def filter_date(
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(d="2024-01-01"),
-    ...         dict(d="2024-01-02"),
-    ...         dict(d="2024-01-03"),
-    ...         dict(d="2024-01-04"),
-    ...         dict(d="2024-01-05"),
-    ...         dict(d="2024-01-06"),
-    ...         dict(d="2024-01-07"),
-    ...         dict(d="2024-01-08"),
+    ...         Row(d="2024-01-01"),
+    ...         Row(d="2024-01-02"),
+    ...         Row(d="2024-01-03"),
+    ...         Row(d="2024-01-04"),
+    ...         Row(d="2024-01-05"),
+    ...         Row(d="2024-01-06"),
+    ...         Row(d="2024-01-07"),
+    ...         Row(d="2024-01-08"),
     ...     ],
     ... )
-    >>> df.transform(sk.filter_date("d", d0="2024-01-07", n=3)).show()
+    >>> sk.filter_date(df, "d", d0="2024-01-07", n=3).show()
     +----------+
     |         d|
     +----------+
@@ -754,7 +718,7 @@ def filter_date(
     +----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.filter_date("d", d0="2024-01-07", n=float("inf"))).show()
+    >>> sk.filter_date(df, "d", d0="2024-01-07", n=float("inf")).show()
     +----------+
     |         d|
     +----------+
@@ -777,35 +741,32 @@ def filter_date(
     if isinstance(n, float) and not math.isinf(n):
         raise ValueError(f'{n=} - only valid float value: float("inf")')
 
-    def inner(df: SparkDF, /) -> SparkDF:
-        date_diff_ago = "_date_diff_ago_"
-        return (
-            df.transform(with_date_diff_ago(date_col, d0, new_col=date_diff_ago))
-            .where((F.col(date_diff_ago) >= 0) & (F.col(date_diff_ago) < n))
-            .drop(date_diff_ago)
-        )
+    date_diff_ago = "_date_diff_ago_"
 
-    return inner
+    return (
+        with_date_diff_ago(df, date_col, d0, new_col=date_diff_ago)
+        .where((F.col(date_diff_ago) >= 0) & (F.col(date_diff_ago) < n))
+        .drop(date_diff_ago)
+    )
 
 
-@toolz.curry
-def has_column(df: SparkDF, /, *, cols: Sequence[str]) -> bool:
+def has_column(df: SparkDF, *cols: str | Iterable[str]) -> bool:
     """Evaluate if all columns are present in dataframe.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x=1), dict(x=2), dict(x=3)])
-    >>> sk.has_column(df, cols=["x"])
+    >>> df = spark.createDataFrame([Row(x=1), Row(x=2), Row(x=3)])
+    >>> sk.has_column(df, "x")
     True
 
-    >>> sk.has_column(df, cols=["y"])
+    >>> sk.has_column(df, ["y"])
     False
     """
     try:
-        df.transform(check_column_present(cols))
+        check_column_present(df, cols)
         return True
     except ColumnNotFoundError:
         return False
@@ -942,20 +903,20 @@ def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
 
 
 def join(
-    *dataframes: SparkDF,
-    on: Union[str, List[str]],
+    *dataframes: SparkDF | Iterable[SparkDF],
+    on: str | list[str],
     how: str = "inner",
 ) -> SparkDF:
     """Join iterable of Spark dataframes.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df1 = spark.createDataFrame([dict(id=1, x="a"), dict(id=2, x="b")])
-    >>> df2 = spark.createDataFrame([dict(id=1, y="c"), dict(id=2, y="d")])
-    >>> df3 = spark.createDataFrame([dict(id=1, z="e"), dict(id=2, z="f")])
+    >>> df1 = spark.createDataFrame([Row(id=1, x="a"), Row(id=2, x="b")])
+    >>> df2 = spark.createDataFrame([Row(id=1, y="c"), Row(id=2, y="d")])
+    >>> df3 = spark.createDataFrame([Row(id=1, z="e"), Row(id=2, z="f")])
     >>> sk.join(df1, df2, df3, on="id").show()
     +---+---+---+---+
     | id|  x|  y|  z|
@@ -983,14 +944,14 @@ def peek(
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=1, y="a"),
-    ...         dict(x=3, y=None),
-    ...         dict(x=None, y="c"),
+    ...         Row(x=1, y="a"),
+    ...         Row(x=3, y=None),
+    ...         Row(x=None, y="c"),
     ...     ]
     ... )
     >>> df.show()
@@ -998,8 +959,8 @@ def peek(
     |   x|   y|
     +----+----+
     |   1|   a|
-    |   3|null|
-    |null|   c|
+    |   3|NULL|
+    |NULL|   c|
     +----+----+
     <BLANKLINE>
     >>> filtered_df = (
@@ -1030,7 +991,7 @@ def peek(
             print(f"shape = ({n_rows}, {n_cols})")
 
         if n > 0:
-            pandas_df = df.limit(n).transform(bool_to_int()).toPandas()
+            pandas_df = df.limit(n).transform(lambda df: bool_to_int(df)).toPandas()
             pandas_df.index += 1
 
             is_inside_notebook = get_ipython() is not None
@@ -1048,17 +1009,20 @@ def peek(
     return inner
 
 
-def select_col_types(df: SparkDF, /, *col_types: SparkColType) -> List[str]:
+def select_col_types(
+    df: SparkDF,
+    *col_types: SparkColType | Iterable[SparkColType],
+) -> list[str]:
     """Identify columns of specified data type.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> from pyspark.sql import types as T
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
-    ...     [dict(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
+    ...     [Row(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
     ...     schema=T.StructType(
     ...         [
     ...             T.StructField("bool", T.BooleanType(), nullable=True),
@@ -1088,7 +1052,7 @@ def select_col_types(df: SparkDF, /, *col_types: SparkColType) -> List[str]:
     return [c for c in df.columns if isinstance(df.schema[c].dataType, col_types)]
 
 
-def str_to_col(x: str, /) -> SparkCol:
+def str_to_col(x: str | SparkCol, /) -> SparkCol:
     """Cast string ``x`` to Spark column else return ``x``.
 
     Examples
@@ -1104,17 +1068,17 @@ def str_to_col(x: str, /) -> SparkCol:
     return F.col(x) if isinstance(x, str) else x
 
 
-def union(*dataframes: SparkDF) -> SparkDF:
+def union(*dataframes: SparkDF | Iterable[SparkDF]) -> SparkDF:
     """Union iterable of Spark dataframes by name.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df1 = spark.createDataFrame([dict(x=1, y=2), dict(x=3, y=4)])
-    >>> df2 = spark.createDataFrame([dict(x=5, y=6), dict(x=7, y=8)])
-    >>> df3 = spark.createDataFrame([dict(x=0, y=1), dict(x=2, y=3)])
+    >>> df1 = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
+    >>> df2 = spark.createDataFrame([Row(x=5, y=6), Row(x=7, y=8)])
+    >>> df3 = spark.createDataFrame([Row(x=0, y=1), Row(x=2, y=3)])
     >>> sk.union(df1, df2, df3).show()
     +---+---+
     |  x|  y|
@@ -1128,36 +1092,38 @@ def union(*dataframes: SparkDF) -> SparkDF:
     +---+---+
     <BLANKLINE>
     """
+    # noinspection PyTypeChecker
     return functools.reduce(SparkDF.unionByName, pk.flatten(dataframes))
 
 
 def with_date_diff_ago(
+    df: SparkDF,
     date_col: str,
-    d0: Union[str, dt.date],
+    d0: str | dt.date,
     new_col: str,
-) -> SparkDFTransformFunc:
+) -> SparkDF:
     """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
     where date differences of past dates are positive integers.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(d="2024-01-01"),
-    ...         dict(d="2024-01-02"),
-    ...         dict(d="2024-01-03"),
-    ...         dict(d="2024-01-04"),
-    ...         dict(d="2024-01-05"),
-    ...         dict(d="2024-01-06"),
-    ...         dict(d="2024-01-07"),
-    ...         dict(d="2024-01-08"),
-    ...         dict(d="2024-01-09"),
+    ...         Row(d="2024-01-01"),
+    ...         Row(d="2024-01-02"),
+    ...         Row(d="2024-01-03"),
+    ...         Row(d="2024-01-04"),
+    ...         Row(d="2024-01-05"),
+    ...         Row(d="2024-01-06"),
+    ...         Row(d="2024-01-07"),
+    ...         Row(d="2024-01-08"),
+    ...         Row(d="2024-01-09"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_date_diff_ago("d", "2024-01-07", "diff")).show()
+    >>> sk.with_date_diff_ago(df, "d", "2024-01-07", "diff").show()
     +----------+----+
     |         d|diff|
     +----------+----+
@@ -1173,40 +1139,37 @@ def with_date_diff_ago(
     +----------+----+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        return df.withColumn(new_col, F.datediff(F.lit(d0), str_to_col(date_col)))
-
-    return inner
+    return df.withColumn(new_col, F.datediff(F.lit(d0), str_to_col(date_col)))
 
 
 def with_date_diff_ahead(
+    df: SparkDF,
     date_col: str,
-    d0: Union[str, dt.date],
+    d0: str | dt.date,
     new_col: str,
-) -> SparkDFTransformFunc:
+) -> SparkDF:
     """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
     where date differences of future dates are positive integers.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(d="2024-01-01"),
-    ...         dict(d="2024-01-02"),
-    ...         dict(d="2024-01-03"),
-    ...         dict(d="2024-01-04"),
-    ...         dict(d="2024-01-05"),
-    ...         dict(d="2024-01-06"),
-    ...         dict(d="2024-01-07"),
-    ...         dict(d="2024-01-08"),
-    ...         dict(d="2024-01-09"),
+    ...         Row(d="2024-01-01"),
+    ...         Row(d="2024-01-02"),
+    ...         Row(d="2024-01-03"),
+    ...         Row(d="2024-01-04"),
+    ...         Row(d="2024-01-05"),
+    ...         Row(d="2024-01-06"),
+    ...         Row(d="2024-01-07"),
+    ...         Row(d="2024-01-08"),
+    ...         Row(d="2024-01-09"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_date_diff_ahead("d", "2024-01-07", "diff")).show()
+    >>> sk.with_date_diff_ahead(df, "d", "2024-01-07", "diff").show()
     +----------+----+
     |         d|diff|
     +----------+----+
@@ -1222,20 +1185,16 @@ def with_date_diff_ahead(
     +----------+----+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(d0)))
-
-    return inner
+    return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(d0)))
 
 
+# noinspection PyTypeChecker
 def with_digitscale(
+    df: SparkDF,
     num_col: str,
     new_col: str,
-    /,
-    *,
     kind: str = "log",
-) -> SparkDFTransformFunc:
+) -> SparkDF:
     """PySpark version of digitscale.
 
     See Also
@@ -1245,24 +1204,24 @@ def with_digitscale(
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(x=0.1),
-    ...         dict(x=1.0),
-    ...         dict(x=10.0),
-    ...         dict(x=100.0),
-    ...         dict(x=1_000.0),
-    ...         dict(x=10_000.0),
-    ...         dict(x=100_000.0),
-    ...         dict(x=1_000_000.0),
-    ...         dict(x=2_000_000.0),
-    ...         dict(x=None),
+    ...         Row(x=0.1),
+    ...         Row(x=1.0),
+    ...         Row(x=10.0),
+    ...         Row(x=100.0),
+    ...         Row(x=1_000.0),
+    ...         Row(x=10_000.0),
+    ...         Row(x=100_000.0),
+    ...         Row(x=1_000_000.0),
+    ...         Row(x=2_000_000.0),
+    ...         Row(x=None),
     ...     ],
     ... )
-    >>> df.transform(sk.with_digitscale("x", "fx")).show()
+    >>> sk.with_digitscale(df, "x", "fx").show()
     +---------+-----------------+
     |        x|               fx|
     +---------+-----------------+
@@ -1275,11 +1234,11 @@ def with_digitscale(
     | 100000.0|              6.0|
     |1000000.0|              7.0|
     |2000000.0|7.301029995663981|
-    |     null|             null|
+    |     NULL|             NULL|
     +---------+-----------------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_digitscale("x", "fx", kind="int")).show()
+    >>> sk.with_digitscale(df, "x", "fx", kind="int").show()
     +---------+----+
     |        x|  fx|
     +---------+----+
@@ -1292,11 +1251,11 @@ def with_digitscale(
     | 100000.0|   6|
     |1000000.0|   7|
     |2000000.0|   7|
-    |     null|null|
+    |     NULL|NULL|
     +---------+----+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_digitscale("x", "fx", kind="linear")).show()
+    >>> sk.with_digitscale(df, "x", "fx", kind="linear").show()
     +---------+-----------------+
     |        x|               fx|
     +---------+-----------------+
@@ -1309,7 +1268,7 @@ def with_digitscale(
     | 100000.0|              6.0|
     |1000000.0|              7.0|
     |2000000.0|7.111111111111111|
-    |     null|             null|
+    |     NULL|             NULL|
     +---------+-----------------+
     <BLANKLINE>
     """
@@ -1317,111 +1276,105 @@ def with_digitscale(
     if kind not in valid_kind:
         raise ValueError(f"{kind=} - must be a valid value: {valid_kind}")
 
-    def inner(df: SparkDF, /) -> SparkDF:
-        x = F.abs(num_col)
-        df = df.withColumn(
-            new_col,
-            F.when(x.isNull(), None).when(x >= 0.1, 1 + F.log10(x)).otherwise(0.0),
+    x = F.abs(num_col)
+    df = df.withColumn(
+        new_col,
+        F.when(x.isNull(), None).when(x >= 0.1, 1 + F.log10(x)).otherwise(0.0),
+    )
+
+    if kind == "int":
+        df = df.withColumn(new_col, F.floor(new_col).cast(T.IntegerType()))
+
+    if kind == "linear":
+        n = "_n_"
+        y0 = F.col(n)
+        y1 = F.col(n) + 1
+        x0 = 10 ** (F.col(n) - 1)
+        x1 = 10 ** F.col(n)
+
+        df = (
+            df.withColumn(n, F.floor(new_col).cast(T.IntegerType()))
+            .withColumn(
+                new_col,
+                F.when(x.isNull(), None)
+                .when(x >= 0.1, (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0))
+                .otherwise(0.0),
+            )
+            .drop(n)
         )
 
-        if kind == "int":
-            df = df.withColumn(new_col, F.floor(new_col).cast(T.IntegerType()))
-
-        if kind == "linear":
-            n = "_n_"
-            y0 = F.col(n)
-            y1 = F.col(n) + 1
-            x0 = 10 ** (F.col(n) - 1)
-            x1 = 10 ** F.col(n)
-
-            df = (
-                df.withColumn(n, F.floor(new_col).cast(T.IntegerType()))
-                .withColumn(
-                    new_col,
-                    F.when(x.isNull(), None)
-                    .when(x >= 0.1, (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0))
-                    .otherwise(0.0),
-                )
-                .drop(n)
-            )
-
-        return df
-
-    return inner
+    return df
 
 
 def with_endofweek_date(
+    df: SparkDF,
     date_col: str,
     new_col: str,
     last_weekday: str = "Sun",
-) -> SparkDFTransformFunc:
+) -> SparkDF:
     """Add column with the end of the week date.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(d="2023-05-01"),
-    ...         dict(d=None),
-    ...         dict(d="2023-05-03"),
-    ...         dict(d="2023-05-08"),
-    ...         dict(d="2023-05-21"),
+    ...         Row(d="2023-05-01"),
+    ...         Row(d=None),
+    ...         Row(d="2023-05-03"),
+    ...         Row(d="2023-05-08"),
+    ...         Row(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_endofweek_date("d", "endofweek")).show()
+    >>> sk.with_endofweek_date(df, "d", "endofweek").show()
     +----------+----------+
     |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-07|
-    |      null|      null|
+    |      NULL|      NULL|
     |2023-05-03|2023-05-07|
     |2023-05-08|2023-05-14|
     |2023-05-21|2023-05-21|
     +----------+----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_endofweek_date("d", "endofweek", "Sat")).show()
+    >>> sk.with_endofweek_date(df, "d", "endofweek", "Sat").show()
     +----------+----------+
     |         d| endofweek|
     +----------+----------+
     |2023-05-01|2023-05-06|
-    |      null|      null|
+    |      NULL|      NULL|
     |2023-05-03|2023-05-06|
     |2023-05-08|2023-05-13|
     |2023-05-21|2023-05-27|
     +----------+----------+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        tmp_col = "_weekday_"
-        return (
-            df.transform(with_weekday(date_col, tmp_col))
-            .withColumn(
-                new_col,
-                F.when(F.col(tmp_col).isNull(), None)
-                .when(F.col(tmp_col) == last_weekday, F.col(date_col))
-                .otherwise(F.next_day(F.col(date_col), last_weekday)),
-            )
-            .drop(tmp_col)
+    tmp_col = "_weekday_"
+    return (
+        with_weekday(df, date_col, tmp_col)
+        .withColumn(
+            new_col,
+            F.when(F.col(tmp_col).isNull(), None)
+            .when(F.col(tmp_col) == last_weekday, F.col(date_col))
+            .otherwise(F.next_day(F.col(date_col), last_weekday)),
         )
+        .drop(tmp_col)
+    )
 
-    return inner
 
-
-def with_increasing_id(new_col: str, /) -> SparkDFTransformFunc:
+def with_increasing_id(df: SparkDF, new_col: str, /) -> SparkDF:
     """Add column with monotonically increasing id.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x="a"), dict(x="b"), dict(x="c"), dict(x="d")])
-    >>> df.transform(sk.with_increasing_id("id")).show()  # doctest: +SKIP
+    >>> df = spark.createDataFrame([Row(x="a"), Row(x="b"), Row(x="c"), Row(x="d")])
+    >>> sk.with_increasing_id(df, "id").show()  # doctest: +SKIP
     +---+-----------+
     |  x|         id|
     +---+-----------+
@@ -1432,23 +1385,19 @@ def with_increasing_id(new_col: str, /) -> SparkDFTransformFunc:
     +---+-----------+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:  # pragma: no cover
-        return df.withColumn(new_col, F.monotonically_increasing_id())
-
-    return inner  # pragma: no cover
+    return df.withColumn(new_col, F.monotonically_increasing_id())  # pragma: no cover
 
 
-def with_index(new_col: str, /) -> SparkDFTransformFunc:
+def with_index(df: SparkDF, new_col: str) -> SparkDF:
     """Add column with an index of consecutive positive integers.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
-    >>> df = spark.createDataFrame([dict(x="a"), dict(x="b"), dict(x="c"), dict(x="d")])
-    >>> df.transform(sk.with_index("idx")).show()
+    >>> df = spark.createDataFrame([Row(x="a"), Row(x="b"), Row(x="c"), Row(x="d")])
+    >>> sk.with_index(df, "idx").show()
     +---+---+
     |  x|idx|
     +---+---+
@@ -1459,94 +1408,87 @@ def with_index(new_col: str, /) -> SparkDFTransformFunc:
     +---+---+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        w = Window.partitionBy(F.lit(1)).orderBy(F.monotonically_increasing_id())
-        return df.withColumn(new_col, F.row_number().over(w))
-
-    return inner
+    w = Window.partitionBy(F.lit(1)).orderBy(F.monotonically_increasing_id())
+    return df.withColumn(new_col, F.row_number().over(w))
 
 
 def with_startofweek_date(
+    df: SparkDF,
     date_col: str,
     new_col: str,
     last_weekday: str = "Sun",
-) -> SparkDFTransformFunc:
+) -> SparkDF:
     """Add column with the start of the week date.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
-    ...         dict(d="2023-05-01"),
-    ...         dict(d=None),
-    ...         dict(d="2023-05-03"),
-    ...         dict(d="2023-05-08"),
-    ...         dict(d="2023-05-21"),
+    ...         Row(d="2023-05-01"),
+    ...         Row(d=None),
+    ...         Row(d="2023-05-03"),
+    ...         Row(d="2023-05-08"),
+    ...         Row(d="2023-05-21"),
     ...     ],
     ... )
-    >>> df.transform(sk.with_startofweek_date("d", "startofweek")).show()
+    >>> sk.with_startofweek_date(df, "d", "startofweek").show()
     +----------+-----------+
     |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-05-01|
-    |      null|       null|
+    |      NULL|       NULL|
     |2023-05-03| 2023-05-01|
     |2023-05-08| 2023-05-08|
     |2023-05-21| 2023-05-15|
     +----------+-----------+
     <BLANKLINE>
 
-    >>> df.transform(sk.with_startofweek_date("d", "startofweek", "Sat")).show()
+    >>> sk.with_startofweek_date(df, "d", "startofweek", "Sat").show()
     +----------+-----------+
     |         d|startofweek|
     +----------+-----------+
     |2023-05-01| 2023-04-30|
-    |      null|       null|
+    |      NULL|       NULL|
     |2023-05-03| 2023-04-30|
     |2023-05-08| 2023-05-07|
     |2023-05-21| 2023-05-21|
     +----------+-----------+
     <BLANKLINE>
     """
-
-    def inner(df: SparkDF, /) -> SparkDF:
-        tmp_col = "_endofweek_"
-        return (
-            df.transform(with_endofweek_date(date_col, tmp_col, last_weekday))
-            .withColumn(new_col, F.date_sub(tmp_col, 6))
-            .drop(tmp_col)
-        )
-
-    return inner
+    tmp_col = "_endofweek_"
+    return (
+        with_endofweek_date(df, date_col, tmp_col, last_weekday)
+        .withColumn(new_col, F.date_sub(tmp_col, 6))
+        .drop(tmp_col)
+    )
 
 
-def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
+def with_weekday(df: SparkDF, date_col: str, new_col: str) -> SparkDF:
     """Add column with the name of the weekday.
 
     Examples
     --------
-    >>> from pyspark.sql import SparkSession
+    >>> from pyspark.sql import Row, SparkSession
     >>> import onekit.sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
-    ...     [dict(d="2023-05-01"), dict(d=None), dict(d="2023-05-03")]
+    ...     [Row(d="2023-05-01"), Row(d=None), Row(d="2023-05-03")]
     ... )
-    >>> df.transform(sk.with_weekday("d", "weekday")).show()
+    >>> sk.with_weekday(df, "d", "weekday").show()
     +----------+-------+
     |         d|weekday|
     +----------+-------+
     |2023-05-01|    Mon|
-    |      null|   null|
+    |      NULL|   NULL|
     |2023-05-03|    Wed|
     +----------+-------+
     <BLANKLINE>
     """
 
-    def determine_weekday(date_col: str, /) -> str:
+    def determine_weekday(date_col: str, /) -> SparkCol:
         weekday_int = F.dayofweek(date_col)
         return (
             F.when(weekday_int == 1, "Sun")
@@ -1559,7 +1501,4 @@ def with_weekday(date_col: str, new_col: str) -> SparkDFTransformFunc:
             .otherwise(None)
         )
 
-    def inner(df: SparkDF, /) -> SparkDF:
-        return df.withColumn(new_col, determine_weekday(date_col))
-
-    return inner
+    return df.withColumn(new_col, determine_weekday(date_col))

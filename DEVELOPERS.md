@@ -148,4 +148,4 @@ poetry publish
 
 ## Git Commit Guidelines
 
-This project applies semantic versioning with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/commit-parsing.html#built-in-commit-parsers) with the default [Commit Message Format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) according to the Angular guidelines.
+This project applies semantic versioning with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/).

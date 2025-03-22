@@ -1,8 +1,3 @@
-from typing import (
-    Tuple,
-    Union,
-)
-
 import pytest
 import toolz
 
@@ -23,7 +18,7 @@ import onekit.mathkit as mk
         (12, (12, 6, 3, 10, 5, 16, 8, 4, 2, 1)),
     ],
 )
-def test_collatz(n: int, expected: Tuple[int]):
+def test_collatz(n: int, expected: tuple[int]):
     if n > 0:
         actual = tuple(mk.collatz(n))
         assert actual == expected
@@ -57,7 +52,7 @@ class TestDigitscale:
             (-5_000, 4.6989700043360187),
         ],
     )
-    def test_digitscale_default_call(self, x: Union[int, float], expected: float):
+    def test_digitscale_default_call(self, x: int | float, expected: float):
         for v in (-x, x):
             actual = mk.digitscale(v)
             assert isinstance(actual, float)
@@ -87,7 +82,7 @@ class TestDigitscale:
             (-5_000, 4),
         ],
     )
-    def test_int(self, x: Union[int, float], expected: int):
+    def test_int(self, x: int | float, expected: int):
         for v in (-x, x):
             actual = mk.digitscale(v, kind="int")
             assert isinstance(actual, int)
@@ -117,7 +112,7 @@ class TestDigitscale:
             (-5_000, 4.444444444444445),
         ],
     )
-    def test_linear(self, x: Union[int, float], expected: int):
+    def test_linear(self, x: int | float, expected: int):
         for v in (-x, x):
             actual = mk.digitscale(v, kind="linear")
             assert isinstance(actual, float)
@@ -137,21 +132,21 @@ def test_fibonacci():
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
 @pytest.mark.parametrize("n", [2, 5])
-def test_isdivisible(x: Union[int, float], n: int):
+def test_isdivisible(x: int | float, n: int):
     actual = mk.isdivisible(x, n)
     expected = x % n == 0
     assert actual == expected
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
-def test_iseven(x: Union[int, float]):
+def test_iseven(x: int | float):
     actual = mk.iseven(x)
     expected = x % 2 == 0
     assert actual == expected
 
 
 @pytest.mark.parametrize("x", [-1, 0, 1, 2, 3, 3.14, 4, 5, 6, 7, 8, 9, 10, 11.0])
-def test_isodd(x: Union[int, float]):
+def test_isodd(x: int | float):
     actual = mk.isodd(x)
     is_even_number = x % 2 == 0
     expected = not is_even_number
@@ -168,7 +163,7 @@ def test_isodd(x: Union[int, float]):
         (2.0, 1),
     ],
 )
-def test_sign(x: Union[int, float], expected: int):
+def test_sign(x: int | float, expected: int):
     actual = mk.sign(x)
     assert isinstance(actual, int)
     assert actual == expected
