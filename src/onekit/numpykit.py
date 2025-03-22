@@ -112,7 +112,7 @@ def digitscale(x: ArrayLike, /, *, kind: str = "log") -> np.ndarray:
     array([0.11111111, 1.11111111, 2.11111111])
     """
     otypes = [int] if kind == "int" else [float]
-    return np.vectorize(mk.digitscale(kind=kind), otypes=otypes)(x)
+    return np.vectorize(lambda x: mk.digitscale(x, kind=kind), otypes=otypes)(x)
 
 
 def stderr(x: ArrayLike, /) -> float:
