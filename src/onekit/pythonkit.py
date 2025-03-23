@@ -387,7 +387,7 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
 
 
 def date_ago(ref_date: dt.date, /, n: int) -> dt.date:
-    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ago from reference date.
+    """Compute date :math:`n \\in \\mathbb{N}_{0}` days ago from reference date.
 
     Examples
     --------
