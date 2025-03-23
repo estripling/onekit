@@ -4,16 +4,10 @@ import math
 import os
 from typing import (
     Any,
-    Callable,
     Iterable,
 )
 
 import toolz
-from IPython import get_ipython
-from IPython.display import (
-    HTML,
-    display,
-)
 from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import Window
@@ -22,6 +16,7 @@ from pyspark.sql import types as SparkColType
 from pyspark.sql import types as T
 from toolz import curried
 
+import onekit.pandaskit as pdk
 import onekit.pythonkit as pk
 
 __all__ = (
@@ -59,8 +54,6 @@ __all__ = (
     "with_startofweek_date",
     "with_weekday",
 )
-
-SparkDFIdentityFunc = Callable[[SparkDF], SparkDF]
 
 
 class SparkkitError(Exception):
@@ -934,13 +927,13 @@ def join(
 
 
 def peek(
+    df: SparkDF,
     n: int = 6,
-    *,
     shape: bool = False,
     cache: bool = False,
     schema: bool = False,
-    index: bool = False,
-) -> SparkDFIdentityFunc:
+    label: str | None = None,
+) -> SparkDF:
     """Peek at dataframe between transformations.
 
     Examples
@@ -965,49 +958,46 @@ def peek(
     +----+----+
     <BLANKLINE>
     >>> filtered_df = (
-    ...     df.transform(sk.peek(shape=True))
+    ...     sk.peek(df, shape=True)
     ...     .where("x IS NOT NULL")
-    ...     .transform(sk.peek(shape=True))
+    ...     .transform(lambda df: sk.peek(df, shape=True))
     ... )
-    shape = (3, 2)
-       x    y
-     1.0    a
-     3.0 None
-    None    c
-    shape = (2, 2)
-     x    y
-     1    a
-     3 None
+    shape=(3, 2)
+    +----+------+------+
+    |    |    x | y    |
+    +====+======+======+
+    |  1 |    1 | a    |
+    +----+------+------+
+    |  2 |    3 | NULL |
+    +----+------+------+
+    |  3 | NULL | c    |
+    +----+------+------+
+    shape=(2, 2)
+    +----+-----+------+
+    |    |   x | y    |
+    +====+=====+======+
+    |  1 |   1 | a    |
+    +----+-----+------+
+    |  2 |   3 | NULL |
+    +----+-----+------+
     """
+    df = df if df.is_cached else df.cache() if cache else df
 
-    def inner(df: SparkDF, /) -> SparkDF:
-        df = df if df.is_cached else df.cache() if cache else df
+    if schema:
+        df.printSchema()
 
-        if schema:
-            df.printSchema()
+    if shape:
+        num_rows = pk.num_to_str(df.count())
+        num_cols = pk.num_to_str(len(df.columns))
+        print(f"shape=({num_rows}, {num_cols})")
 
-        if shape:
-            n_rows = pk.num_to_str(df.count())
-            n_cols = pk.num_to_str(len(df.columns))
-            print(f"shape = ({n_rows}, {n_cols})")
+    if n > 0:
+        pdk.display(
+            df=df.limit(n).transform(lambda df: bool_to_int(df)).toPandas(),
+            caption=label,
+        )
 
-        if n > 0:
-            pandas_df = df.limit(n).transform(lambda df: bool_to_int(df)).toPandas()
-            pandas_df.index += 1
-
-            is_inside_notebook = get_ipython() is not None
-
-            df_repr = (
-                pandas_df.to_html(index=index, na_rep="None", col_space="20px")
-                if is_inside_notebook
-                else pandas_df.to_string(index=index, na_rep="None")
-            )
-
-            display(HTML(df_repr)) if is_inside_notebook else print(df_repr)
-
-        return df
-
-    return inner
+    return df
 
 
 def select_col_types(

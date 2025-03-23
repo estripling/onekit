@@ -408,9 +408,11 @@ class TestSparkKit:
             ]
         )
         actual = (
-            df.transform(sk.peek(n=20, shape=True, cache=True, schema=True, index=True))
+            df.transform(
+                lambda df: sk.peek(df, n=20, shape=True, cache=True, schema=True)
+            )
             .where(F.col("x").isNotNull())
-            .transform(sk.peek())
+            .transform(lambda df: sk.peek(df))
         )
         expected = df.where(F.col("x").isNotNull())
         self.assert_dataframe_equal(actual, expected)

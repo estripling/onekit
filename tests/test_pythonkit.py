@@ -358,6 +358,12 @@ def test_func_name():
     assert actual == expected
 
 
+def test_get_shell_type():
+    actual = pk.get_shell_type()
+    expected = "python"
+    assert actual == expected
+
+
 def test_headline():
     actual = pk.headline("Hello, World!", n=30)
     expected = "------- Hello, World! --------"
@@ -483,7 +489,8 @@ def test_lazy_read_lines():
         (100, "100"),
         (1000, "1_000"),
         (1000000, "1_000_000"),
-        (100000.0, "100_000.0"),
+        (100000.0, "100_000"),
+        (100000.01, "100_000.01"),
     ],
 )
 def test_num_to_str(x: int | float, expected: str):
