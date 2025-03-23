@@ -250,7 +250,7 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     return rng.random() < bias
 
 
-def concat_strings(sep: str, /, *strings: str) -> str:
+def concat_strings(sep: str, /, *strings: str | Iterable[str]) -> str:
     """Concatenate strings.
 
     Examples
@@ -1048,7 +1048,7 @@ def signif(x: int | float, /, n: int) -> int | float:
     return round(x, n)
 
 
-def source_code(x: object, /) -> str:
+def source_code(x: Any, /) -> str:
     """Get source code of an object :math:`x`.
 
     Examples
