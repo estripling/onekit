@@ -216,15 +216,15 @@ def test_date_ahead(n: int, ref_date, expected: dt.date):
 
 
 def test_date_count_backward():
-    d0 = dt.date(2022, 1, 1)
-    actual = toolz.pipe(pk.date_count_backward(d0), curried.take(3), list)
+    ref_date = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_backward(ref_date), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
 
 def test_date_count_forward():
-    d0 = dt.date(2022, 1, 1)
-    actual = toolz.pipe(pk.date_count_forward(d0), curried.take(3), list)
+    ref_date = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_forward(ref_date), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
     assert actual == expected
 

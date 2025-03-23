@@ -426,17 +426,17 @@ def date_ahead(ref_date: dt.date, /, n: int) -> dt.date:
     return ref_date + dt.timedelta(days=n)
 
 
-def date_count_backward(d0: dt.date, /) -> Generator:
-    """Generate sequence of consecutive dates in backward manner w.r.t. :math:`d_{0}`.
+def date_count_backward(ref_date: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in backward manner w.r.t. reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> from toolz import curried
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
+    >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
-    ...     pk.date_count_backward(d0),
+    ...     pk.date_count_backward(ref_date),
     ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
@@ -444,20 +444,20 @@ def date_count_backward(d0: dt.date, /) -> Generator:
     ['2022-01-01', '2021-12-31', '2021-12-30']
     """
     successor = operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
-def date_count_forward(d0: dt.date, /) -> Generator:
-    """Generate sequence of consecutive dates in forward manner w.r.t. :math:`d_{0}`.
+def date_count_forward(ref_date: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in forward manner w.r.t. reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> from toolz import curried
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
+    >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
-    ...     pk.date_count_forward(d0),
+    ...     pk.date_count_forward(ref_date),
     ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
@@ -465,7 +465,7 @@ def date_count_forward(d0: dt.date, /) -> Generator:
     ['2022-01-01', '2022-01-02', '2022-01-03']
     """
     successor = operator.add
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
 # noinspection PyTypeChecker
