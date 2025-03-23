@@ -386,32 +386,24 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     return output
 
 
-@toolz.curry
-def date_ago(d0: dt.date, /, n: int) -> dt.date:
-    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ago.
+def date_ago(ref_date: dt.date, /, n: int) -> dt.date:
+    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ago from reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-
-    >>> # function is curried
-    >>> today_ds = pk.date_ago(d0)
-    >>> today_ds(n=0)
+    >>> ref_date = dt.date(2022, 1, 1)
+    >>> pk.date_ago(ref_date, n=0)
     datetime.date(2022, 1, 1)
-    >>> today_ds(1)
+    >>> pk.date_ago(ref_date, n=1)
     datetime.date(2021, 12, 31)
-    >>> today_ds(2)
+    >>> pk.date_ago(ref_date, n=2)
     datetime.date(2021, 12, 30)
-
-    >>> lag3 = pk.date_ago(n=3)
-    >>> lag3(dt.date(2024, 1, 1))
-    datetime.date(2023, 12, 29)
     """
     if not isinstance(n, int) or n < 0:
         raise ValueError(f"{n=} - must be a non-negative integer")
-    return d0 - dt.timedelta(days=n)
+    return ref_date - dt.timedelta(days=n)
 
 
 @toolz.curry
