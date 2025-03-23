@@ -13,6 +13,7 @@ from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Callable,
+    Sequence,
 )
 
 import pytest
@@ -740,7 +741,7 @@ class TestRegexFunctions:
         assert actual == expected
 
     @pytest.fixture(scope="class")
-    def zen_of_python(self) -> tuple[str]:
+    def zen_of_python(self) -> Sequence[str]:
         return (
             "The Zen of Python, by Tim Peters",
             "Beautiful is better than ugly.",
@@ -813,6 +814,7 @@ class TestStopwatch:
             TypeError,
             match=r"got some positional-only arguments passed as keyword arguments",
         ):
+            # noinspection PyArgumentList
             with pk.stopwatch(label=label):
                 slumber()
 
@@ -1096,18 +1098,21 @@ class TestStopwatch:
     @pytest.mark.parametrize("flush", [None, 0, 1.0, set(), [2]])
     def test_raises_type_error__flush(self, slumber, flush):
         with pytest.raises(TypeError, match=r"flush=.* - must be bool"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(flush=flush):
                 slumber()
 
     @pytest.mark.parametrize("zone", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__zone(self, slumber, zone):
         with pytest.raises(TypeError, match=r"timezone=.* - must be str or NoneType"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(timezone=zone):
                 slumber()
 
     @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__fmt(self, slumber, fmt):
         with pytest.raises(TypeError, match=r"fmt=.* - must be str or NoneType"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(fmt=fmt):
                 slumber()
 

@@ -468,6 +468,7 @@ def date_count_forward(d0: dt.date, /) -> Generator:
     return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
 
 
+# noinspection PyTypeChecker
 def date_range(
     min_date: dt.date,
     max_date: dt.date,
@@ -563,6 +564,7 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     return new_xmin, new_xmax
 
 
+# noinspection PyTypeChecker
 def filter_regex(
     pattern: str,
     /,
@@ -782,7 +784,7 @@ def last_date_of_month(year: int, month: int, /) -> dt.date:
 
 
 def lazy_read_lines(
-    path: str,
+    path: str | Path,
     /,
     *,
     encoding: str | None = None,
@@ -815,6 +817,7 @@ def lazy_read_lines(
             yield line
 
 
+# noinspection PyTypeChecker
 def map_regex(
     pattern: str,
     /,
