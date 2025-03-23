@@ -673,17 +673,17 @@ def date_range(
 def filter_date(
     df: SparkDF,
     date_col: str,
-    d0: str | dt.date,
-    n: int | float,
+    ref_date: str | dt.date,
+    num_days: int | float,
 ) -> SparkDF:
-    """Returns dataframe with rows such that date is in :math:`(d_{-n}, d_{0}]`.
+    """Filter dataframe such that `num_days` corresponds to the number of distinct dates
+    when consecutively counting backwards from reference date.
 
     Notes
     -----
-    - :math:`d_{0}`: reference date (inclusive)
-    - :math:`d_{-n} < d_{0}`: relative date (exclusive)
-    - :math:`n > 0`: number of dates from :math:`d_{-n}` to :math:`d_{0}`
-    - If `n=float("inf")`, returned dates are in :math:`(d_{-\\infty}, d_{0}]`
+    - reference date is inclusive
+    - relative date = date_ago(ref_date, num_days) is exclusive
+    - If `num_days=float("inf")`, returns all dates prior to reference date (inclusive)
 
     Examples
     --------
@@ -702,7 +702,7 @@ def filter_date(
     ...         Row(d="2024-01-08"),
     ...     ],
     ... )
-    >>> sk.filter_date(df, "d", d0="2024-01-07", n=3).show()
+    >>> sk.filter_date(df, "d", ref_date="2024-01-07", num_days=3).show()
     +----------+
     |         d|
     +----------+
@@ -712,7 +712,7 @@ def filter_date(
     +----------+
     <BLANKLINE>
 
-    >>> sk.filter_date(df, "d", d0="2024-01-07", n=float("inf")).show()
+    >>> sk.filter_date(df, "d", ref_date="2024-01-07", num_days=float("inf")).show()
     +----------+
     |         d|
     +----------+
@@ -726,20 +726,20 @@ def filter_date(
     +----------+
     <BLANKLINE>
     """
-    if not isinstance(n, (int, float)):
-        raise TypeError(f"{type(n)=} - must be an int or float")
+    if not isinstance(num_days, (int, float)):
+        raise TypeError(f"{type(num_days)=} - must be an int or float")
 
-    if isinstance(n, int) and n < 1:
-        raise ValueError(f"{n=} - must be a positive integer")
+    if isinstance(num_days, int) and num_days < 1:
+        raise ValueError(f"{num_days=} - must be a positive integer")
 
-    if isinstance(n, float) and not math.isinf(n):
-        raise ValueError(f'{n=} - only valid float value: float("inf")')
+    if isinstance(num_days, float) and not math.isinf(num_days):
+        raise ValueError(f'{num_days=} - only valid float value: float("inf")')
 
     date_diff_ago = "_date_diff_ago_"
 
     return (
-        with_date_diff_ago(df, date_col, d0, new_col=date_diff_ago)
-        .where((F.col(date_diff_ago) >= 0) & (F.col(date_diff_ago) < n))
+        with_date_diff_ago(df, date_col, ref_date, new_col=date_diff_ago)
+        .where((F.col(date_diff_ago) >= 0) & (F.col(date_diff_ago) < num_days))
         .drop(date_diff_ago)
     )
 

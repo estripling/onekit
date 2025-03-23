@@ -301,7 +301,7 @@ class TestSparkKit:
 
     @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
     def test_filter_date(self, spark: SparkSession, func: Callable):
-        d0 = func("2024-01-01")
+        ref_date = func("2024-01-01")
         df = spark.createDataFrame(
             [
                 Row(d=func("2023-11-30"), n1=False, n2=False, n30=False, n_inf=True),
@@ -312,7 +312,7 @@ class TestSparkKit:
                 Row(d=func("2023-12-29"), n1=False, n2=False, n30=True, n_inf=True),
                 Row(d=func("2023-12-30"), n1=False, n2=False, n30=True, n_inf=True),
                 Row(d=func("2023-12-31"), n1=False, n2=True, n30=True, n_inf=True),
-                Row(d=d0, n1=True, n2=True, n30=True, n_inf=True),
+                Row(d=ref_date, n1=True, n2=True, n30=True, n_inf=True),
                 Row(d=func("2024-01-02"), n1=False, n2=False, n30=False, n_inf=False),
                 Row(d=func("2024-01-08"), n1=False, n2=False, n30=False, n_inf=False),
                 Row(d=func("2024-01-10"), n1=False, n2=False, n30=False, n_inf=False),
@@ -326,18 +326,18 @@ class TestSparkKit:
             (float("inf"), "n_inf"),
             (math.inf, "n_inf"),
         ]:
-            actual = sk.filter_date(df, "d", d0=d0, n=n).select("d")
+            actual = sk.filter_date(df, "d", ref_date=ref_date, num_days=n).select("d")
             expected = df.where(col).select("d")
             self.assert_dataframe_equal(actual, expected)
 
         for n in [None, "0", "a_string"]:
             with pytest.raises(TypeError):
                 # noinspection PyTypeChecker
-                sk.filter_date(df, "d", d0=d0, n=n)
+                sk.filter_date(df, "d", ref_date=ref_date, num_days=n)
 
         for n in [0, -1, 1.0, 1.5]:
             with pytest.raises(ValueError):
-                sk.filter_date(df, "d", d0=d0, n=n)
+                sk.filter_date(df, "d", ref_date=ref_date, num_days=n)
 
     def test_has_column(self, spark: SparkSession):
         df = spark.createDataFrame([Row(x=1, y=2)])
