@@ -257,7 +257,7 @@ def test_date_count_forward():
         (dt.date(2022, 1, 1), dt.date(2022, 1, 1), (dt.date(2022, 1, 1),)),
     ],
 )
-def test_daterange(start: dt.date, end: dt.date, expected: tuple[dt.date]):
+def test_date_range(start: dt.date, end: dt.date, expected: tuple[dt.date]):
     actual = tuple(pk.date_range(start, end))
     assert actual == expected
 
