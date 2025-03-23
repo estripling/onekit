@@ -50,8 +50,8 @@ __all__ = (
     "last_date_of_month",
     "lazy_read_lines",
     "map_regex",
+    "num_days",
     "num_to_str",
-    "number_of_days",
     "op",
     "prompt_yes_no",
     "reduce_sets",
@@ -849,6 +849,30 @@ def map_regex(
     return map(functools.partial(re.findall, pattern, flags=flags), flatten(strings))
 
 
+def num_days(d1: dt.date, d2: dt.date, /) -> int:
+    """Compute the number of days between two dates (both endpoints inclusive).
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> pk.num_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
+    1
+
+    >>> pk.num_days(dt.date(2022, 8, 1), dt.date(2022, 8, 2))
+    2
+
+    >>> pk.num_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
+    7
+
+    >>> # function makes sure: start <= end
+    >>> pk.num_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
+    7
+    """
+    start, end = sorted([d1, d2])
+    return (end - start).days + 1
+
+
 def num_to_str(x: int | float, /) -> str:
     """Cast number to string with underscores as thousands separator.
 
@@ -865,30 +889,6 @@ def num_to_str(x: int | float, /) -> str:
     integer = f"{int(i):_}"
     fractional = f"{f:g}".lstrip("0")
     return integer if math.isclose(f, 0) else f"{integer}{fractional}"
-
-
-def number_of_days(d1: dt.date, d2: dt.date, /) -> int:
-    """Compute the number of days between two dates (both inclusive).
-
-    Examples
-    --------
-    >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
-    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
-    1
-
-    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 2))
-    2
-
-    >>> pk.number_of_days(dt.date(2022, 8, 1), dt.date(2022, 8, 7))
-    7
-
-    >>> # function makes sure: start <= end
-    >>> pk.number_of_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
-    7
-    """
-    start, end = sorted([d1, d2])
-    return (end - start).days + 1
 
 
 def op(func: Callable, const: Any, /) -> Callable[[Any], Any]:
