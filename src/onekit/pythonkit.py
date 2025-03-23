@@ -872,9 +872,12 @@ def num_to_str(x: int | float, /) -> str:
     '1_000_000'
 
     >>> pk.num_to_str(100000.0)
-    '100_000.0'
+    '100_000'
     """
-    return f"{x:_}"
+    f, i = math.modf(x)
+    integer = f"{int(i):_}"
+    fractional = f"{f:g}".lstrip("0")
+    return integer if math.isclose(f, 0) else f"{integer}{fractional}"
 
 
 def number_of_days(d1: dt.date, d2: dt.date, /) -> int:
