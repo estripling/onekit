@@ -167,7 +167,6 @@ def bump(x: Vector, /) -> float:
     return negate(np.exp(-1 / (1 - r**2)) if r < 1 else 0)
 
 
-@toolz.curry
 def fetch_minima(func: Callable, /, n: int) -> list[Minimum] | None:
     """Get minima for defined functions.
 
