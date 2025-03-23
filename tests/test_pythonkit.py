@@ -183,7 +183,7 @@ def test_date_ago(n: int, ref_date, expected: dt.date):
 
 
 @pytest.mark.parametrize(
-    "n, d0, expected",
+    "n, ref_date, expected",
     [
         (1.0, dt.date(2022, 1, 1), None),
         (-1, dt.date(2022, 1, 1), None),
@@ -200,18 +200,18 @@ def test_date_ago(n: int, ref_date, expected: dt.date):
         (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
     ],
 )
-def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
+def test_date_ahead(n: int, ref_date, expected: dt.date):
     if isinstance(n, int) and n >= 0:
-        actual = pk.date_ahead(d0, n)
+        actual = pk.date_ahead(ref_date, n)
         assert actual == expected
 
-        dates = pk.date_range(d0, actual, incl_min=True, incl_max=True)
-        n_days = curried.count(dates)
-        n_days_expected = n + 1
-        assert n_days == n_days_expected
+        dates = pk.date_range(ref_date, actual, incl_min=True, incl_max=True)
+        num_days = curried.count(dates)
+        num_days_expected = n + 1
+        assert num_days == num_days_expected
     else:
         with pytest.raises(ValueError):
-            pk.date_ahead(d0, n)
+            pk.date_ahead(ref_date, n)
 
 
 def test_date_count_backward():
