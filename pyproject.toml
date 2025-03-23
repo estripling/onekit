@@ -57,6 +57,7 @@ tqdm = "^4.67.1"
 
 [tool.poetry.group.pandaskit.dependencies]
 pandas = ">=0.23.2"
+tabulate = "^0.9.0"
 
 [tool.poetry.group.sklearnkit.dependencies]
 scikit-learn = ">=1.3"
