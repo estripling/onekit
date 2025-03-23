@@ -888,20 +888,15 @@ def number_of_days(d1: dt.date, d2: dt.date, /) -> int:
     return (end - start).days + 1
 
 
-@toolz.curry
-def op(func: Callable, a: Any, x: Any, /) -> Any:
+def op(func: Callable, const: Any, /) -> Callable[[Any], Any]:
     """Leverage operator functions.
 
-    Use ``op`` to create functions of ``x`` with fixed ``a``.
+    Use ``op`` to create functions of ``x`` with a fixed argument ``const``.
 
     Examples
     --------
     >>> import operator
     >>> import onekit.pythonkit as pk
-    >>> pk.op(operator.add, 1, 1)
-    2
-
-    >>> # function is curried
     >>> inc = pk.op(operator.add, 1)
     >>> inc(1)
     2
@@ -910,7 +905,11 @@ def op(func: Callable, a: Any, x: Any, /) -> Any:
     >>> dec(1)
     0
     """
-    return func(x, a)
+
+    def inner(x: Any, /) -> Any:
+        return func(x, const)
+
+    return inner
 
 
 def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
