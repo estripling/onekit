@@ -13,6 +13,7 @@ from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Callable,
+    Sequence,
 )
 
 import pytest
@@ -151,7 +152,7 @@ def test_contrast_sets():
 
 
 @pytest.mark.parametrize(
-    "n, d0, expected",
+    "n, ref_date, expected",
     [
         (1.0, dt.date(2022, 1, 1), None),
         (-1, dt.date(2022, 1, 1), None),
@@ -168,22 +169,22 @@ def test_contrast_sets():
         (29, dt.date(2020, 2, 1), dt.date(2020, 1, 3)),
     ],
 )
-def test_date_ago(n: int, d0: dt.date, expected: dt.date):
+def test_date_ago(n: int, ref_date, expected: dt.date):
     if isinstance(n, int) and n >= 0:
-        actual = pk.date_ago(d0, n)
+        actual = pk.date_ago(ref_date, n)
         assert actual == expected
 
-        dates = pk.date_range(actual, d0, incl_min=True, incl_max=True)
-        n_days = curried.count(dates)
-        n_days_expected = n + 1
-        assert n_days == n_days_expected
+        dates = pk.date_range(actual, ref_date, incl_min=True, incl_max=True)
+        num_days = curried.count(dates)
+        num_days_expected = n + 1
+        assert num_days == num_days_expected
     else:
         with pytest.raises(ValueError):
-            pk.date_ago(d0, n)
+            pk.date_ago(ref_date, n)
 
 
 @pytest.mark.parametrize(
-    "n, d0, expected",
+    "n, ref_date, expected",
     [
         (1.0, dt.date(2022, 1, 1), None),
         (-1, dt.date(2022, 1, 1), None),
@@ -200,30 +201,30 @@ def test_date_ago(n: int, d0: dt.date, expected: dt.date):
         (29, dt.date(2020, 2, 1), dt.date(2020, 3, 1)),
     ],
 )
-def test_date_ahead(n: int, d0: dt.date, expected: dt.date):
+def test_date_ahead(n: int, ref_date, expected: dt.date):
     if isinstance(n, int) and n >= 0:
-        actual = pk.date_ahead(d0, n)
+        actual = pk.date_ahead(ref_date, n)
         assert actual == expected
 
-        dates = pk.date_range(d0, actual, incl_min=True, incl_max=True)
-        n_days = curried.count(dates)
-        n_days_expected = n + 1
-        assert n_days == n_days_expected
+        dates = pk.date_range(ref_date, actual, incl_min=True, incl_max=True)
+        num_days = curried.count(dates)
+        num_days_expected = n + 1
+        assert num_days == num_days_expected
     else:
         with pytest.raises(ValueError):
-            pk.date_ahead(d0, n)
+            pk.date_ahead(ref_date, n)
 
 
 def test_date_count_backward():
-    d0 = dt.date(2022, 1, 1)
-    actual = toolz.pipe(pk.date_count_backward(d0), curried.take(3), list)
+    ref_date = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_backward(ref_date), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2021, 12, 31), dt.date(2021, 12, 30)]
     assert actual == expected
 
 
 def test_date_count_forward():
-    d0 = dt.date(2022, 1, 1)
-    actual = toolz.pipe(pk.date_count_forward(d0), curried.take(3), list)
+    ref_date = dt.date(2022, 1, 1)
+    actual = toolz.pipe(pk.date_count_forward(ref_date), curried.take(3), list)
     expected = [dt.date(2022, 1, 1), dt.date(2022, 1, 2), dt.date(2022, 1, 3)]
     assert actual == expected
 
@@ -526,8 +527,7 @@ def test_reduce_sets(func: Callable, expected: set[int]):
     y = {2, 4, 6}
     z = {2, 6, 8}
 
-    f = pk.reduce_sets(func)
-    assert isinstance(f, toolz.curry)
+    f = functools.partial(pk.reduce_sets, func)
 
     actual = f(x, y, z)
     assert isinstance(actual, set)
@@ -741,7 +741,7 @@ class TestRegexFunctions:
         assert actual == expected
 
     @pytest.fixture(scope="class")
-    def zen_of_python(self) -> tuple[str]:
+    def zen_of_python(self) -> Sequence[str]:
         return (
             "The Zen of Python, by Tim Peters",
             "Beautiful is better than ugly.",
@@ -814,6 +814,7 @@ class TestStopwatch:
             TypeError,
             match=r"got some positional-only arguments passed as keyword arguments",
         ):
+            # noinspection PyArgumentList
             with pk.stopwatch(label=label):
                 slumber()
 
@@ -1097,18 +1098,21 @@ class TestStopwatch:
     @pytest.mark.parametrize("flush", [None, 0, 1.0, set(), [2]])
     def test_raises_type_error__flush(self, slumber, flush):
         with pytest.raises(TypeError, match=r"flush=.* - must be bool"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(flush=flush):
                 slumber()
 
     @pytest.mark.parametrize("zone", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__zone(self, slumber, zone):
         with pytest.raises(TypeError, match=r"timezone=.* - must be str or NoneType"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(timezone=zone):
                 slumber()
 
     @pytest.mark.parametrize("fmt", [True, 0, 1.0, set(), [2]])
     def test_raises_type_error__fmt(self, slumber, fmt):
         with pytest.raises(TypeError, match=r"fmt=.* - must be str or NoneType"):
+            # noinspection PyTypeChecker
             with pk.stopwatch(fmt=fmt):
                 slumber()
 

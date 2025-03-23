@@ -250,7 +250,7 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     return rng.random() < bias
 
 
-def concat_strings(sep: str, /, *strings: str) -> str:
+def concat_strings(sep: str, /, *strings: str | Iterable[str]) -> str:
     """Concatenate strings.
 
     Examples
@@ -386,73 +386,57 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
     return output
 
 
-@toolz.curry
-def date_ago(d0: dt.date, /, n: int) -> dt.date:
-    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ago.
+def date_ago(ref_date: dt.date, /, n: int) -> dt.date:
+    """Compute date :math:`n \\in \\mathbb{N}_{0}` days ago from reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-
-    >>> # function is curried
-    >>> today_ds = pk.date_ago(d0)
-    >>> today_ds(n=0)
+    >>> ref_date = dt.date(2022, 1, 1)
+    >>> pk.date_ago(ref_date, n=0)
     datetime.date(2022, 1, 1)
-    >>> today_ds(1)
+    >>> pk.date_ago(ref_date, n=1)
     datetime.date(2021, 12, 31)
-    >>> today_ds(2)
+    >>> pk.date_ago(ref_date, n=2)
     datetime.date(2021, 12, 30)
-
-    >>> lag3 = pk.date_ago(n=3)
-    >>> lag3(dt.date(2024, 1, 1))
-    datetime.date(2023, 12, 29)
     """
     if not isinstance(n, int) or n < 0:
         raise ValueError(f"{n=} - must be a non-negative integer")
-    return d0 - dt.timedelta(days=n)
+    return ref_date - dt.timedelta(days=n)
 
 
-@toolz.curry
-def date_ahead(d0: dt.date, /, n: int) -> dt.date:
-    """Compute date that is :math:`n \\in \\mathbb{N}_{0}` days ahead.
+def date_ahead(ref_date: dt.date, /, n: int) -> dt.date:
+    """Compute date :math:`n \\in \\mathbb{N}_{0}` days ahead from reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
-
-    >>> # function is curried
-    >>> today_ds = pk.date_ahead(d0)
-    >>> today_ds(n=0)
+    >>> ref_date = dt.date(2022, 1, 1)
+    >>> pk.date_ahead(ref_date, n=0)
     datetime.date(2022, 1, 1)
-    >>> today_ds(1)
+    >>> pk.date_ahead(ref_date, n=1)
     datetime.date(2022, 1, 2)
-    >>> today_ds(2)
+    >>> pk.date_ahead(ref_date, n=2)
     datetime.date(2022, 1, 3)
-
-    >>> lead3 = pk.date_ahead(n=3)
-    >>> lead3(dt.date(2024, 1, 1))
-    datetime.date(2024, 1, 4)
     """
     if not isinstance(n, int) or n < 0:
         raise ValueError(f"{n=} - must be a non-negative integer")
-    return d0 + dt.timedelta(days=n)
+    return ref_date + dt.timedelta(days=n)
 
 
-def date_count_backward(d0: dt.date, /) -> Generator:
-    """Generate sequence of consecutive dates in backward manner w.r.t. :math:`d_{0}`.
+def date_count_backward(ref_date: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in backward manner w.r.t. reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> from toolz import curried
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
+    >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
-    ...     pk.date_count_backward(d0),
+    ...     pk.date_count_backward(ref_date),
     ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
@@ -460,20 +444,20 @@ def date_count_backward(d0: dt.date, /) -> Generator:
     ['2022-01-01', '2021-12-31', '2021-12-30']
     """
     successor = operator.sub
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
-def date_count_forward(d0: dt.date, /) -> Generator:
-    """Generate sequence of consecutive dates in forward manner w.r.t. :math:`d_{0}`.
+def date_count_forward(ref_date: dt.date, /) -> Generator:
+    """Generate sequence of consecutive dates in forward manner w.r.t. reference date.
 
     Examples
     --------
     >>> import datetime as dt
     >>> from toolz import curried
     >>> import onekit.pythonkit as pk
-    >>> d0 = dt.date(2022, 1, 1)
+    >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
-    ...     pk.date_count_forward(d0),
+    ...     pk.date_count_forward(ref_date),
     ...     curried.map(pk.date_to_str),
     ...     curried.take(3),
     ...     list,
@@ -481,9 +465,10 @@ def date_count_forward(d0: dt.date, /) -> Generator:
     ['2022-01-01', '2022-01-02', '2022-01-03']
     """
     successor = operator.add
-    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), d0)
+    return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
+# noinspection PyTypeChecker
 def date_range(
     min_date: dt.date,
     max_date: dt.date,
@@ -579,6 +564,7 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
     return new_xmin, new_xmax
 
 
+# noinspection PyTypeChecker
 def filter_regex(
     pattern: str,
     /,
@@ -798,7 +784,7 @@ def last_date_of_month(year: int, month: int, /) -> dt.date:
 
 
 def lazy_read_lines(
-    path: str,
+    path: str | Path,
     /,
     *,
     encoding: str | None = None,
@@ -831,6 +817,7 @@ def lazy_read_lines(
             yield line
 
 
+# noinspection PyTypeChecker
 def map_regex(
     pattern: str,
     /,
@@ -904,20 +891,15 @@ def number_of_days(d1: dt.date, d2: dt.date, /) -> int:
     return (end - start).days + 1
 
 
-@toolz.curry
-def op(func: Callable, a: Any, x: Any, /) -> Any:
+def op(func: Callable, const: Any, /) -> Callable[[Any], Any]:
     """Leverage operator functions.
 
-    Use ``op`` to create functions of ``x`` with fixed ``a``.
+    Use ``op`` to create functions of ``x`` with a fixed argument ``const``.
 
     Examples
     --------
     >>> import operator
     >>> import onekit.pythonkit as pk
-    >>> pk.op(operator.add, 1, 1)
-    2
-
-    >>> # function is curried
     >>> inc = pk.op(operator.add, 1)
     >>> inc(1)
     2
@@ -926,7 +908,11 @@ def op(func: Callable, a: Any, x: Any, /) -> Any:
     >>> dec(1)
     0
     """
-    return func(x, a)
+
+    def inner(x: Any, /) -> Any:
+        return func(x, const)
+
+    return inner
 
 
 def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
@@ -998,7 +984,7 @@ def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
             answer = input(response_text).lower()
 
 
-@toolz.curry
+# noinspection PyTypeChecker
 def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) -> set:
     """Apply function of two set arguments to reduce iterable of sets.
 
@@ -1016,13 +1002,11 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) 
     >>> pk.reduce_sets(set.difference, *sets)
     {0, 1, 3}
 
-    >>> # function is curried
-    >>> pk.reduce_sets(set.union)(*sets)
+    >>> pk.reduce_sets(set.union, x, y, z)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> pk.reduce_sets(set.union)(sets)
+    >>> pk.reduce_sets(set.union, sets)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> union_sets = pk.reduce_sets(set.union)
-    >>> union_sets(x, y, z)
+    >>> pk.reduce_sets(set.union, *sets)
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, curried.map(set), curried.reduce(func))
@@ -1040,7 +1024,6 @@ def remove_punctuation(text: str, /) -> str:
     return text.translate(str.maketrans("", "", string.punctuation))
 
 
-@toolz.curry
 def signif(x: int | float, /, n: int) -> int | float:
     """Round :math:`x` to its :math:`n` significant digits.
 
@@ -1050,12 +1033,10 @@ def signif(x: int | float, /, n: int) -> int | float:
     >>> pk.signif(987654321, 3)
     988000000
 
-    >>> # function is curried
-    >>> [pk.signif(14393237.76)(n) for n in range(1, 6)]
+    >>> [pk.signif(14393237.76, n) for n in range(1, 6)]
     [10000000.0, 14000000.0, 14400000.0, 14390000.0, 14393000.0]
 
-    >>> signif3 = pk.signif(n=3)
-    >>> signif3(14393237.76)
+    >>> pk.signif(14393237.76, n=3)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:
@@ -1068,7 +1049,7 @@ def signif(x: int | float, /, n: int) -> int | float:
     return round(x, n)
 
 
-def source_code(x: object, /) -> str:
+def source_code(x: Any, /) -> str:
     """Get source code of an object :math:`x`.
 
     Examples
