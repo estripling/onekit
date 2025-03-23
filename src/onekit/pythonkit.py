@@ -981,7 +981,7 @@ def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
             answer = input(response_text).lower()
 
 
-@toolz.curry
+# noinspection PyTypeChecker
 def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) -> set:
     """Apply function of two set arguments to reduce iterable of sets.
 
@@ -999,13 +999,11 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) 
     >>> pk.reduce_sets(set.difference, *sets)
     {0, 1, 3}
 
-    >>> # function is curried
-    >>> pk.reduce_sets(set.union)(*sets)
+    >>> pk.reduce_sets(set.union, x, y, z)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> pk.reduce_sets(set.union)(sets)
+    >>> pk.reduce_sets(set.union, sets)
     {0, 1, 2, 3, 4, 6, 8}
-    >>> union_sets = pk.reduce_sets(set.union)
-    >>> union_sets(x, y, z)
+    >>> pk.reduce_sets(set.union, *sets)
     {0, 1, 2, 3, 4, 6, 8}
     """
     return toolz.pipe(sets, flatten, curried.map(set), curried.reduce(func))

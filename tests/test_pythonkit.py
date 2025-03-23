@@ -526,8 +526,7 @@ def test_reduce_sets(func: Callable, expected: set[int]):
     y = {2, 4, 6}
     z = {2, 6, 8}
 
-    f = pk.reduce_sets(func)
-    assert isinstance(f, toolz.curry)
+    f = functools.partial(pk.reduce_sets, func)
 
     actual = f(x, y, z)
     assert isinstance(actual, set)
