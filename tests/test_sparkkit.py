@@ -496,7 +496,7 @@ class TestSparkKit:
 
     @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
     def test_with_date_diff_ago(self, spark: SparkSession, func: Callable):
-        d0 = func("2024-01-01")
+        ref_date = func("2024-01-01")
         df = spark.createDataFrame(
             [
                 Row(i=1, d=func("2023-11-30"), expect=32),
@@ -512,13 +512,13 @@ class TestSparkKit:
             ]
         )
 
-        actual = sk.with_date_diff_ago(df, "d", d0, "fx").select("i", "fx")
+        actual = sk.with_date_diff_ago(df, "d", ref_date, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
     @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
     def test_with_date_diff_ahead(self, spark: SparkSession, func: Callable):
-        d0 = func("2024-01-01")
+        ref_date = func("2024-01-01")
         df = spark.createDataFrame(
             [
                 Row(i=1, d=func("2023-11-30"), expect=-32),
@@ -534,7 +534,7 @@ class TestSparkKit:
             ]
         )
 
-        actual = sk.with_date_diff_ahead(df, "d", d0, "fx").select("i", "fx")
+        actual = sk.with_date_diff_ahead(df, "d", ref_date, "fx").select("i", "fx")
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 

@@ -1101,10 +1101,10 @@ def union(*dataframes: SparkDF | Iterable[SparkDF]) -> SparkDF:
 def with_date_diff_ago(
     df: SparkDF,
     date_col: str,
-    d0: str | dt.date,
+    ref_date: str | dt.date,
     new_col: str,
 ) -> SparkDF:
-    """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
+    """Add column with date differences w.r.t. the reference date,
     where date differences of past dates are positive integers.
 
     Examples
@@ -1141,16 +1141,16 @@ def with_date_diff_ago(
     +----------+----+
     <BLANKLINE>
     """
-    return df.withColumn(new_col, F.datediff(F.lit(d0), str_to_col(date_col)))
+    return df.withColumn(new_col, F.datediff(F.lit(ref_date), str_to_col(date_col)))
 
 
 def with_date_diff_ahead(
     df: SparkDF,
     date_col: str,
-    d0: str | dt.date,
+    ref_date: str | dt.date,
     new_col: str,
 ) -> SparkDF:
-    """Add column with date differences w.r.t. the reference date :math:`d_{0}`,
+    """Add column with date differences w.r.t. the reference date,
     where date differences of future dates are positive integers.
 
     Examples
@@ -1187,7 +1187,7 @@ def with_date_diff_ahead(
     +----------+----+
     <BLANKLINE>
     """
-    return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(d0)))
+    return df.withColumn(new_col, F.datediff(str_to_col(date_col), F.lit(ref_date)))
 
 
 # noinspection PyTypeChecker
