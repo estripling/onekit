@@ -45,7 +45,7 @@ class TestItertoolsAPI:
 
         actual = curried.pipe(
             itertools.count(0, 0.1),
-            curried.map(pk.signif(n=3)),
+            curried.map(lambda x: pk.signif(x, n=3)),
             takewhile(lambda x: x <= 1),
             tuple,
         )

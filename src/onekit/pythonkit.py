@@ -1023,7 +1023,6 @@ def remove_punctuation(text: str, /) -> str:
     return text.translate(str.maketrans("", "", string.punctuation))
 
 
-@toolz.curry
 def signif(x: int | float, /, n: int) -> int | float:
     """Round :math:`x` to its :math:`n` significant digits.
 
@@ -1033,12 +1032,10 @@ def signif(x: int | float, /, n: int) -> int | float:
     >>> pk.signif(987654321, 3)
     988000000
 
-    >>> # function is curried
-    >>> [pk.signif(14393237.76)(n) for n in range(1, 6)]
+    >>> [pk.signif(14393237.76, n) for n in range(1, 6)]
     [10000000.0, 14000000.0, 14400000.0, 14390000.0, 14393000.0]
 
-    >>> signif3 = pk.signif(n=3)
-    >>> signif3(14393237.76)
+    >>> pk.signif(14393237.76, n=3)
     14400000.0
     """
     if not isinstance(n, int) or n < 1:
