@@ -358,6 +358,12 @@ def test_func_name():
     assert actual == expected
 
 
+def test_get_shell_type():
+    actual = pk.get_shell_type()
+    expected = "python"
+    assert actual == expected
+
+
 def test_headline():
     actual = pk.headline("Hello, World!", n=30)
     expected = "------- Hello, World! --------"

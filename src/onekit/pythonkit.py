@@ -43,6 +43,7 @@ __all__ = (
     "flatten",
     "filter_regex",
     "func_name",
+    "get_shell_type",
     "headline",
     "highlight_string_differences",
     "humantime",
@@ -648,6 +649,39 @@ def func_name() -> str:
     'foobar'
     """
     return inspect.stack()[1].function
+
+
+def get_shell_type() -> str:  # pragma: no cover
+    """Returns the type of the current shell session.
+
+    The function identifies whether code is executed from within
+    a 'python', 'ipython', or 'notebook' session.
+
+    Examples
+    --------
+    >>> import onekit.pythonkit as pk
+    >>> pk.get_shell_type()
+    'python'
+    """
+    try:
+        from IPython import get_ipython
+
+        if get_ipython() is None:
+            return "python"
+
+        shell = get_ipython().__class__.__name__
+
+        if shell == "TerminalInteractiveShell":
+            return "ipython"
+
+        elif shell == "ZMQInteractiveShell":
+            return "notebook"
+
+        else:
+            return "python"
+
+    except (ModuleNotFoundError, ImportError, NameError):
+        return "python"
 
 
 def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
