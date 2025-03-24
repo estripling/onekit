@@ -37,6 +37,7 @@ __all__ = (
     "date_ahead",
     "date_count_backward",
     "date_count_forward",
+    "date_diff",
     "date_range",
     "date_to_str",
     "extend_range",
@@ -468,6 +469,28 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
     return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
+def date_diff(from_date: dt.date, to_date: dt.date, /) -> int:
+    """Compute difference betweem dates.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> import onekit.pythonkit as pk
+    >>> d1 = dt.date(2024, 7, 1)
+    >>> d2 = dt.date(2024, 7, 7)
+
+    >>> pk.date_diff(d1, d1)
+    0
+
+    >>> pk.date_diff(d1, d2)
+    6
+
+    >>> pk.date_diff(d2, d1)
+    -6
+    """
+    return (to_date - from_date).days
+
+
 # noinspection PyTypeChecker
 def date_range(
     min_date: dt.date,
@@ -869,8 +892,7 @@ def num_days(d1: dt.date, d2: dt.date, /) -> int:
     >>> pk.num_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
     7
     """
-    start, end = sorted([d1, d2])
-    return (end - start).days + 1
+    return abs(date_diff(d1, d2)) + 1
 
 
 def num_to_str(x: int | float, /) -> str:

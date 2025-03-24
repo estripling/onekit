@@ -229,6 +229,23 @@ def test_date_count_forward():
     assert actual == expected
 
 
+def test_date_diff():
+    d1 = dt.date(2024, 7, 1)
+    d2 = dt.date(2024, 7, 7)
+
+    actual = pk.date_diff(d1, d1)
+    expected = 0
+    assert actual == expected
+
+    actual = pk.date_diff(d1, d2)
+    expected = 6
+    assert actual == expected
+
+    actual = pk.date_diff(d2, d1)
+    expected = -6
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "start, end, expected",
     [
@@ -257,7 +274,7 @@ def test_date_count_forward():
         (dt.date(2022, 1, 1), dt.date(2022, 1, 1), (dt.date(2022, 1, 1),)),
     ],
 )
-def test_daterange(start: dt.date, end: dt.date, expected: tuple[dt.date]):
+def test_date_range(start: dt.date, end: dt.date, expected: tuple[dt.date]):
     actual = tuple(pk.date_range(start, end))
     assert actual == expected
 
