@@ -892,8 +892,7 @@ def num_days(d1: dt.date, d2: dt.date, /) -> int:
     >>> pk.num_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
     7
     """
-    start, end = sorted([d1, d2])
-    return (end - start).days + 1
+    return abs(date_diff(d1, d2)) + 1
 
 
 def num_to_str(x: int | float, /) -> str:
