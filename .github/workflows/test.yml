@@ -26,6 +26,11 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: 🔝 Upgrade pip, setuptools, and wheel
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade setuptools wheel
+
     - name: ☕ set up Java
       uses: actions/setup-java@v4
       with:
