@@ -66,7 +66,7 @@ def cvf(*cols: str | Iterable[str]) -> PandasDFPipeFunc:
 
 def display(
     df: PandasDF,
-    caption: str | None = None,
+    label: str | None = None,
     na_rep: str | None = "NULL",
     drop_original_index: bool = True,
     with_row_numbers: bool = True,
@@ -89,7 +89,7 @@ def display(
     |  3 | NULL |   6 |
     +----+------+-----+
     """
-    with_caption = caption is not None
+    with_label = label is not None
 
     def print_tabulated_df() -> None:
         tabulated_df = tabulate(
@@ -100,9 +100,9 @@ def display(
             intfmt="_g",
             missingval=na_rep,
         )
-        if with_caption:
+        if with_label:
             n = max(map(len, tabulated_df.splitlines()))
-            print(pk.headline(caption, n=n, fillchar="="))
+            print(pk.headline(label, n=n, fillchar="="))
         print(tabulated_df)
 
     if with_row_numbers:
@@ -116,9 +116,9 @@ def display(
     try:
         from IPython.display import display as notebook_display
 
-        df_style = df.style.set_caption(caption) if with_caption else df.style
+        df_style = df.style.set_caption(label) if with_label else df.style
         table_styles = []
-        if with_caption:
+        if with_label:
             table_styles.append(
                 dict(
                     selector="caption",
