@@ -993,8 +993,8 @@ def peek(
 
     if n > 0:
         pdk.display(
-            df=df.limit(n).transform(lambda df: bool_to_int(df)).toPandas(),
-            caption=label,
+            df=df.limit(n).transform(lambda df: bool_to_str(df)).toPandas(),
+            label=label,
         )
 
     return df
