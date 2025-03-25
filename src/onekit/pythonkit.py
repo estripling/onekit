@@ -11,6 +11,10 @@ import re
 import shutil
 import string
 from contextlib import ContextDecorator
+from enum import (
+    Enum,
+    member,
+)
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
@@ -27,6 +31,7 @@ import toolz
 from toolz import curried
 
 __all__ = (
+    "BaseEnum",
     "archive_files",
     "are_predicates_true",
     "check_random_state",
@@ -69,6 +74,16 @@ __all__ = (
 Pair = tuple[float, float]
 Predicate = Callable[[Any], bool]
 Seed = int | random.Random | None
+
+
+# noinspection PyTypeChecker
+class BaseEnum(Enum):
+    """Common methods for Enum classes."""
+
+    @classmethod
+    def all(cls) -> tuple[member]:
+        """Returns tuple of all members of a concrete Enum class."""
+        return tuple(mbr for mbr in cls)
 
 
 def archive_files(

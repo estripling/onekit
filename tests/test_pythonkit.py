@@ -7,6 +7,7 @@ import platform
 import random
 import re
 import time
+from enum import auto
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -23,6 +24,17 @@ import toolz
 from toolz import curried
 
 import onekit.pythonkit as pk
+from onekit.pythonkit import BaseEnum
+
+
+def test_base_enum():
+    class Animal(BaseEnum):
+        CAT = auto()
+        DOG = auto()
+
+    actual = Animal.all()
+    expected = (Animal.CAT, Animal.DOG)
+    assert actual == expected
 
 
 @pytest.mark.parametrize("kind", ["zip", "gztar"])
