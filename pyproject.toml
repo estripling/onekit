@@ -46,6 +46,7 @@ pre-commit-hooks = "^5.0.0"
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
 pytest-skip-slow = "^0.0.5"
+time-machine = "^2.16.0"
 
 [tool.poetry.group.docs.dependencies]
 furo = "^2023.9.10"
