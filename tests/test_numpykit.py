@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-import onekit.numpykit as npk
+from onekit import numpykit as npk
 
 
 @pytest.mark.parametrize(

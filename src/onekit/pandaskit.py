@@ -10,7 +10,7 @@ import toolz
 from pandas import DataFrame as PandasDF
 from tabulate import tabulate
 
-import onekit.pythonkit as pk
+from onekit import pythonkit as pk
 
 __all__ = (
     "cvf",
@@ -29,7 +29,7 @@ def cvf(*cols: str | Iterable[str]) -> PandasDFPipeFunc:
     Examples
     --------
     >>> import pandas as pd
-    >>> import onekit.pandaskit as pdk
+    >>> from onekit import pandaskit as pdk
     >>> df = pd.DataFrame({"x": ["a", "c", "b", "g", "h", "a", "g", "a"]})
     >>> df.pipe(pdk.cvf("x"))
        x  count  percent  cumul_count  cumul_percent
@@ -76,7 +76,7 @@ def display(
     Examples
     --------
     >>> import pandas as pd
-    >>> import onekit.pandaskit as pdk
+    >>> from onekit import pandaskit as pdk
     >>> df = pd.DataFrame([dict(x=1, y=2), dict(x=3, y=4), dict(x=None, y=6)])
     >>> pdk.display(df)
     +----+------+-----+
@@ -160,7 +160,7 @@ def join(
     Examples
     --------
     >>> import pandas as pd
-    >>> import onekit.pandaskit as pdk
+    >>> from onekit import pandaskit as pdk
     >>> df1 = pd.DataFrame([dict(a=1, b=3), dict(a=2, b=4)])
     >>> df2 = pd.DataFrame([dict(a=1, c=5), dict(a=2, c=6)])
     >>> df3 = pd.DataFrame([dict(a=1, d=7)])
@@ -182,7 +182,7 @@ def profile(df: PandasDF, /, *, q: list[int] | None = None) -> PandasDF:
     Examples
     --------
     >>> import pandas as pd
-    >>> import onekit.pandaskit as pdk
+    >>> from onekit import pandaskit as pdk
     >>> data = {
     ...     "a": [True, None, False, False, True, False],
     ...     "b": [1] * 6,
@@ -256,7 +256,7 @@ def union(*dataframes: PandasDF | Iterable[PandasDF]) -> PandasDF:
     Examples
     --------
     >>> import pandas as pd
-    >>> import onekit.pandaskit as pdk
+    >>> from onekit import pandaskit as pdk
     >>> df1 = pd.DataFrame([dict(x=1, y=2), dict(x=3, y=4)])
     >>> df2 = pd.DataFrame([dict(x=5, y=6), dict(x=7, y=8)])
     >>> df3 = pd.DataFrame([dict(x=0, y=1), dict(x=2, y=3)])

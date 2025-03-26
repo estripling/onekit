@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import onekit.sklearnkit as slk
+from onekit import sklearnkit as slk
 
 
 class TestPrecisionRecall:

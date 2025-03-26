@@ -18,8 +18,8 @@ from typing import (
 import numpy as np
 import toolz
 
-import onekit.numpykit as npk
-import onekit.pythonkit as pk
+from onekit import numpykit as npk
+from onekit import pythonkit as pk
 
 Bounds = list[tuple[float, float]]
 Seed = int | float | random.Random | np.random.RandomState | np.random.Generator | None

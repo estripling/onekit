@@ -13,8 +13,8 @@ from pyspark.sql import (
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
-import onekit.pythonkit as pk
-import onekit.sparkkit as sk
+from onekit import pythonkit as pk
+from onekit import sparkkit as sk
 
 
 @pytest.mark.slow

@@ -3,7 +3,7 @@ import random
 import numpy as np
 import numpy.typing as npt
 
-import onekit.mathkit as mk
+from onekit import mathkit as mk
 
 __all__ = (
     "check_random_state",
@@ -24,7 +24,7 @@ def check_random_state(seed: Seed = None) -> np.random.Generator:
     Examples
     --------
     >>> import numpy as np
-    >>> import onekit.numpykit as npk
+    >>> from onekit import numpykit as npk
     >>> rng = npk.check_random_state()
     >>> isinstance(rng, np.random.Generator)
     True
@@ -73,7 +73,7 @@ def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vec
 
     Examples
     --------
-    >>> import onekit.numpykit as npk
+    >>> from onekit import numpykit as npk
     >>> npk.check_vector([0, 0])
     array([0, 0])
     """
@@ -101,7 +101,7 @@ def digitscale(x: ArrayLike, /, *, kind: str = "log") -> np.ndarray:
 
     Examples
     --------
-    >>> import onekit.numpykit as npk
+    >>> from onekit import numpykit as npk
     >>> npk.digitscale([0.1, 1, 10, 100, 1_000, 10_000, 2_000_000])
     array([0.     , 1.     , 2.     , 3.     , 4.     , 5.     , 7.30103])
 
@@ -121,7 +121,7 @@ def stderr(x: ArrayLike, /) -> float:
     Examples
     --------
     >>> import numpy as np
-    >>> import onekit.numpykit as npk
+    >>> from onekit import numpykit as npk
     >>> round(npk.stderr([98, 127, 82, 67, 121, np.nan, 119, 92, 110, 113, 107]), 4)
     5.9632
     """

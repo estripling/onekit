@@ -16,8 +16,8 @@ import numpy as np
 import numpy.typing as npt
 import toolz
 
-import onekit.numpykit as npk
-import onekit.vizkit as vk
+from onekit import numpykit as npk
+from onekit import vizkit as vk
 
 __all__ = (
     "ackley",
@@ -69,7 +69,7 @@ def ackley(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.ackley([0, 0]), 4)
     0.0
 
@@ -109,7 +109,7 @@ def beale(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> ofk.beale([3, 0.5])
     0.0
 
@@ -152,7 +152,7 @@ def bump(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.bump([0, 0]), 4)
     -0.3679
 
@@ -172,7 +172,7 @@ def fetch_minima(func: Callable, /, n: int) -> list[Minimum] | None:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> sphere_minima_n5 = ofk.fetch_minima(ofk.sphere, 5)
     >>> sphere_minima_n5
     [Minimum(x=array([0, 0, 0, 0, 0]), fx=0)]
@@ -317,13 +317,13 @@ def negate(fx: float) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> ofk.negate(1.0)
     -1.0
 
     >>> # transform into a maximization problem
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> problem = toolz.compose_left(ofk.ackley, ofk.negate)
     >>> round(problem([0, 0]), 4)
     0.0
@@ -362,7 +362,7 @@ def peaks(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.peaks([0, 0]), 4)
     0.981
     """
@@ -387,7 +387,7 @@ def rastrigin(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.rastrigin([0, 0]), 4)
     0.0
 
@@ -420,7 +420,7 @@ def rosenbrock(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.rosenbrock([0, 0]), 4)
     1.0
 
@@ -459,7 +459,7 @@ def schwefel(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> round(ofk.schwefel([420.9687]), 4)
     0.0
 
@@ -499,7 +499,7 @@ def sinc(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> ofk.sinc([0])
     -1.0
 
@@ -522,7 +522,7 @@ def sphere(x: Vector, /) -> float:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
+    >>> from onekit import optfunckit as ofk
     >>> ofk.sphere([0, 0])
     0.0
 

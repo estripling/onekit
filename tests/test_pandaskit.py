@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from pandas import DataFrame as PandasDF
 
-import onekit.pandaskit as pdk
+from onekit import pandaskit as pdk
 
 
 def test_cvf():

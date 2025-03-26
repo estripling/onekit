@@ -3,9 +3,9 @@ import numpy.testing as npt
 import pytest
 import toolz
 
-import onekit.dekit as dek
-import onekit.numpykit as npk
-import onekit.optfunckit as ofk
+from onekit import dekit as dek
+from onekit import numpykit as npk
+from onekit import optfunckit as ofk
 from onekit.dekit import (
     Bounds,
     DifferentialEvolution,
