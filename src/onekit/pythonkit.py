@@ -32,6 +32,7 @@ from toolz import curried
 
 __all__ = (
     "BaseEnum",
+    "ShellType",
     "archive_files",
     "are_predicates_true",
     "check_random_state",
@@ -84,6 +85,11 @@ class BaseEnum(Enum):
     def all(cls) -> tuple[member]:
         """Returns tuple of all members of a concrete Enum class."""
         return tuple(mbr for mbr in cls)
+
+
+class ShellType(BaseEnum):
+    TERMINAL_INTERACTIVE_SHELL = "TerminalInteractiveShell"
+    ZMQ_INTERACTIVE_SHELL = "ZMQInteractiveShell"
 
 
 def archive_files(
@@ -695,10 +701,10 @@ def get_shell_type() -> str:  # pragma: no cover
 
         shell = get_ipython().__class__.__name__
 
-        if shell == "TerminalInteractiveShell":
+        if shell == ShellType.TERMINAL_INTERACTIVE_SHELL.value:
             return "ipython"
 
-        elif shell == "ZMQInteractiveShell":
+        elif shell == ShellType.ZMQ_INTERACTIVE_SHELL.value:
             return "notebook"
 
         else:

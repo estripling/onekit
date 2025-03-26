@@ -24,7 +24,10 @@ import toolz
 from toolz import curried
 
 import onekit.pythonkit as pk
-from onekit.pythonkit import BaseEnum
+from onekit.pythonkit import (
+    BaseEnum,
+    ShellType,
+)
 
 
 def test_base_enum():
@@ -35,6 +38,12 @@ def test_base_enum():
     actual = Animal.all()
     expected = (Animal.CAT, Animal.DOG)
     assert actual == expected
+
+
+def test_shell_type():
+    assert ShellType.TERMINAL_INTERACTIVE_SHELL.value == "TerminalInteractiveShell"
+    assert ShellType.ZMQ_INTERACTIVE_SHELL.value == "ZMQInteractiveShell"
+    assert len(ShellType.all()) == 2
 
 
 @pytest.mark.parametrize("kind", ["zip", "gztar"])
