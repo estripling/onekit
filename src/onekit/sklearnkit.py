@@ -60,7 +60,9 @@ def precision_given_recall_score(
 
     Examples
     --------
+    >>> import numpy as np
     >>> from onekit import sklearnkit as slk
+    >>> np.set_printoptions(legacy="1.21")
     >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
     >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
     >>> slk.precision_given_recall_score(y_true, y_score, min_recall=0.7)

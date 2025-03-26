@@ -980,11 +980,7 @@ def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
     prompt = (
         "[y/n]"
         if default is None
-        else "[Y/n]"
-        if default == "yes"
-        else "[y/N]"
-        if default == "no"
-        else "invalid"
+        else "[Y/n]" if default == "yes" else "[y/N]" if default == "no" else "invalid"
     )
 
     if prompt == "invalid":

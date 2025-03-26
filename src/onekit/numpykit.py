@@ -122,6 +122,7 @@ def stderr(x: ArrayLike, /) -> float:
     --------
     >>> import numpy as np
     >>> from onekit import numpykit as npk
+    >>> np.set_printoptions(legacy="1.21")
     >>> round(npk.stderr([98, 127, 82, 67, 121, np.nan, 119, 92, 110, 113, 107]), 4)
     5.9632
     """

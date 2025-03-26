@@ -895,13 +895,17 @@ class TestStopwatch:
         expected = (
             regex_default_message
             if case in (1, 2)
-            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
-            if case == 3
-            else self.create_regex_for_message(
-                r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+            else (
+                self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+                if case == 3
+                else (
+                    self.create_regex_for_message(
+                        r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+                    )
+                    if case == 4
+                    else None
+                )
             )
-            if case == 4
-            else None
         )
         assert re.search(expected, actual) is not None
         assert sw.fmt == default_fmt if fmt is None else sw.fmt == fmt
@@ -946,9 +950,11 @@ class TestStopwatch:
         expected_message = (
             regex_default_message
             if case in (1, 2)
-            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
-            if case == 3
-            else None
+            else (
+                self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+                if case == 3
+                else None
+            )
         )
         expected = (
             expected_message
@@ -1075,13 +1081,17 @@ class TestStopwatch:
         expected_message = (
             regex_default_message
             if case in [1, 2]
-            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
-            if case == 3
-            else self.create_regex_for_message(
-                r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+            else (
+                self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+                if case == 3
+                else (
+                    self.create_regex_for_message(
+                        r"\w+, \d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}"
+                    )
+                    if case == 4
+                    else None
+                )
             )
-            if case == 4
-            else None
         )
         expected = expected_message.replace("$", f" - {func.__name__}$")
         assert re.search(expected, actual) is not None
@@ -1113,9 +1123,11 @@ class TestStopwatch:
         expected_message = (
             regex_default_message
             if case in (1, 2)
-            else self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
-            if case == 3
-            else None
+            else (
+                self.create_regex_for_message(r"\d{2}:\d{2}:\d{2}")
+                if case == 3
+                else None
+            )
         )
         expected = (
             expected_message.replace("$", f" - {func.__name__}$")

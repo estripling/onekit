@@ -2,7 +2,8 @@
 
 ## Development Environment: Dev Container
 
-This project comes with a [development container (or dev container)](https://containers.dev) setup, which allows for a reproducible development environment.
+This project comes with a [development container (or dev container)](https://containers.dev) setup, which allows for a
+reproducible development environment.
 To get started with the development, make sure you have the following software installed on your machine:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -39,7 +40,7 @@ python playbook.py --check
 To install a virtual Python environment locally, run the following commands from the root directory:
 
 ```shell
-which python
+which python  # Bash-like shell
 ```
 
 ```shell
@@ -55,7 +56,7 @@ source venv/onekit_on_linux/bin/activate  # Linux
 ```
 
 ```shell
-poetry install --no-interaction; \
+poetry install --no-interaction --all-extras; \
 pre-commit install
 ```
 
@@ -70,27 +71,43 @@ poetry check --lock
 ```
 
 ```shell
-poetry lock --no-update
+poetry lock
 ```
 
 ```shell
-poetry add \
+poetry add --optional basic \
 toolz \
 pytz
 ```
 
 ```shell
-poetry add --group precommit \
-autoflake \
-"black[jupyter]" \
-isort \
-"flake8>=5.0.4" \
-pre-commit \
-pre-commit-hooks
+poetry install --extras "basic"
 ```
 
 ```shell
-poetry add --group testing \
+poetry add --optional analytics \
+pandas[compression,computation,excel,output-formatting,parquet,performance,plot] \
+scikit-learn \
+tqdm \
+pyspark==3.5.3
+```
+
+```shell
+poetry install --extras "analytics"
+```
+
+```shell
+poetry install --all-extras
+```
+
+```shell
+poetry add --group dev \
+autoflake \
+black[jupyter] \
+isort \
+flake8 \
+pre-commit \
+pre-commit-hooks \
 pytest \
 pytest-cov \
 pytest-skip-slow
@@ -113,32 +130,6 @@ python-semantic-release
 ```
 
 ```shell
-poetry add --group dekit \
-"numpy==1.26.4" \
-tqdm
-```
-
-```shell
-poetry add --group pandaskit \
-"pandas>=0.23.2"
-```
-
-```shell
-poetry add --group sklearnkit \
-"scikit-learn>=1.3"
-```
-
-```shell
-poetry add --group sparkkit \
-pyspark==3.5.3
-```
-
-```shell
-poetry add --group vizkit \
-"matplotlib>=3.7.1"
-```
-
-```shell
 poetry build
 ```
 
@@ -148,4 +139,5 @@ poetry publish
 
 ## Git Commit Guidelines
 
-This project applies semantic versioning with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/).
+This project applies semantic versioning
+with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/).

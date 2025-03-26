@@ -24,8 +24,14 @@ All-in-One Python Kit:
 
 `onekit` is available on [PyPI](https://pypi.org/project/onekit/) for Python 3.11+:
 
-```console
+```shell
 pip install onekit
+```
+
+With optional dependencies:
+
+```shell
+pip install onekit[basic,analytics]
 ```
 
 ## Disclaimer

@@ -125,10 +125,8 @@ class KeyFunction:
 
     @staticmethod
     def neg_inf():
-        return (
-            lambda ind: -float("inf")
-            if ind.fx is None or not np.isfinite(ind.fx)
-            else ind.fx
+        return lambda ind: (
+            -float("inf") if ind.fx is None or not np.isfinite(ind.fx) else ind.fx
         )
 
 
