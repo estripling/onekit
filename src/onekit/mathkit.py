@@ -59,7 +59,7 @@ def collatz(n: int, /) -> Generator:
     Examples
     --------
     >>> import toolz
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> n = 12
     >>> list(mk.collatz(n))
     [12, 6, 3, 10, 5, 16, 8, 4, 2, 1]
@@ -125,7 +125,7 @@ def digitscale(x: int | float, /, *, kind: str = "log") -> int | float:
 
     Examples
     --------
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> list(map(mk.digitscale, [0.1, 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]))
     [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
 
@@ -196,7 +196,7 @@ def fibonacci() -> Generator:
     Examples
     --------
     >>> import toolz
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> list(toolz.take(13, mk.fibonacci()))
     [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
     """
@@ -216,7 +216,7 @@ def isdivisible(x: int | float, /, n: int) -> bool:
     Examples
     --------
     >>> from functools import partial
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> mk.isdivisible(49, 7)
     True
 
@@ -237,7 +237,7 @@ def iseven(x: int | float, /) -> bool:
 
     Examples
     --------
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> mk.iseven(0)
     True
 
@@ -255,7 +255,7 @@ def isodd(x: int | float, /) -> bool:
 
     Examples
     --------
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> mk.isodd(0)
     False
 
@@ -282,7 +282,7 @@ def sign(x: int | float, /) -> int:
 
     Examples
     --------
-    >>> import onekit.mathkit as mk
+    >>> from onekit import mathkit as mk
     >>> mk.sign(0)
     0
 

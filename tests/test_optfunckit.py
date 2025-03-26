@@ -4,8 +4,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-import onekit.optfunckit as ofk
-import onekit.vizkit as vk
+from onekit import optfunckit as ofk
+from onekit import vizkit as vk
 
 
 @pytest.mark.parametrize(

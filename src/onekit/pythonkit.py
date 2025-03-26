@@ -129,7 +129,7 @@ def archive_files(
     Examples
     --------
     >>> # archive all Python files and Notebooks in current working directory
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.archive_files("./", wildcards=["*.py", "*.ipynb"])  # doctest: +SKIP
     """
     target = Path(target).resolve()
@@ -163,8 +163,8 @@ def are_predicates_true(
 
     Examples
     --------
-    >>> import onekit.mathkit as mk
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import mathkit as mk
+    >>> from onekit import pythonkit as pk
     >>> pk.are_predicates_true(all, lambda x: x % 2 == 0, lambda x: x % 5 == 0)(10)
     True
 
@@ -217,7 +217,7 @@ def check_random_state(seed: Seed = None) -> random.Random:
     Examples
     --------
     >>> import random
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> rng = pk.check_random_state()
     >>> isinstance(rng, random.Random)
     True
@@ -243,7 +243,7 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     Examples
     --------
     >>> from functools import partial
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> {pk.coinflip(0.5) for _ in range(30)} == {True, False}
     True
 
@@ -278,7 +278,7 @@ def concat_strings(sep: str, /, *strings: str | Iterable[str]) -> str:
     Examples
     --------
     >>> from functools import partial
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.concat_strings(" ", "Hello", "World")
     'Hello World'
     >>> pk.concat_strings(" ", ["Hello", "World"])
@@ -303,7 +303,7 @@ def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> a = {"a", "c", "b", "g", "h", "i", "j", "k"}
     >>> b = {"c", "d", "e", "f", "g", "p", "q"}
     >>> summary = pk.contrast_sets(a, b)
@@ -414,7 +414,7 @@ def date_ago(ref_date: dt.date, /, n: int) -> dt.date:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> ref_date = dt.date(2022, 1, 1)
     >>> pk.date_ago(ref_date, n=0)
     datetime.date(2022, 1, 1)
@@ -434,7 +434,7 @@ def date_ahead(ref_date: dt.date, /, n: int) -> dt.date:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> ref_date = dt.date(2022, 1, 1)
     >>> pk.date_ahead(ref_date, n=0)
     datetime.date(2022, 1, 1)
@@ -455,7 +455,7 @@ def date_count_backward(ref_date: dt.date, /) -> Generator:
     --------
     >>> import datetime as dt
     >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
     ...     pk.date_count_backward(ref_date),
@@ -476,7 +476,7 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
     --------
     >>> import datetime as dt
     >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> ref_date = dt.date(2022, 1, 1)
     >>> curried.pipe(
     ...     pk.date_count_forward(ref_date),
@@ -496,7 +496,7 @@ def date_diff(from_date: dt.date, to_date: dt.date, /) -> int:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> d1 = dt.date(2024, 7, 1)
     >>> d2 = dt.date(2024, 7, 7)
 
@@ -527,7 +527,7 @@ def date_range(
     --------
     >>> import datetime as dt
     >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> d1 = dt.date(2022, 1, 1)
     >>> d2 = dt.date(2022, 1, 3)
 
@@ -577,7 +577,7 @@ def date_to_str(d: dt.date, /) -> str:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.date_to_str(dt.date(2022, 1, 1))
     '2022-01-01'
     """
@@ -589,7 +589,7 @@ def extend_range(xmin: float, xmax: float, /, *, factor: float = 0.05) -> Pair:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.extend_range(0.0, 1.0)
     (-0.05, 1.05)
 
@@ -620,7 +620,7 @@ def filter_regex(
     Examples
     --------
     >>> from functools import partial
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> list(pk.filter_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
     ['Hello, World!', 'Hello!']
 
@@ -645,7 +645,7 @@ def flatten(*items: Any | Iterable[Any]) -> Generator:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> list(pk.flatten([[1, 2], *[3, 4], [5]]))
     [1, 2, 3, 4, 5]
 
@@ -671,7 +671,7 @@ def func_name() -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> def foobar():
     ...     return pk.func_name()
     ...
@@ -689,7 +689,7 @@ def get_shell_type() -> str:  # pragma: no cover
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.get_shell_type()
     'python'
     """
@@ -719,7 +719,7 @@ def headline(text: str, /, *, n: int = 88, fillchar: str = "-") -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.headline("Hello, World!", n=30)
     '------- Hello, World! --------'
     """
@@ -731,7 +731,7 @@ def highlight_string_differences(lft_str: str, rgt_str: str, /) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> print(pk.highlight_string_differences("hello", "hall"))  # doctest: +SKIP
     hello
      |  |
@@ -762,7 +762,7 @@ def humantime(seconds: int | float, /) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> # 1 second
     >>> pk.humantime(1)
     '1s'
@@ -819,7 +819,7 @@ def last_date_of_month(year: int, month: int, /) -> dt.date:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.last_date_of_month(2022, 1)
     datetime.date(2022, 1, 31)
     """
@@ -841,7 +841,7 @@ def lazy_read_lines(
     --------
     >>> import inspect
     >>> from toolz import curried
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> inspect.isgeneratorfunction(pk.lazy_read_lines)
     True
 
@@ -873,7 +873,7 @@ def map_regex(
     Examples
     --------
     >>> from functools import partial
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> list(pk.map_regex("hello", "Hello, World!", "Hi, there!", "Hello!"))
     [['Hello'], [], ['Hello']]
 
@@ -899,7 +899,7 @@ def num_days(d1: dt.date, d2: dt.date, /) -> int:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.num_days(dt.date(2022, 8, 1), dt.date(2022, 8, 1))
     1
 
@@ -921,7 +921,7 @@ def num_to_str(x: int | float, /) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.num_to_str(1000000)
     '1_000_000'
 
@@ -942,7 +942,7 @@ def op(func: Callable, const: Any, /) -> Callable[[Any], Any]:
     Examples
     --------
     >>> import operator
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> inc = pk.op(operator.add, 1)
     >>> inc(1)
     2
@@ -963,7 +963,7 @@ def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.prompt_yes_no("Is all clear?")  # doctest: +SKIP
     Is all clear? [y/n] y<enter>
     True
@@ -1033,7 +1033,7 @@ def reduce_sets(func: Callable[[set, set], set], /, *sets: set | Iterable[set]) 
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> x = {0, 1, 2, 3}
     >>> y = {2, 4, 6}
     >>> z = {2, 6, 8}
@@ -1060,7 +1060,7 @@ def remove_punctuation(text: str, /) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.remove_punctuation("I think, therefore I am. --Descartes")
     'I think therefore I am Descartes'
     """
@@ -1072,7 +1072,7 @@ def signif(x: int | float, /, n: int) -> int | float:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.signif(987654321, 3)
     988000000
 
@@ -1097,7 +1097,7 @@ def source_code(x: Any, /) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> def greet():
     ...     return "Hello, World!"
     ...
@@ -1137,7 +1137,7 @@ class stopwatch(ContextDecorator):
     --------
     >>> # as context manager
     >>> import time
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> with pk.stopwatch():  # doctest: +SKIP
     ...     time.sleep(0.1)
     ...
@@ -1145,7 +1145,7 @@ class stopwatch(ContextDecorator):
 
     >>> # as decorator
     >>> import time
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> @pk.stopwatch()
     ... def func():
     ...     time.sleep(0.1)
@@ -1155,7 +1155,7 @@ class stopwatch(ContextDecorator):
 
     >>> # stopwatch instance
     >>> import time
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> with pk.stopwatch("instance-example") as sw:  # doctest: +SKIP
     ...     time.sleep(0.1)
     ...
@@ -1177,7 +1177,7 @@ class stopwatch(ContextDecorator):
 
     >>> # compute total elapsed time
     >>> import time
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> with pk.stopwatch(1) as sw1:  # doctest: +SKIP
     ...     time.sleep(1)
     ...
@@ -1393,7 +1393,7 @@ def str_to_date(string: str, /) -> dt.date:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.str_to_date("2022-01-01")
     datetime.date(2022, 1, 1)
     """
@@ -1417,7 +1417,7 @@ def timestamp(zone: str | None = None, fmt: str | None = None) -> str:
 
     Examples
     --------
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.timestamp()  # doctest: +SKIP
     '2024-01-01 00:00:00'
 
@@ -1435,7 +1435,7 @@ def weekday(d: dt.date, /) -> str:
     Examples
     --------
     >>> import datetime as dt
-    >>> import onekit.pythonkit as pk
+    >>> from onekit import pythonkit as pk
     >>> pk.weekday(dt.date(2022, 8, 1))
     'Mon'
     >>> pk.weekday(dt.date(2022, 8, 7))

@@ -26,7 +26,7 @@ def precision_given_recall(
 
     Examples
     --------
-    >>> import onekit.sklearnkit as slk
+    >>> from onekit import sklearnkit as slk
     >>> import pandas as pd
     >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
     >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
@@ -60,7 +60,7 @@ def precision_given_recall_score(
 
     Examples
     --------
-    >>> import onekit.sklearnkit as slk
+    >>> from onekit import sklearnkit as slk
     >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
     >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
     >>> slk.precision_given_recall_score(y_true, y_score, min_recall=0.7)
@@ -85,7 +85,7 @@ def precision_given_recall_summary(
 
     Examples
     --------
-    >>> import onekit.sklearnkit as slk
+    >>> from onekit import sklearnkit as slk
     >>> import pandas as pd
     >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
     >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]
@@ -156,7 +156,7 @@ def precision_recall_values(
 
     Examples
     --------
-    >>> import onekit.sklearnkit as slk
+    >>> from onekit import sklearnkit as slk
     >>> import pandas as pd
     >>> y_true = [0, 1, 1, 1, 0, 0, 0, 1]
     >>> y_score = [0.1, 0.4, 0.35, 0.8, 0.5, 0.2, 0.75, 0.5]

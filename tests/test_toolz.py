@@ -10,7 +10,7 @@ from toolz import (
     itertoolz,
 )
 
-import onekit.mathkit as mk
+from onekit import mathkit as mk
 
 
 class TestToolzAPI:

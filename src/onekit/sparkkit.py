@@ -16,8 +16,8 @@ from pyspark.sql import types as SparkColType
 from pyspark.sql import types as T
 from toolz import curried
 
-import onekit.pandaskit as pdk
-import onekit.pythonkit as pk
+from onekit import pandaskit as pdk
+from onekit import pythonkit as pk
 
 __all__ = (
     "add_prefix",
@@ -111,7 +111,7 @@ def add_prefix(df: SparkDF, prefix: str, subset: list[str] | None = None) -> Spa
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x=1, y=2)])
     >>> sk.add_prefix(df, "pfx_").show()
@@ -134,7 +134,7 @@ def add_suffix(df: SparkDF, suffix: str, subset: list[str] | None = None) -> Spa
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x=1, y=2)])
     >>> sk.add_suffix(df, "_sfx").show()
@@ -161,7 +161,7 @@ def all_col(*cols: str | Iterable[str]) -> SparkCol:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -204,7 +204,7 @@ def any_col(*cols: str | Iterable[str]) -> SparkCol:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -258,7 +258,7 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -315,7 +315,7 @@ def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -353,7 +353,7 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -396,7 +396,7 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -429,7 +429,7 @@ def bool_to_int(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -471,7 +471,7 @@ def bool_to_str(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -515,7 +515,7 @@ def check_column_present(df: SparkDF, *cols: str | Iterable[str]) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x=1), Row(x=2), Row(x=3)])
     >>> sk.check_column_present(df, "x").show()
@@ -547,7 +547,7 @@ def count_nulls(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -574,7 +574,7 @@ def cvf(df: SparkDF, *cols: str | SparkCol | Iterable[str | SparkCol]) -> SparkD
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -625,7 +625,7 @@ def date_range(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -688,7 +688,7 @@ def filter_date(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -750,7 +750,7 @@ def has_column(df: SparkDF, *cols: str | Iterable[str]) -> bool:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x=1), Row(x=2), Row(x=3)])
     >>> sk.has_column(df, "x")
@@ -778,7 +778,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -819,7 +819,7 @@ def is_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -848,7 +848,7 @@ def is_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -877,7 +877,7 @@ def is_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -906,7 +906,7 @@ def join(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df1 = spark.createDataFrame([Row(id=1, x="a"), Row(id=2, x="b")])
     >>> df2 = spark.createDataFrame([Row(id=1, y="c"), Row(id=2, y="d")])
@@ -939,7 +939,7 @@ def peek(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1010,7 +1010,7 @@ def select_col_types(
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from pyspark.sql import types as T
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [Row(bool=True, double=1.0, float=2.0, int=3, long=4, str="string")],
@@ -1060,7 +1060,7 @@ def str_to_col(x: str | SparkCol, /) -> SparkCol:
     Examples
     --------
     >>> from pyspark.sql import functions as F
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> sk.str_to_col("x")
     Column<'x'>
 
@@ -1076,7 +1076,7 @@ def union(*dataframes: SparkDF | Iterable[SparkDF]) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df1 = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> df2 = spark.createDataFrame([Row(x=5, y=6), Row(x=7, y=8)])
@@ -1110,7 +1110,7 @@ def with_date_diff_ago(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1156,7 +1156,7 @@ def with_date_diff_ahead(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1207,7 +1207,7 @@ def with_digitscale(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1319,7 +1319,7 @@ def with_endofweek_date(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1373,7 +1373,7 @@ def with_increasing_id(df: SparkDF, new_col: str, /) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x="a"), Row(x="b"), Row(x="c"), Row(x="d")])
     >>> sk.with_increasing_id(df, "id").show()  # doctest: +SKIP
@@ -1396,7 +1396,7 @@ def with_index(df: SparkDF, new_col: str) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x="a"), Row(x="b"), Row(x="c"), Row(x="d")])
     >>> sk.with_index(df, "idx").show()
@@ -1425,7 +1425,7 @@ def with_startofweek_date(
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [
@@ -1474,7 +1474,7 @@ def with_weekday(df: SparkDF, date_col: str, new_col: str) -> SparkDF:
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
-    >>> import onekit.sparkkit as sk
+    >>> from onekit import sparkkit as sk
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame(
     ...     [Row(d="2023-05-01"), Row(d=None), Row(d="2023-05-03")]

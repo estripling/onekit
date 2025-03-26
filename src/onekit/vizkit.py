@@ -12,7 +12,7 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-import onekit.numpykit as npk
+from onekit import numpykit as npk
 
 __all__ = (
     "Config",
@@ -169,8 +169,8 @@ class FunctionPlotter:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> plotter = vk.FunctionPlotter(ofk.sphere, bounds=[(-5, 5)])
     >>> plotter
     FunctionPlotter(func=sphere, bounds=[(-5, 5)])
@@ -368,8 +368,8 @@ def create_xy_points(func: Func1n, x_values: ArrayLike, /) -> XyPoints:
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> vk.create_xy_points(ofk.sphere, [-2, -1, 0, 1, 2])
     XyPoints(x=array([-2, -1,  0,  1,  2]), y=array([4., 1., 0., 1., 4.]))
     """
@@ -388,8 +388,8 @@ def create_xyz_points(
 
     Examples
     --------
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> vk.create_xyz_points(ofk.sphere, [-1, 0, 1])
     XyzPoints(x=array([[-1,  0,  1],
            [-1,  0,  1],
@@ -418,7 +418,7 @@ def discrete_cmap(
 
     Examples
     --------
-    >>> import onekit.vizkit as vk
+    >>> from onekit import vizkit as vk
     >>> vk.discrete_cmap(2)
     [(0.876168, 0.891125, 0.09525, 1.0), (0.282623, 0.140926, 0.457517, 1.0)]
     """
@@ -454,8 +454,8 @@ def plot_contour(
     Examples
     --------
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> ax = toolz.pipe(  # doctest: +SKIP
     ...     vk.create_xyz_points(ofk.sphere, [-1, 0, 1]),
     ...     vk.plot_contour,
@@ -496,8 +496,8 @@ def plot_line(xy_pts: XyPoints, /, *, kws_plot=None, ax=None) -> Axes:
     Examples
     --------
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> ax = toolz.pipe(  # doctest: +SKIP
     ...     vk.create_xy_points(ofk.sphere, [-2, -1, 0, 1, 2]),
     ...     vk.plot_line,
@@ -541,8 +541,8 @@ def plot_surface(
     Examples
     --------
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> ax = toolz.pipe(  # doctest: +SKIP
     ...     vk.create_xyz_points(ofk.sphere, [-1, 0, 1]),
     ...     vk.plot_surface,
@@ -592,8 +592,8 @@ def plot_xy_points(xy_pts: XyPoints, /, *, kws_scatter=None, ax=None) -> Axes:
     Examples
     --------
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> ax = toolz.pipe(  # doctest: +SKIP
     ...     vk.create_xy_points(ofk.sphere, [-2, -1, 0, 1, 2]),
     ...     vk.plot_xy_points,
@@ -626,8 +626,8 @@ def plot_xyz_points(xyz_pts: XyzPoints, /, *, kws_scatter=None, ax=None) -> Axes
     Examples
     --------
     >>> import toolz
-    >>> import onekit.optfunckit as ofk
-    >>> import onekit.vizkit as vk
+    >>> from onekit import optfunckit as ofk
+    >>> from onekit import vizkit as vk
     >>> ax = toolz.pipe(  # doctest: +SKIP
     ...     vk.create_xyz_points(ofk.sphere, [-1, 0, 1]),
     ...     vk.plot_xyz_points,

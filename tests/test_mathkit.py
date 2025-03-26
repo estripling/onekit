@@ -1,7 +1,7 @@
 import pytest
 import toolz
 
-import onekit.mathkit as mk
+from onekit import mathkit as mk
 
 
 @pytest.mark.parametrize(

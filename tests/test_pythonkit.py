@@ -23,7 +23,7 @@ import time_machine
 import toolz
 from toolz import curried
 
-import onekit.pythonkit as pk
+from onekit import pythonkit as pk
 from onekit.pythonkit import (
     BaseEnum,
     ShellType,
