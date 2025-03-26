@@ -22,7 +22,7 @@ requires-python = ">=3.11"
 dependencies = []
 
 [tool.poetry]
-version = "2.0.0"
+version = "2.1.0"
 
 [project.optional-dependencies]
 basic = [

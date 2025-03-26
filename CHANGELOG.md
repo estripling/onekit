@@ -1,6 +1,65 @@
 # CHANGELOG
 
 
+## v2.1.0 (2025-03-26)
+
+### Features
+
+- Add base enum ([#100](https://github.com/estripling/onekit/pull/100),
+  [`ce052bf`](https://github.com/estripling/onekit/commit/ce052bf07acb3cd6137924e409a95edff9c2e0f5))
+
+* feat(pythonkit): add BaseEnum
+
+* feat(pythonkit): add ShellType Enum
+
+- **pythonkit**: Add date_diff ([#98](https://github.com/estripling/onekit/pull/98),
+  [`01739b5`](https://github.com/estripling/onekit/commit/01739b59f087978fd84ffb272a8f5d695e4b128d))
+
+* docs(LICENSE): update year
+
+* test: rename test function
+
+* feat(pythonkit): add date_diff
+
+* refactor(num_days): use date_diff
+
+* docs(pyproject.toml): add classifier python 3.12
+
+* build(workflows/test.yml): upgrade pip, setuptools, and wheel
+
+* build(workflows/test.yml): use env workaround
+
+* build(workflows/test.yml): downgrade setuptools
+
+* build(workflows/test.yml): pin setuptools==78.0.2
+
+* build(workflows/release.yml): pin setuptools==78.0.2
+
+### Refactoring
+
+- Change onekit imports ([#101](https://github.com/estripling/onekit/pull/101),
+  [`67509d9`](https://github.com/estripling/onekit/commit/67509d9ff897c4b0980f7377dc51dc57a9586d27))
+
+- Enable installation of optional dependencies
+  ([#102](https://github.com/estripling/onekit/pull/102),
+  [`64baee0`](https://github.com/estripling/onekit/commit/64baee03d24999609a7dcd2a38716a641525ba09))
+
+* build: introduce optional dependencies
+
+* docs: update for optional dependencies
+
+* docs: update notebooks
+
+* build: update time-machine for docs requirements
+
+* build: add without groups in workflows
+
+* build: add time-machine to dev group
+
+- **peek**: Cast bool to str not int ([#99](https://github.com/estripling/onekit/pull/99),
+  [`ff06a4c`](https://github.com/estripling/onekit/commit/ff06a4c4bf86b40f54a9d9fe941d5452040675d8))
+
+
 ## v2.0.0 (2025-03-23)
 
 ### Build System
