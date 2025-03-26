@@ -11,6 +11,10 @@ import re
 import shutil
 import string
 from contextlib import ContextDecorator
+from enum import (
+    Enum,
+    member,
+)
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
@@ -27,6 +31,8 @@ import toolz
 from toolz import curried
 
 __all__ = (
+    "BaseEnum",
+    "ShellType",
     "archive_files",
     "are_predicates_true",
     "check_random_state",
@@ -69,6 +75,21 @@ __all__ = (
 Pair = tuple[float, float]
 Predicate = Callable[[Any], bool]
 Seed = int | random.Random | None
+
+
+# noinspection PyTypeChecker
+class BaseEnum(Enum):
+    """Common methods for Enum classes."""
+
+    @classmethod
+    def all(cls) -> tuple[member]:
+        """Returns tuple of all members of a concrete Enum class."""
+        return tuple(mbr for mbr in cls)
+
+
+class ShellType(BaseEnum):
+    TERMINAL_INTERACTIVE_SHELL = "TerminalInteractiveShell"
+    ZMQ_INTERACTIVE_SHELL = "ZMQInteractiveShell"
 
 
 def archive_files(
@@ -680,10 +701,10 @@ def get_shell_type() -> str:  # pragma: no cover
 
         shell = get_ipython().__class__.__name__
 
-        if shell == "TerminalInteractiveShell":
+        if shell == ShellType.TERMINAL_INTERACTIVE_SHELL.value:
             return "ipython"
 
-        elif shell == "ZMQInteractiveShell":
+        elif shell == ShellType.ZMQ_INTERACTIVE_SHELL.value:
             return "notebook"
 
         else:
