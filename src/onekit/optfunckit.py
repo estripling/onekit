@@ -7,6 +7,7 @@ References
 .. [wiki] "Test functions for optimization", Wikipedia,
     `<https://en.wikipedia.org/wiki/Test_functions_for_optimization>`_
 """
+
 from typing import (
     Callable,
     NamedTuple,

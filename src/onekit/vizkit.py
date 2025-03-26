@@ -418,7 +418,9 @@ def discrete_cmap(
 
     Examples
     --------
+    >>> import numpy as np
     >>> from onekit import vizkit as vk
+    >>> np.set_printoptions(legacy="1.21")
     >>> vk.discrete_cmap(2)
     [(0.876168, 0.891125, 0.09525, 1.0), (0.282623, 0.140926, 0.457517, 1.0)]
     """
