@@ -1104,8 +1104,8 @@ def with_date_diff_ago(
     ref_date: str | dt.date,
     new_col: str,
 ) -> SparkDF:
-    """Add column with date differences w.r.t. the reference date,
-    where date differences of past dates are positive integers.
+    """Add a column showing date differences with respect to the reference date,
+    where differences to past dates are positive integers.
 
     Examples
     --------
@@ -1150,8 +1150,8 @@ def with_date_diff_ahead(
     ref_date: str | dt.date,
     new_col: str,
 ) -> SparkDF:
-    """Add column with date differences w.r.t. the reference date,
-    where date differences of future dates are positive integers.
+    """Add a column showing date differences with respect to the reference date,
+    where differences to future dates are positive integers.
 
     Examples
     --------
