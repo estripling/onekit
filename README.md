@@ -31,7 +31,7 @@ pip install onekit
 With optional dependencies:
 
 ```shell
-pip install onekit[basic,analytics]
+pip install onekit[base,analytics,pyspark]
 ```
 
 ## Disclaimer
