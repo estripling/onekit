@@ -75,25 +75,33 @@ poetry lock
 ```
 
 ```shell
-poetry add --optional basic \
+poetry add --optional base \
 toolz \
 pytz
 ```
 
 ```shell
-poetry install --extras "basic"
+poetry install --extras "base"
 ```
 
 ```shell
 poetry add --optional analytics \
 pandas[compression,computation,excel,output-formatting,parquet,performance,plot] \
 scikit-learn \
-tqdm \
-pyspark==3.5.3
+tqdm
 ```
 
 ```shell
 poetry install --extras "analytics"
+```
+
+```shell
+poetry add --optional pyspark \
+pyspark==3.5.3
+```
+
+```shell
+poetry install --extras "pyspark"
 ```
 
 ```shell
