@@ -1,6 +1,34 @@
 # CHANGELOG
 
 
+## v2.1.1 (2025-03-27)
+
+### Bug Fixes
+
+- Docstrings of with_date_diff_ago and with_date_diff_ahead
+  ([#106](https://github.com/estripling/onekit/pull/106),
+  [`16ce937`](https://github.com/estripling/onekit/commit/16ce9371525bbb4aba76c4f3acd3b793f969d74e))
+
+### Build System
+
+- Rename venv -> .venv ([#104](https://github.com/estripling/onekit/pull/104),
+  [`8bfb1c0`](https://github.com/estripling/onekit/commit/8bfb1c096985886cf229bba221da70aa2f44057a))
+
+### Documentation
+
+- Add collatz plots ([#105](https://github.com/estripling/onekit/pull/105),
+  [`8ce30ea`](https://github.com/estripling/onekit/commit/8ce30ea8d5b4111054868e5ce2d96054f1344a23))
+
+### Refactoring
+
+- Update optional dependencies ([#103](https://github.com/estripling/onekit/pull/103),
+  [`9b16757`](https://github.com/estripling/onekit/commit/9b16757e5fd783b51bbead27a92768cc56612279))
+
+* build: refactor optional dependency groups
+
+* docs: account for refactored optional dependency groups
+
+
 ## v2.1.0 (2025-03-26)
 
 ### Features
