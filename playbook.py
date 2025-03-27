@@ -12,13 +12,8 @@ from subprocess import (
     CalledProcessError,
     CompletedProcess,
 )
-from typing import (
-    List,
-    Optional,
-    Union,
-)
 
-Response = Union[CompletedProcess, CalledProcessError]
+Response = CompletedProcess | CalledProcessError
 
 
 def main() -> None:
@@ -216,12 +211,12 @@ def run_remove_branches() -> None:
     print(process(response__delete_remote_branch_reference))
 
 
-def get_current_branch() -> Optional[str]:
+def get_current_branch() -> str | None:
     response = run_shell_command("git rev-parse --abbrev-ref HEAD", capture_output=True)
     return process(response)
 
 
-def get_last_commit(n: Optional[int] = None) -> Optional[str]:
+def get_last_commit(n: int | None = None) -> str | None:
     """Returns hash of the most recent commit of current branch."""
     response = run_shell_command("git rev-parse HEAD", capture_output=True)
     return process(response)[:n]
@@ -256,7 +251,7 @@ def get_root() -> Path:
 
 def get_venv_path() -> str:
     name = f"onekit_on_{platform.system().lower()}"
-    return get_root().joinpath("venv").joinpath(name).resolve().as_posix()
+    return get_root().joinpath(".venv").joinpath(name).resolve().as_posix()
 
 
 def has_command_run_successfully(response: CompletedProcess) -> bool:
@@ -275,7 +270,7 @@ def is_windows() -> bool:
     return platform.system() == "Windows"
 
 
-def process(response: Response) -> Optional[str]:
+def process(response: Response) -> str | None:
     if has_command_run_successfully(response):
         return decode(response)
 
@@ -298,10 +293,10 @@ def run_pipe_command(*commands: str, print_cmd: bool = True) -> Response:
 
 
 def run_shell_command(
-    cmd: Union[str, List[str]],
+    cmd: str | list[str],
     capture_output: bool = False,
     print_cmd: bool = False,
-    other: Optional[Response] = None,
+    other: Response | None = None,
 ) -> Response:
     """Execute a shell command with Python."""
     try:
