@@ -48,11 +48,11 @@ python playbook.py --create-venv
 ```
 
 ```shell
-source venv/onekit_on_windows/Scripts/activate  # Windows - Git Bash
+source .venv/onekit_on_windows/Scripts/activate  # Windows - Git Bash
 ```
 
 ```shell
-source venv/onekit_on_linux/bin/activate  # Linux
+source .venv/onekit_on_linux/bin/activate  # Linux
 ```
 
 ```shell
