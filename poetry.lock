@@ -2865,7 +2865,7 @@ description = "Enables Python programs to dynamically access arbitrary Java obje
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"analytics\""
+markers = "extra == \"pyspark\""
 files = [
     {file = "py4j-0.10.9.7-py2.py3-none-any.whl", hash = "sha256:85defdfd2b2376eb3abf5ca6474b51ab7e0de341c75a02f46dc9b5976f5a5c1b"},
     {file = "py4j-0.10.9.7.tar.gz", hash = "sha256:0b6e5315bb3ada5cf62ac651d107bb2ebc02def3dee9d9548e3baac644ea8dbb"},
@@ -3136,7 +3136,7 @@ description = "Apache Spark Python API"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"analytics\""
+markers = "extra == \"pyspark\""
 files = [
     {file = "pyspark-3.5.3.tar.gz", hash = "sha256:68b7cc0c0c570a7d8644f49f40d2da8709b01d30c9126cc8cf93b4f84f3d9747"},
 ]
@@ -3413,7 +3413,7 @@ description = "World timezone definitions, modern and historical"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"basic\" or extra == \"analytics\""
+markers = "extra == \"base\" or extra == \"analytics\""
 files = [
     {file = "pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00"},
     {file = "pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"},
@@ -4584,7 +4584,7 @@ description = "List processing tools and functional utilities"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"basic\""
+markers = "extra == \"base\""
 files = [
     {file = "toolz-1.0.0-py3-none-any.whl", hash = "sha256:292c8f1c4e7516bf9086f8850935c799a874039c8bcf959d47b600e4c44a6236"},
     {file = "toolz-1.0.0.tar.gz", hash = "sha256:2c86e3d9a04798ac556793bced838816296a2f085017664e4995cb40a1047a02"},
@@ -4968,10 +4968,11 @@ cffi = {version = ">=1.11", markers = "platform_python_implementation == \"PyPy\
 cffi = ["cffi (>=1.11)"]
 
 [extras]
-analytics = ["pandas", "pyspark", "scikit-learn", "tqdm"]
-basic = ["pytz", "toolz"]
+analytics = ["pandas", "scikit-learn", "tqdm"]
+base = ["pytz", "toolz"]
+pyspark = ["pyspark"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "ca3e743b79fa6942d8411123482e179f99cb183920dbaed11a4a0605d228dcdc"
+content-hash = "4b897f306b1056f9a971e3a895b4d1bfa6ca160bd899a94e8b555c74a4003660"
