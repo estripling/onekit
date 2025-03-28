@@ -13,6 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from onekit import numpykit as npk
+from onekit import pythonkit as pk
 
 __all__ = (
     "Config",
@@ -21,6 +22,7 @@ __all__ = (
     "create_xyz_points",
     "discrete_cmap",
     "plot_contour",
+    "plot_digitscale",
     "plot_line",
     "plot_surface",
     "plot_xy_points",
@@ -477,6 +479,66 @@ def plot_contour(
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.15)
     plt.colorbar(contour_plot, cax=cax)
+
+    return ax
+
+
+def plot_digitscale(
+    x,
+    /,
+    *,
+    cmap_name: str = "YlOrBr_r",
+    kws_plot: dict[str, str] | None = None,
+    ax=None,
+) -> Axes:
+    """Plot a scaled version of :math:`x` using digitscale.
+
+    See Also
+    --------
+    onekit.mathkit.digitscale : Python version
+
+    Examples
+    --------
+    >>> from onekit import mathkit as mk
+    >>> from onekit import vizkit as vk
+    >>> vk.plot_digitscale(tuple(mk.collatz(27)))  # doctest: +SKIP
+    """
+    ax = ax or plt.gca()
+
+    kwargs_plot = dict(marker=".", color="black")
+    kwargs_plot.update(kws_plot or dict())
+
+    x_values = np.asarray(x)
+    x_scaled = npk.digitscale(x_values)
+    ax.plot(x_scaled, **kwargs_plot)
+    x_limits = ax.get_xlim()
+
+    y_min = int(np.floor(x_scaled.min()))
+    y_max = int(np.ceil(x_scaled.max()))
+    y_range = tuple(range(y_min, y_max))
+    colors = discrete_cmap(y_max, name=cmap_name, lower_bound=0.2, upper_bound=0.8)
+
+    for i, y in enumerate(y_range):
+        ax.fill_between(x_limits, y, y + 1, color=colors[i], alpha=0.3)
+
+    ax.set_xlim(x_limits)
+    ax.set_yticks(y_range)
+
+    ax.set_xlabel("index")
+    ax.set_ylabel("num_digits(orig_value)")
+
+    ax.set_title(
+        pk.concat_strings(
+            ", ",
+            f"mean={pk.num_to_str(x_values.mean())}",
+            f"median={pk.num_to_str(float(np.median(x_values)))}",
+            f"std={pk.num_to_str(x_values.std(ddof=1))}",
+            f"min={pk.num_to_str(x_values.min())}",
+            f"max={pk.num_to_str(x_values.max())}",
+        ),
+        size="medium",
+        pad=12,
+    )
 
     return ax
 

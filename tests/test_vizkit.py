@@ -8,6 +8,7 @@ import numpy.testing as npt
 import pytest
 import toolz
 
+from onekit import mathkit as mk
 from onekit import optfunckit as ofk
 from onekit import vizkit as vk
 
@@ -143,6 +144,12 @@ def test_plot_contour():
         vk.create_xyz_points(ofk.sphere, [-1, 0, 1]),
         vk.plot_contour,
     )
+    plt.close()
+    assert isinstance(actual, matplotlib.axes.Axes)
+
+
+def test_plot_digitscale():
+    actual = vk.plot_digitscale(tuple(mk.collatz(27)))
     plt.close()
     assert isinstance(actual, matplotlib.axes.Axes)
 
