@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.2.0 (2025-03-28)
+
+### Features
+
+- **vizkit**: Add plot_digitscale ([#107](https://github.com/estripling/onekit/pull/107),
+  [`4326afd`](https://github.com/estripling/onekit/commit/4326afd2c240cc90e1195db5138fe845b44f1a5b))
+
+
 ## v2.1.1 (2025-03-27)
 
 ### Bug Fixes
