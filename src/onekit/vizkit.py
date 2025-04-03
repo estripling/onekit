@@ -531,7 +531,6 @@ def plot_digitscale(
     ax.set_xlim(x_limits)
     ax.set_yticks(y_range)
 
-    ax.set_xlabel("index")
     ax.set_ylabel("num_digits(orig_value)", labelpad=6)
 
     ax.set_title(
