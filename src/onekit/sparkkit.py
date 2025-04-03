@@ -1,7 +1,6 @@
 import datetime as dt
 import functools
 import math
-import os
 from typing import (
     Any,
     Iterable,
@@ -55,54 +54,13 @@ __all__ = (
     "with_weekday",
 )
 
-
-class SparkkitError(Exception):
-    """A base class for sparkkit exceptions."""
-
-
-class ColumnNotFoundError(SparkkitError):
-    """Exception if columns are not found in dataframe."""
-
-    def __init__(self, missing_cols: list[str]):
-        self.missing_cols = missing_cols
-        self.message = f"following columns not found: {missing_cols}"
-        super().__init__(self.message)
-
-
-class RowCountMismatchError(SparkkitError):
-    """Exception if row counts mismatch."""
-
-    def __init__(self, n_lft: int, n_rgt: int):
-        n_diff = abs(n_lft - n_rgt)
-        self.n_lft = n_lft
-        self.n_rgt = n_rgt
-        self.n_diff = n_diff
-        self.message = f"{n_lft=:_}, {n_rgt=:_}, {n_diff=:_}"
-        super().__init__(self.message)
-
-
-class RowMismatchError(SparkkitError):
-    """Exception if rows mismatch."""
-
-    def __init__(self, lft_rows: SparkDF, rgt_rows: SparkDF, n_lft: int, n_rgt: int):
-        self.lft_rows = lft_rows
-        self.rgt_rows = rgt_rows
-        self.n_lft = n_lft
-        self.n_rgt = n_rgt
-        self.message = f"{n_lft=:_}, {n_rgt=:_}"
-        super().__init__(self.message)
-
-
-class SchemaMismatchError(SparkkitError):
-    """Exception if schemas mismatch."""
-
-    def __init__(self, lft_schema: str, rgt_schema: str):
-        self.lft_schema = lft_schema
-        self.rgt_schema = rgt_schema
-        msg = pk.highlight_string_differences(lft_schema, rgt_schema)
-        n_diff = sum(c == "|" for c in msg.splitlines()[1])
-        self.message = pk.concat_strings(os.linesep, f"{n_diff=}", msg)
-        super().__init__(self.message)
+from onekit.exception import (
+    ColumnNotFoundError,
+    OnekitError,
+    RowCountMismatchError,
+    RowMismatchError,
+    SchemaMismatchError,
+)
 
 
 def add_prefix(df: SparkDF, prefix: str, subset: list[str] | None = None) -> SparkDF:
@@ -259,6 +217,11 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
+    >>> from onekit.exception import (
+    ...     SchemaMismatchError,
+    ...     RowCountMismatchError,
+    ...     RowMismatchError,
+    ... )
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -269,10 +232,10 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(z=1, y="a", x=9), Row(z=3, y="b", x=8)])
     >>> try:
     ...     sk.assert_dataframe_equal(lft_df, rgt_df)
-    ... except sk.SchemaMismatchError as error:
+    ... except SchemaMismatchError as error:
     ...     print(error)
     ...
-    n_diff=15
+    num_diff=15
     struct<x:bigint,y:bigint>
            |          |||  |||||||||||
     struct<z:bigint,y:string,x:bigint>
@@ -281,19 +244,19 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6)])
     >>> try:
     ...     sk.assert_dataframe_equal(lft_df, rgt_df)
-    ... except sk.RowCountMismatchError as error:
+    ... except RowCountMismatchError as error:
     ...     print(error)
     ...
-    n_lft=1, n_rgt=2, n_diff=1
+    num_lft=1, num_rgt=2, num_diff=1
 
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4), Row(x=5, y=6)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=9), Row(x=7, y=8)])
     >>> try:
     ...     sk.assert_dataframe_equal(lft_df, rgt_df)
-    ... except sk.RowMismatchError as error:
+    ... except RowMismatchError as error:
     ...     print(error)
     ...
-    n_lft=2, n_rgt=2
+    num_lft=2, num_rgt=2
     """
     assert_schema_equal(lft_df, rgt_df)
     assert_row_count_equal(lft_df, rgt_df)
@@ -316,6 +279,7 @@ def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
+    >>> from onekit.exception import RowCountMismatchError
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -326,16 +290,16 @@ def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(x=1)])
     >>> try:
     ...     sk.assert_row_count_equal(lft_df, rgt_df)
-    ... except sk.RowCountMismatchError as error:
+    ... except RowCountMismatchError as error:
     ...     print(error)
     ...
-    n_lft=2, n_rgt=1, n_diff=1
+    num_lft=2, num_rgt=1, num_diff=1
     """
-    n_lft = lft_df.count()
-    n_rgt = rgt_df.count()
+    num_lft = lft_df.count()
+    num_rgt = rgt_df.count()
 
-    if n_lft != n_rgt:
-        raise RowCountMismatchError(n_lft, n_rgt)
+    if num_lft != num_rgt:
+        raise RowCountMismatchError(num_lft, num_rgt)
 
 
 def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
@@ -354,6 +318,7 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
+    >>> from onekit.exception import RowMismatchError
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -364,21 +329,21 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6), Row(x=7, y=8)])
     >>> try:
     ...     sk.assert_row_equal(lft_df, rgt_df)
-    ... except sk.RowMismatchError as error:
+    ... except RowMismatchError as error:
     ...     print(error)
     ...
-    n_lft=1, n_rgt=2
+    num_lft=1, num_rgt=2
     """
     lft_rows = lft_df.subtract(rgt_df)
     rgt_rows = rgt_df.subtract(lft_df)
 
-    n_lft = lft_rows.count()
-    n_rgt = rgt_rows.count()
+    num_lft = lft_rows.count()
+    num_rgt = rgt_rows.count()
 
-    is_equal = (n_lft == 0) and (n_rgt == 0)
+    is_equal = (num_lft == 0) and (num_rgt == 0)
 
     if not is_equal:
-        raise RowMismatchError(lft_rows, rgt_rows, n_lft, n_rgt)
+        raise RowMismatchError(lft_rows, rgt_rows, num_lft, num_rgt)
 
 
 def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
@@ -386,7 +351,7 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
 
     Raises
     ------
-    sk.SchemaMismatchError
+    SchemaMismatchError
         If schemas are not equal.
 
     See Also
@@ -397,6 +362,7 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
+    >>> from onekit.exception import SchemaMismatchError
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -407,10 +373,10 @@ def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(x=1), Row(x=3)])
     >>> try:
     ...     sk.assert_schema_equal(lft_df, rgt_df)
-    ... except sk.SchemaMismatchError as error:
+    ... except SchemaMismatchError as error:
     ...     print(error)
     ...
-    n_diff=10
+    num_diff=10
     struct<x:bigint,y:bigint>
                    ||||||||||
     struct<x:bigint>
@@ -509,13 +475,14 @@ def check_column_present(df: SparkDF, *cols: str | Iterable[str]) -> SparkDF:
 
     Raises
     ------
-    sk.ColumnNotFoundError
+    ColumnNotFoundError
         If columns are not found in dataframe.
 
     Examples
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
+    >>> from onekit.exception import ColumnNotFoundError
     >>> spark = SparkSession.builder.getOrCreate()
     >>> df = spark.createDataFrame([Row(x=1), Row(x=2), Row(x=3)])
     >>> sk.check_column_present(df, "x").show()
@@ -530,7 +497,7 @@ def check_column_present(df: SparkDF, *cols: str | Iterable[str]) -> SparkDF:
 
     >>> try:
     ...     sk.check_column_present(df, "y").show()
-    ... except sk.ColumnNotFoundError as error:
+    ... except ColumnNotFoundError as error:
     ...     print(error)
     ...
     following columns not found: ['y']
@@ -805,7 +772,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
         assert_row_count_equal(lft_df, rgt_df)
         assert_row_equal(lft_df, rgt_df)
         return True
-    except SparkkitError:
+    except OnekitError:
         return False
 
 

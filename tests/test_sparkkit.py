@@ -15,6 +15,12 @@ from pyspark.sql import types as T
 
 from onekit import pythonkit as pk
 from onekit import sparkkit as sk
+from onekit.exception import (
+    ColumnNotFoundError,
+    RowCountMismatchError,
+    RowMismatchError,
+    SchemaMismatchError,
+)
 
 
 @pytest.mark.slow
@@ -115,7 +121,7 @@ class TestSparkKit:
 
         assert sk.assert_row_count_equal(lft_df, rgt_df__equal) is None
 
-        with pytest.raises(sk.RowCountMismatchError):
+        with pytest.raises(RowCountMismatchError):
             sk.assert_row_count_equal(lft_df, rgt_df__different)
 
     def test_assert_row_equal(self, spark: SparkSession):
@@ -126,7 +132,7 @@ class TestSparkKit:
 
         assert sk.assert_row_equal(lft_df, rgt_df__equal) is None
 
-        with pytest.raises(sk.RowMismatchError):
+        with pytest.raises(RowMismatchError):
             sk.assert_row_equal(lft_df, rgt_df__different)
 
     def test_assert_schema_equal(self, spark: SparkSession):
@@ -140,10 +146,10 @@ class TestSparkKit:
 
         assert sk.assert_schema_equal(lft_df, rgt_df__equal) is None
 
-        with pytest.raises(sk.SchemaMismatchError):
+        with pytest.raises(SchemaMismatchError):
             sk.assert_schema_equal(lft_df, rgt_df__different_type)
 
-        with pytest.raises(sk.SchemaMismatchError):
+        with pytest.raises(SchemaMismatchError):
             sk.assert_schema_equal(lft_df, rgt_df__different_size)
 
     def test_bool_to_int(self, spark: SparkSession):
@@ -194,10 +200,10 @@ class TestSparkKit:
         actual = sk.check_column_present(df, "x", "y")
         assert actual is df
 
-        with pytest.raises(sk.ColumnNotFoundError):
+        with pytest.raises(ColumnNotFoundError):
             sk.check_column_present(df, "z")
 
-        with pytest.raises(sk.ColumnNotFoundError):
+        with pytest.raises(ColumnNotFoundError):
             sk.check_column_present(df, "x", "y", "z")
 
     def test_count_nulls(self, spark: SparkSession):
