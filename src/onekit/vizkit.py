@@ -15,6 +15,8 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 from onekit import numpykit as npk
 from onekit import pythonkit as pk
 
+ArrayLike = npt.ArrayLike
+
 __all__ = (
     "Config",
     "FunctionPlotter",
@@ -484,14 +486,13 @@ def plot_contour(
 
 
 def plot_digitscale(
-    x,
-    /,
-    *,
+    x: ArrayLike,
+    y: ArrayLike | None = None,
     cmap_name: str = "YlOrBr_r",
     kws_plot: dict[str, str] | None = None,
     ax=None,
 ) -> Axes:
-    """Plot a scaled version of :math:`x` using digitscale.
+    """Plot a digit-scaled version of :math:`y` against :math:`x`.
 
     See Also
     --------
@@ -507,34 +508,40 @@ def plot_digitscale(
 
     kwargs_plot = dict(marker=".", color="black")
     kwargs_plot.update(kws_plot or dict())
+    for k in ["x", "y"]:
+        kwargs_plot.pop(k, None)
 
-    x_values = np.asarray(x)
-    x_scaled = npk.digitscale(x_values)
-    ax.plot(x_scaled, **kwargs_plot)
+    if y is None:
+        y = x
+        x = np.arange(len(y))
+
+    y_values = np.asarray(y)
+    y_scaled = npk.digitscale(y_values)
+    ax.plot(x, y_scaled, **kwargs_plot)
     x_limits = ax.get_xlim()
 
-    y_min = int(np.floor(x_scaled.min()))
-    y_max = int(np.ceil(x_scaled.max()))
+    y_min = int(np.floor(y_scaled.min()))
+    y_max = int(np.ceil(y_scaled.max()))
     y_range = tuple(range(y_min, y_max))
     colors = discrete_cmap(y_max, name=cmap_name, lower_bound=0.2, upper_bound=0.8)
 
-    for i, y in enumerate(y_range):
-        ax.fill_between(x_limits, y, y + 1, color=colors[i], alpha=0.3)
+    for i, yi in enumerate(y_range):
+        ax.fill_between(x_limits, yi, yi + 1, color=colors[i], alpha=0.3)
 
     ax.set_xlim(x_limits)
     ax.set_yticks(y_range)
 
     ax.set_xlabel("index")
-    ax.set_ylabel("num_digits(orig_value)")
+    ax.set_ylabel("num_digits(orig_value)", labelpad=6)
 
     ax.set_title(
         pk.concat_strings(
             ", ",
-            f"mean={pk.num_to_str(x_values.mean())}",
-            f"median={pk.num_to_str(float(np.median(x_values)))}",
-            f"std={pk.num_to_str(x_values.std(ddof=1))}",
-            f"min={pk.num_to_str(x_values.min())}",
-            f"max={pk.num_to_str(x_values.max())}",
+            f"mean={pk.num_to_str(y_values.mean())}",
+            f"median={pk.num_to_str(float(np.median(y_values)))}",
+            f"std={pk.num_to_str(y_values.std(ddof=1))}",
+            f"min={pk.num_to_str(y_values.min())}",
+            f"max={pk.num_to_str(y_values.max())}",
         ),
         size="medium",
         pad=12,
