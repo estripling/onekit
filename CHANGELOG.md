@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.2.2 (2025-04-03)
+
+### Bug Fixes
+
+- **plot_digitscale**: Do not set xlabel ([#109](https://github.com/estripling/onekit/pull/109),
+  [`26767f2`](https://github.com/estripling/onekit/commit/26767f2e05d59d9504408852b27af3e315a3ace0))
+
+
 ## v2.2.1 (2025-04-03)
 
 ### Bug Fixes
