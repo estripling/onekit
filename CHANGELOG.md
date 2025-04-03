@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.2.1 (2025-04-03)
+
+### Bug Fixes
+
+- **plot_digitscale**: Have x and y ([#108](https://github.com/estripling/onekit/pull/108),
+  [`5c76c1e`](https://github.com/estripling/onekit/commit/5c76c1e5b30d93d0d5c9128e9d57d04219cbdeeb))
+
+
 ## v2.2.0 (2025-03-28)
 
 ### Features
