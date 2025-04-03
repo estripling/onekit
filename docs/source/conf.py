@@ -55,6 +55,7 @@ def skip_util_classes(app, what, name, obj, skip, options):
         skip = True
 
     modules_to_show = [
+        "exception",
         "mathkit",
         "numpykit",
         "optfunckit",
