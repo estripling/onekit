@@ -7,7 +7,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "onekit"
-copyright = "2024 Eugen Stripling"
+copyright = "2023-2025 Eugen Stripling"
 author = "Eugen Stripling"
 
 # -- General configuration ---------------------------------------------------
