@@ -25,7 +25,7 @@ __all__ = (
     "any_col",
     "assert_dataframe_equal",
     "assert_row_count_equal",
-    "assert_row_equal",
+    "assert_row_value_equal",
     "assert_schema_equal",
     "bool_to_int",
     "bool_to_str",
@@ -37,7 +37,7 @@ __all__ = (
     "has_column",
     "is_dataframe_equal",
     "is_row_count_equal",
-    "is_row_equal",
+    "is_row_value_equal",
     "is_schema_equal",
     "join",
     "peek",
@@ -58,7 +58,7 @@ from onekit.exception import (
     ColumnNotFoundError,
     OnekitError,
     RowCountMismatchError,
-    RowMismatchError,
+    RowValueMismatchError,
     SchemaMismatchError,
 )
 
@@ -204,14 +204,14 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         If schemas are not equal.
     RowCountMismatchError
         If row counts are not equal.
-    RowMismatchError
-        If rows are not equal.
+    RowValueMismatchError
+        If row values are not equal.
 
     See Also
     --------
     assert_schema_equal : Validate schemas.
     assert_row_count_equal : Validate row counts.
-    assert_row_equal : Validate rows.
+    assert_row_value_equal : Validate row values.
 
     Examples
     --------
@@ -220,7 +220,7 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> from onekit.exception import (
     ...     SchemaMismatchError,
     ...     RowCountMismatchError,
-    ...     RowMismatchError,
+    ...     RowValueMismatchError,
     ... )
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -253,14 +253,14 @@ def assert_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=9), Row(x=7, y=8)])
     >>> try:
     ...     sk.assert_dataframe_equal(lft_df, rgt_df)
-    ... except RowMismatchError as error:
+    ... except RowValueMismatchError as error:
     ...     print(error)
     ...
     num_lft=2, num_rgt=2
     """
     assert_schema_equal(lft_df, rgt_df)
     assert_row_count_equal(lft_df, rgt_df)
-    assert_row_equal(lft_df, rgt_df)
+    assert_row_value_equal(lft_df, rgt_df)
 
 
 def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
@@ -302,13 +302,13 @@ def assert_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
         raise RowCountMismatchError(num_lft, num_rgt)
 
 
-def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
-    """Validate rows of both dataframes are equal.
+def assert_row_value_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
+    """Validate row values of both dataframes are equal.
 
     Raises
     ------
-    RowMismatchError
-        If rows are not equal.
+    RowValueMismatchError
+        If row values are not equal.
 
     See Also
     --------
@@ -318,18 +318,18 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     --------
     >>> from pyspark.sql import Row, SparkSession
     >>> from onekit import sparkkit as sk
-    >>> from onekit.exception import RowMismatchError
+    >>> from onekit.exception import RowValueMismatchError
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
-    >>> sk.assert_row_equal(lft_df, rgt_df) is None
+    >>> sk.assert_row_value_equal(lft_df, rgt_df) is None
     True
 
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6), Row(x=7, y=8)])
     >>> try:
-    ...     sk.assert_row_equal(lft_df, rgt_df)
-    ... except RowMismatchError as error:
+    ...     sk.assert_row_value_equal(lft_df, rgt_df)
+    ... except RowValueMismatchError as error:
     ...     print(error)
     ...
     num_lft=1, num_rgt=2
@@ -343,7 +343,7 @@ def assert_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
     is_equal = (num_lft == 0) and (num_rgt == 0)
 
     if not is_equal:
-        raise RowMismatchError(lft_rows, rgt_rows, num_lft, num_rgt)
+        raise RowValueMismatchError(lft_rows, rgt_rows, num_lft, num_rgt)
 
 
 def assert_schema_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> None:
@@ -740,7 +740,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     --------
     is_schema_equal : Evaluate schemas.
     is_row_count_equal : Evaluate row counts.
-    is_row_equal : Evaluate rows.
+    is_row_value_equal : Evaluate row values.
 
     Examples
     --------
@@ -770,7 +770,7 @@ def is_dataframe_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     try:
         assert_schema_equal(lft_df, rgt_df)
         assert_row_count_equal(lft_df, rgt_df)
-        assert_row_equal(lft_df, rgt_df)
+        assert_row_value_equal(lft_df, rgt_df)
         return True
     except OnekitError:
         return False
@@ -805,7 +805,7 @@ def is_row_count_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
         return False
 
 
-def is_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
+def is_row_value_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     """Evaluate if rows of both dataframes are equal.
 
     See Also
@@ -819,18 +819,18 @@ def is_row_equal(lft_df: SparkDF, rgt_df: SparkDF, /) -> bool:
     >>> spark = SparkSession.builder.getOrCreate()
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
-    >>> sk.is_row_equal(lft_df, rgt_df)
+    >>> sk.is_row_value_equal(lft_df, rgt_df)
     True
 
     >>> lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
     >>> rgt_df = spark.createDataFrame([Row(x=3, y=4), Row(x=5, y=6), Row(x=7, y=8)])
-    >>> sk.is_row_equal(lft_df, rgt_df)
+    >>> sk.is_row_value_equal(lft_df, rgt_df)
     False
     """
     try:
-        assert_row_equal(lft_df, rgt_df)
+        assert_row_value_equal(lft_df, rgt_df)
         return True
-    except RowMismatchError:
+    except RowValueMismatchError:
         return False
 
 

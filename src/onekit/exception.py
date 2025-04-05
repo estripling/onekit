@@ -8,6 +8,15 @@ from pyspark.sql import DataFrame as SparkDF
 
 from onekit import pythonkit as pk
 
+__all__ = (
+    "ColumnNotFoundError",
+    "InvalidChoiceError",
+    "OnekitError",
+    "RowCountMismatchError",
+    "RowValueMismatchError",
+    "SchemaMismatchError",
+)
+
 
 class OnekitError(Exception):
     """A base class for onekit exceptions."""
@@ -77,8 +86,14 @@ class RowCountMismatchError(OnekitError):
         super().__init__(self.message)
 
 
-class RowMismatchError(OnekitError):
-    """Exception if rows mismatch."""
+class RowValueMismatchError(OnekitError):
+    """Exception for mismatch of row values.
+
+    See Also
+    --------
+    assert_row_value_equal : Validate row values.
+    is_row_value_equal : Evaluate row values.
+    """
 
     def __init__(
         self,
@@ -91,7 +106,11 @@ class RowMismatchError(OnekitError):
         self.rgt_rows = rgt_rows
         self.num_lft = num_lft
         self.num_rgt = num_rgt
-        self.message = f"{num_lft=:_}, {num_rgt=:_}"
+        self.message = pk.concat_strings(
+            ", ",
+            f"{num_lft}={pk.num_to_str(num_lft)}",
+            f"{num_rgt}={pk.num_to_str(num_rgt)}",
+        )
         super().__init__(self.message)
 
 

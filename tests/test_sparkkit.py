@@ -18,7 +18,7 @@ from onekit import sparkkit as sk
 from onekit.exception import (
     ColumnNotFoundError,
     RowCountMismatchError,
-    RowMismatchError,
+    RowValueMismatchError,
     SchemaMismatchError,
 )
 
@@ -124,16 +124,16 @@ class TestSparkKit:
         with pytest.raises(RowCountMismatchError):
             sk.assert_row_count_equal(lft_df, rgt_df__different)
 
-    def test_assert_row_equal(self, spark: SparkSession):
+    def test_assert_row_value_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
         rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df__different = spark.createDataFrame([Row(x=1, y=7), Row(x=3, y=9)])
 
-        assert sk.assert_row_equal(lft_df, rgt_df__equal) is None
+        assert sk.assert_row_value_equal(lft_df, rgt_df__equal) is None
 
-        with pytest.raises(RowMismatchError):
-            sk.assert_row_equal(lft_df, rgt_df__different)
+        with pytest.raises(RowValueMismatchError):
+            sk.assert_row_value_equal(lft_df, rgt_df__different)
 
     def test_assert_schema_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
@@ -371,14 +371,14 @@ class TestSparkKit:
         assert sk.is_row_count_equal(lft_df, rgt_df__equal)
         assert not sk.is_row_count_equal(lft_df, rgt_df__different)
 
-    def test_is_row_equal(self, spark: SparkSession):
+    def test_is_row_value_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
 
         rgt_df__equal = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
         rgt_df__different = spark.createDataFrame([Row(x=1, y=7), Row(x=3, y=9)])
 
-        assert sk.is_row_equal(lft_df, rgt_df__equal)
-        assert not sk.is_row_equal(lft_df, rgt_df__different)
+        assert sk.is_row_value_equal(lft_df, rgt_df__equal)
+        assert not sk.is_row_value_equal(lft_df, rgt_df__different)
 
     def test_is_schema_equal(self, spark: SparkSession):
         lft_df = spark.createDataFrame([Row(x=1, y=2), Row(x=3, y=4)])
