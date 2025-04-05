@@ -25,6 +25,11 @@ class OnekitError(Exception):
 class ColumnNotFoundError(OnekitError):
     """Exception for missing columns in dataframe.
 
+    See Also
+    --------
+    check_column_present : Validate column presence.
+    has_column : Evaluate column presence.
+
     Examples
     --------
     >>> from onekit.exception import ColumnNotFoundError
@@ -33,7 +38,7 @@ class ColumnNotFoundError(OnekitError):
     "following columns not found: ['a', 'b', 'c']"
     """
 
-    def __init__(self, missing_cols: list[str]):
+    def __init__(self, missing_cols: Iterable[str]):
         self.missing_cols = missing_cols
         self.message = f"following columns not found: {missing_cols}"
         super().__init__(self.message)
@@ -64,12 +69,17 @@ class InvalidChoiceError(OnekitError):
 class RowCountMismatchError(OnekitError):
     """Exception for mismatch of row counts.
 
+    See Also
+    --------
+    assert_row_count_equal : Validate row counts.
+    is_row_count_equal : Evaluate row counts.
+
     Examples
     --------
     >>> from onekit.exception import RowCountMismatchError
     >>> error = RowCountMismatchError(num_lft=10000, num_rgt=12000)
     >>> error.message
-    '10_000, 12_000, |2_000|'
+    'num_lft=10_000, num_rgt=12_000, num_diff=2_000'
     """
 
     def __init__(self, num_lft: int, num_rgt: int):
@@ -79,9 +89,9 @@ class RowCountMismatchError(OnekitError):
         self.num_diff = num_diff
         self.message = pk.concat_strings(
             ", ",
-            pk.num_to_str(num_lft),
-            pk.num_to_str(num_rgt),
-            f"|{pk.num_to_str(num_diff)}|",
+            f"num_lft={pk.num_to_str(num_lft)}",
+            f"num_rgt={pk.num_to_str(num_rgt)}",
+            f"num_diff={pk.num_to_str(num_diff)}",
         )
         super().__init__(self.message)
 
@@ -108,8 +118,8 @@ class RowValueMismatchError(OnekitError):
         self.num_rgt = num_rgt
         self.message = pk.concat_strings(
             ", ",
-            f"{num_lft}={pk.num_to_str(num_lft)}",
-            f"{num_rgt}={pk.num_to_str(num_rgt)}",
+            f"num_lft={pk.num_to_str(num_lft)}",
+            f"num_rgt={pk.num_to_str(num_rgt)}",
         )
         super().__init__(self.message)
 

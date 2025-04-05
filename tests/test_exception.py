@@ -24,5 +24,5 @@ def test_invalid_choice_error():
 def test_row_count_mismatch_error():
     error = RowCountMismatchError(num_lft=10000, num_rgt=12000)
     actual = error.message
-    expected = "10_000, 12_000, |2_000|"
+    expected = "num_lft=10_000, num_rgt=12_000, num_diff=2_000"
     assert actual == expected
