@@ -53,14 +53,27 @@ class InvalidChoiceError(OnekitError):
 
 
 class RowCountMismatchError(OnekitError):
-    """Exception if row counts mismatch."""
+    """Exception for mismatch of row counts.
+
+    Examples
+    --------
+    >>> from onekit.exception import RowCountMismatchError
+    >>> error = RowCountMismatchError(num_lft=10000, num_rgt=12000)
+    >>> error.message
+    '10_000, 12_000, |2_000|'
+    """
 
     def __init__(self, num_lft: int, num_rgt: int):
         num_diff = abs(num_lft - num_rgt)
         self.num_lft = num_lft
         self.num_rgt = num_rgt
         self.num_diff = num_diff
-        self.message = f"{num_lft=:_}, {num_rgt=:_}, {num_diff=:_}"
+        self.message = pk.concat_strings(
+            ", ",
+            pk.num_to_str(num_lft),
+            pk.num_to_str(num_rgt),
+            f"|{pk.num_to_str(num_diff)}|",
+        )
         super().__init__(self.message)
 
 
