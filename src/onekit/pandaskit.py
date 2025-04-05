@@ -209,7 +209,7 @@ def profile(df: PandasDF, /, *, q: list[int] | None = None) -> PandasDF:
     q95               NaN        1.0     NaN
     max               NaN        1.0     NaN
     """
-    n_rows, _ = df.shape
+    num_rows, _ = df.shape
     quantiles = q or (5, 25, 50, 75, 95)
 
     basic_info_df = pd.concat(
@@ -220,12 +220,12 @@ def profile(df: PandasDF, /, *, q: list[int] | None = None) -> PandasDF:
                 df.isnull()
                 .sum()
                 .to_frame("isnull")
-                .assign(isnull_pct=lambda df: 100 * df["isnull"] / n_rows)
+                .assign(isnull_pct=lambda df: 100 * df["isnull"] / num_rows)
             ),
             (
                 df.nunique()
                 .to_frame("unique")
-                .assign(unique_pct=lambda df: 100 * df["unique"] / n_rows)
+                .assign(unique_pct=lambda df: 100 * df["unique"] / num_rows)
             ),
         ],
         axis=1,

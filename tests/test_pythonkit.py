@@ -551,6 +551,17 @@ def test_num_to_str(x: int | float, expected: str):
     assert actual == expected
 
 
+def test_parent_varname():
+    my_var = None
+
+    def f(x) -> str:
+        return pk.parent_varname(x)
+
+    actual = f(my_var)
+    expected = "my_var"
+    assert actual == expected
+
+
 @pytest.mark.parametrize(
     "func, expected",
     [
