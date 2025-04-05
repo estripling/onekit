@@ -115,7 +115,13 @@ class RowValueMismatchError(OnekitError):
 
 
 class SchemaMismatchError(OnekitError):
-    """Exception if schemas mismatch."""
+    """Exception for mismatch of schemas.
+
+    See Also
+    --------
+    assert_schema_equal : Validate schemas.
+    is_schema_equal : Evaluate schemas.
+    """
 
     def __init__(self, lft_schema: str, rgt_schema: str):
         self.lft_schema = lft_schema
