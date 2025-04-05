@@ -1,4 +1,8 @@
 import os
+from typing import (
+    Any,
+    Iterable,
+)
 
 from pyspark.sql import DataFrame as SparkDF
 
@@ -15,6 +19,28 @@ class ColumnNotFoundError(OnekitError):
     def __init__(self, missing_cols: list[str]):
         self.missing_cols = missing_cols
         self.message = f"following columns not found: {missing_cols}"
+        super().__init__(self.message)
+
+
+class InvalidChoiceError(OnekitError):
+    """Exception for invalid choice error.
+
+    Examples
+    --------
+    >>> from onekit.exception import InvalidChoiceError
+    >>> x = 0
+    >>> error = InvalidChoiceError(value=x, choices=[1, 2, 3])
+    >>> error.message
+    'x=0 invalid choice - choose from [1, 2, 3]'
+    """
+
+    def __init__(self, value: Any, choices: Iterable[Any] | None = None):
+        self.value = value
+        self.choices = choices
+        msg = f"{pk.parent_varname(value)}={value} invalid choice"
+        if choices is not None:
+            msg += f" - choose from {choices}"
+        self.message = msg
         super().__init__(self.message)
 
 
