@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.0.1 (2025-04-05)
+
+### Bug Fixes
+
+- Notebook docs ([#112](https://github.com/estripling/onekit/pull/112),
+  [`047f002`](https://github.com/estripling/onekit/commit/047f002c7a8c46f70d3091b367b99418bfb8dda6))
+
+
 ## v3.0.0 (2025-04-05)
 
 ### Documentation
