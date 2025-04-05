@@ -1,4 +1,14 @@
-from onekit.exception import InvalidChoiceError
+from onekit.exception import (
+    ColumnNotFoundError,
+    InvalidChoiceError,
+)
+
+
+def test_column_not_found_error():
+    error = ColumnNotFoundError(missing_cols=["a", "b", "c"])
+    actual = error.message
+    expected = "following columns not found: ['a', 'b', 'c']"
+    assert actual == expected
 
 
 def test_invalid_choice_error():

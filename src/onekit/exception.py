@@ -14,7 +14,15 @@ class OnekitError(Exception):
 
 
 class ColumnNotFoundError(OnekitError):
-    """Exception if columns are not found in dataframe."""
+    """Exception for missing columns in dataframe.
+
+    Examples
+    --------
+    >>> from onekit.exception import ColumnNotFoundError
+    >>> error = ColumnNotFoundError(missing_cols=["a", "b", "c"])
+    >>> error.message
+    "following columns not found: ['a', 'b', 'c']"
+    """
 
     def __init__(self, missing_cols: list[str]):
         self.missing_cols = missing_cols
