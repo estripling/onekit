@@ -60,6 +60,7 @@ __all__ = (
     "num_days",
     "num_to_str",
     "op",
+    "parent_varname",
     "prompt_yes_no",
     "reduce_sets",
     "remove_punctuation",
@@ -956,6 +957,23 @@ def op(func: Callable, const: Any, /) -> Callable[[Any], Any]:
         return func(x, const)
 
     return inner
+
+
+def parent_varname(x: Any, /) -> str:
+    """Returns the name of the parent variable of :math:`x`.
+
+    Examples
+    --------
+    >>> from onekit import pythonkit as pk
+    >>> my_var = "my_string_value"
+    >>> def f(x) -> str:
+    ...     return pk.parent_varname(x)
+    ...
+    >>> f(my_var)
+    'my_var'
+    """
+    variables = inspect.currentframe().f_back.f_back.f_locals.items()
+    return [name for name, value in variables if value is x][0]
 
 
 def prompt_yes_no(question: str, /, *, default: str | None = None) -> bool:
