@@ -1,6 +1,48 @@
 # CHANGELOG
 
 
+## v3.0.0 (2025-04-05)
+
+### Documentation
+
+- Update mathkit.ipynb ([#110](https://github.com/estripling/onekit/pull/110),
+  [`6c5c1c8`](https://github.com/estripling/onekit/commit/6c5c1c85e7ae543da5576a0d9b02a37144e44b15))
+
+### Features
+
+- Add exception module ([#111](https://github.com/estripling/onekit/pull/111),
+  [`60a5fac`](https://github.com/estripling/onekit/commit/60a5fac3e99960a08cfd6d7a750472f6f1a79909))
+
+* feat: add exception module
+
+* docs: add exception module
+
+* docs: update copyright
+
+* refactor: n -> num
+
+* feat(pythonkit): add parent_varname
+
+* feat(exception): add InvalidChoiceError
+
+* test: ColumnNotFoundError
+
+* test: RowCountMismatchError
+
+* fix: rename RowMismatchError -> RowValueMismatchError
+
+* docs(SchemaMismatchError): update docstring
+
+* docs(exception): update docstrings
+
+BREAKING CHANGE: renamed function assert_row_equal -> assert_row_value_equal and is_row_equal ->
+  is_row_value_equal
+
+### Breaking Changes
+
+- Renamed function assert_row_equal -> assert_row_value_equal and is_row_equal -> is_row_value_equal
+
+
 ## v2.2.2 (2025-04-03)
 
 ### Bug Fixes
