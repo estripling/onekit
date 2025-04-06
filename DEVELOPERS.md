@@ -148,4 +148,4 @@ poetry publish
 ## Git Commit Guidelines
 
 This project applies semantic versioning
-with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/).
+with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/) using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
