@@ -98,24 +98,13 @@ jobs:
       with:
         version: '2.1.1'
 
-    - name: 🔧 ensure Poetry is on PATH
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
     - name: 💻 install onekit
       run: poetry install --with packaging --without dev,docs
 
-    - name: 🔍 debug Poetry path
-      run: |
-        echo "Current PATH: $PATH"
-        which poetry
-        poetry --version
-
     - name: 🐍 Python Semantic Release (PSR)
-      uses: python-semantic-release/python-semantic-release@v8.7.0
+      uses: python-semantic-release/python-semantic-release@v8.3.0
       id: release
       if: github.ref_name == 'main'
-      env:
-        PATH: ${{ env.HOME }}/.local/bin:${{ env.PATH }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
