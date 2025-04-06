@@ -59,14 +59,23 @@ class BetaParams(NamedTuple):
 
     def get_summary(self, hdi_prob: float = 0.95) -> str:
         """Compute summary statistics of the Beta distribution."""
-        hdi_pct = pk.num_to_str(100 * hdi_prob)
-        hdi_lower_endpoint, hdi_upper_endpoint = map(pk.num_to_str, self.hdi(hdi_prob))
+        mode = self.mode
+        mode_info = f"mode={pk.num_to_str(mode)}" if mode is not None else None
+
+        hdi_endpoints = self.hdi(hdi_prob)
+        if hdi_endpoints is not None:
+            hdi_pct = pk.num_to_str(100 * hdi_prob)
+            hdi_lower_endpoint, hdi_upper_endpoint = map(pk.num_to_str, hdi_endpoints)
+            hdi_info = f"{hdi_pct}%-HDI=[{hdi_lower_endpoint}, {hdi_upper_endpoint}]"
+        else:
+            hdi_info = None
+
         return pk.concat_strings(
             " ",
             f"{self} ->",
             f"mean={pk.num_to_str(self.mean)}",
-            f"mode={pk.num_to_str(self.mode)}",
-            f"{hdi_pct}%-HDI=[{hdi_lower_endpoint}, {hdi_upper_endpoint}]",
+            mode_info,
+            hdi_info,
         )
 
 
