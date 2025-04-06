@@ -126,6 +126,11 @@ def test_concat_strings():
     expected = " + ".join(strings)
     assert actual == expected
 
+    strings = ["Hello", None, "World", None]
+    actual = pk.concat_strings(" ", strings)
+    expected = "Hello World"
+    assert actual == expected
+
 
 def test_contrast_sets():
     x = {"a", "c", "b", "g", "h"}

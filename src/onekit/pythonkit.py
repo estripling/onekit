@@ -273,8 +273,8 @@ def coinflip(bias: float, /, *, seed: Seed = None) -> bool:
     return rng.random() < bias
 
 
-def concat_strings(sep: str, /, *strings: str | Iterable[str]) -> str:
-    """Concatenate strings.
+def concat_strings(sep: str, /, *strings: str | None | Iterable[str | None]) -> str:
+    """Concatenate strings, excluding None values.
 
     Examples
     --------
@@ -296,7 +296,14 @@ def concat_strings(sep: str, /, *strings: str | Iterable[str]) -> str:
     >>> list(map(ws_concat, [["Hello", "World"], ["Hi", "there"]]))
     ['Hello World', 'Hi there']
     """
-    return sep.join(toolz.pipe(strings, flatten, curried.map(str)))
+    return sep.join(
+        toolz.pipe(
+            strings,
+            flatten,
+            curried.filter(lambda x: x is not None),
+            curried.map(str),
+        )
+    )
 
 
 def contrast_sets(x: set, y: set, /, *, n: int = 3) -> dict:

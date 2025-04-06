@@ -59,6 +59,26 @@ def test_check_vector():
 
 
 @pytest.mark.parametrize(
+    "data, pos_label, expected",
+    [
+        ([0, 1, 2, 1, 0, 1], 1, np.array([False, True, False, True, False, True])),
+        (
+            ["cat", "dog", "cat", "bird", "cat", "dog"],
+            "dog",
+            np.array([False, True, False, False, False, True]),
+        ),
+    ],
+)
+def test_create_boolean_array(
+    data: np.ndarray,
+    pos_label: int | str,
+    expected: np.ndarray,
+):
+    actual = npk.create_boolean_array(data, pos_label)
+    npt.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize(
     "x, kind, expected",
     [
         (

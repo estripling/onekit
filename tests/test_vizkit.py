@@ -139,6 +139,13 @@ def test_discrete_cmap():
     assert all(isinstance(value, float) for rgba in rgba_list for value in rgba)
 
 
+@pytest.mark.parametrize("alpha, beta", [(1, 1), (2, 2)])
+def test_plot_beta_distribution(alpha: int, beta: int):
+    actual = vk.plot_beta_distribution(alpha, beta)
+    plt.close()
+    assert isinstance(actual, matplotlib.axes.Axes)
+
+
 def test_plot_contour():
     actual = toolz.pipe(
         vk.create_xyz_points(ofk.sphere, [-1, 0, 1]),

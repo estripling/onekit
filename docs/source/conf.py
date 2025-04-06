@@ -61,6 +61,7 @@ def skip_util_classes(app, what, name, obj, skip, options):
         "optfunckit",
         "pandaskit",
         "pythonkit",
+        "scipykit",
         "sklearnkit",
         "sparkkit",
         "vizkit",
