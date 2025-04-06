@@ -1,6 +1,78 @@
 # CHANGELOG
 
 
+## v3.1.0 (2025-04-06)
+
+### Bug Fixes
+
+- Downgrade psr to 8.3.0
+  ([`d6973fa`](https://github.com/estripling/onekit/commit/d6973faf0ac27d3a7412d2b47046b1c495f25526))
+
+- **release.yml**: Add debug poetry path
+  ([`fd6a91b`](https://github.com/estripling/onekit/commit/fd6a91bbe7efbdedde885532f31bb2ee2f890db3))
+
+- **release.yml**: Add path to psr
+  ([`5305f98`](https://github.com/estripling/onekit/commit/5305f986e947dab4a6891c6afc65f19f2174cedb))
+
+- **release.yml**: Add poetry build
+  ([`3854def`](https://github.com/estripling/onekit/commit/3854def91c51c982556eb8f6bea03881c308ae89))
+
+- **release.yml**: Downgrade psr version
+  ([`7ed66a5`](https://github.com/estripling/onekit/commit/7ed66a59168ee1940718b3a7f3f340dd16df88c5))
+
+- **release.yml**: Ensure poetry is on path
+  ([`669e526`](https://github.com/estripling/onekit/commit/669e52677523ebdddb1eae7de1fce2188b80483b))
+
+- **release.yml**: Restore version before psr upgrade
+  ([`5104add`](https://github.com/estripling/onekit/commit/5104add316dd71951b72c8e9bcf28d51ac88c464))
+
+### Build System
+
+- Downgrade python-semantic-release to 8.7.0
+  ([`13d2447`](https://github.com/estripling/onekit/commit/13d2447d208b042206686d3f866edace17c8fb02))
+
+- Update python-semantic-release ([#113](https://github.com/estripling/onekit/pull/113),
+  [`2ca4175`](https://github.com/estripling/onekit/commit/2ca41754fb22294056529a485d186511aebcbbba))
+
+* build: update python-semantic-release 8.7.0 -> 9.21.0
+
+* build(release.yml): update python-semantic-release
+
+- **test.yml**: Do not run on push
+  ([`aaca910`](https://github.com/estripling/onekit/commit/aaca910aa9962c9f0e8f0638c761b074e6c08fb6))
+
+### Code Style
+
+- Use lowercase
+  ([`dcc1625`](https://github.com/estripling/onekit/commit/dcc16257429d75fae7aa01d3b84fd75aca685f77))
+
+### Documentation
+
+- **DEVELOPERS.md**: Add conventional commits link
+  ([`5d5efc5`](https://github.com/estripling/onekit/commit/5d5efc501bcff29eec0265bc1fe00ea9de1a55c2))
+
+### Features
+
+- Add scipykit ([#114](https://github.com/estripling/onekit/pull/114),
+  [`4dc8e1e`](https://github.com/estripling/onekit/commit/4dc8e1ea2a553a1b98c722ef65e6ae83735f4817))
+
+* feat(numpykit): add create_boolean_array
+
+* feat(scipykit): add compute_beta_posterior
+
+* feat(scipykit): add highest density interval
+
+* feat(concat_strings): exclude None values
+
+* fix(BetaParams.get_summary): proper treatment of None values
+
+* test(BetaParams): add more tests
+
+* feat(vizkit): add plot_beta_distribution
+
+* refactor(BetaParams): get_summary
+
+
 ## v3.0.1 (2025-04-05)
 
 ### Bug Fixes
