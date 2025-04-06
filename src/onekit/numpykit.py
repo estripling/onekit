@@ -8,6 +8,7 @@ from onekit import mathkit as mk
 __all__ = (
     "check_random_state",
     "check_vector",
+    "create_boolean_array",
     "digitscale",
     "stderr",
 )
@@ -89,6 +90,25 @@ def check_vector(x: ArrayLike, /, *, n_min: int = 1, n_max: int = np.inf) -> Vec
         raise TypeError(f"x with n={len(x)} - n must be an integer in {domain}")
 
     return x
+
+
+# noinspection PyTypeChecker
+def create_boolean_array(data: ArrayLike, pos_label: int | str) -> np.ndarray:
+    """Returns a boolean array indicating positions of pos_label in input data.
+
+    Examples
+    --------
+    >>> from onekit import numpykit as npk
+    >>> data = [0, 1, 2, 1, 0, 1]
+    >>> npk.create_boolean_array(data, pos_label=1)
+    array([False,  True, False,  True, False,  True])
+
+    >>> data = ["cat", "dog", "cat", "bird", "cat", "dog"]
+    >>> npk.create_boolean_array(data, pos_label="dog")
+    array([False,  True, False, False, False,  True])
+    """
+    data_array = np.asarray(data)
+    return data_array == pos_label
 
 
 def digitscale(x: ArrayLike, /, *, kind: str = "log") -> np.ndarray:
