@@ -104,6 +104,12 @@ jobs:
     - name: 💻 install onekit
       run: poetry install --with packaging --without dev,docs
 
+    - name: 🔍 debug Poetry path
+      run: |
+        echo "Current PATH: $PATH"
+        which poetry
+        poetry --version
+
     - name: 🐍 Python Semantic Release (PSR)
       uses: python-semantic-release/python-semantic-release@v9.21.0
       id: release
@@ -112,9 +118,6 @@ jobs:
         PATH: ${{ env.HOME }}/.local/bin:${{ env.PATH }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: 🛠️ build distributions with Poetry
-      run: poetry build
 
     - name: 🚀 publish to GitHub releases
       uses: python-semantic-release/upload-to-gh-release@main
