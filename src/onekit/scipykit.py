@@ -1,6 +1,12 @@
+import operator
 from typing import (
     Iterable,
     NamedTuple,
+)
+
+from scipy import (
+    optimize,
+    stats,
 )
 
 from onekit import numpykit as npk
@@ -20,23 +26,47 @@ class BetaParams(NamedTuple):
 
     @property
     def mean(self) -> float:
-        """Calculate the mean of the Beta distribution."""
+        """Compute the mean of the Beta distribution."""
         return self.alpha / (self.alpha + self.beta)
 
     @property
     def mode(self) -> float | None:
-        """Calculate the mode of the Beta distribution.
+        """Compute the mode of the Beta distribution.
 
         Note that the mode is undefined for alpha <= 1 or beta <= 1.
         """
         if self.alpha > 1 and self.beta > 1:
             return (self.alpha - 1) / (self.alpha + self.beta - 2)
 
-    def get_summary(self) -> str:
+    def hdi(self, hdi_prob: float = 0.95) -> tuple[float, float] | None:
+        """Compute the highest density interval (HDI) of the Beta distribution.
+
+        Note that the HDI is not computed for alpha <= 1 or beta <= 1.
+        """
+        if self.alpha > 1 and self.beta > 1:
+            beta_dist = stats.beta(self.alpha, self.beta)
+            tail_prob = 1 - hdi_prob
+
+            def interval_width(x: float) -> float:
+                return beta_dist.ppf(hdi_prob + x) - beta_dist.ppf(x)
+
+            hdi_tail_prob = operator.getitem(
+                optimize.fmin(interval_width, tail_prob, ftol=1e-12, disp=False),
+                0,
+            )
+            hdi_endpoints = beta_dist.ppf([hdi_tail_prob, hdi_prob + hdi_tail_prob])
+            return hdi_endpoints[0], hdi_endpoints[1]
+
+    def get_summary(self, hdi_prob: float = 0.95) -> str:
+        """Compute summary statistics of the Beta distribution."""
+        hdi_pct = pk.num_to_str(100 * hdi_prob)
+        hdi_lower_endpoint, hdi_upper_endpoint = map(pk.num_to_str, self.hdi(hdi_prob))
         return pk.concat_strings(
-            ", ",
-            f"{self} -> mean={pk.num_to_str(self.mean)}",
+            " ",
+            f"{self} ->",
+            f"mean={pk.num_to_str(self.mean)}",
             f"mode={pk.num_to_str(self.mode)}",
+            f"{hdi_pct}%-HDI=[{hdi_lower_endpoint}, {hdi_upper_endpoint}]",
         )
 
 
@@ -59,23 +89,23 @@ def compute_beta_posterior(
     >>> data = [1, 0, 1, 1, 0]
     >>> posterior = sck.compute_beta_posterior(data)
     >>> posterior.get_summary()
-    'BetaParams(alpha=4, beta=3) -> mean=0.571429, mode=0.6'
+    'BetaParams(alpha=4, beta=3) -> mean=0.571429 mode=0.6 95%-HDI=[0.238706, 0.895169]'
 
-    >>> data = ["head", "tail", "head", "head", "tail"]
+    >>> data = ["head", "tail", "head", "head", "tail", "head", "head", "tail"]
     >>> prior = BetaParams(alpha=2, beta=2)
     >>> posterior = sck.compute_beta_posterior(data, prior, pos_label="head")
     >>> posterior.get_summary()
-    'BetaParams(alpha=5, beta=4) -> mean=0.555556, mode=0.571429'
+    'BetaParams(alpha=7, beta=5) -> mean=0.583333 mode=0.6 95%-HDI=[0.318232, 0.841428]'
 
     >>> data = [1, 0, 1, 1, 0]
     >>> prior = BetaParams(alpha=1, beta=1)
     >>> posterior1 = sck.compute_beta_posterior(data, prior)
     >>> posterior1.get_summary()
-    'BetaParams(alpha=4, beta=3) -> mean=0.571429, mode=0.6'
+    'BetaParams(alpha=4, beta=3) -> mean=0.571429 mode=0.6 95%-HDI=[0.238706, 0.895169]'
     >>> more_data = [1, 0, 1, 0, 1]
     >>> posterior2 = sck.compute_beta_posterior(more_data, prior=posterior1)
     >>> posterior2.get_summary()
-    'BetaParams(alpha=7, beta=5) -> mean=0.583333, mode=0.6'
+    'BetaParams(alpha=7, beta=5) -> mean=0.583333 mode=0.6 95%-HDI=[0.318232, 0.841428]'
     """
     prior = prior or BetaParams()
     y = npk.create_boolean_array(data, pos_label)
