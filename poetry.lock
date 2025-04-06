@@ -3341,24 +3341,23 @@ six = ">=1.5"
 
 [[package]]
 name = "python-gitlab"
-version = "4.13.0"
-description = "A python wrapper for the GitLab API"
+version = "3.15.0"
+description = "Interact with GitLab API"
 optional = false
-python-versions = ">=3.8.0"
+python-versions = ">=3.7.0"
 groups = ["packaging"]
 files = [
-    {file = "python_gitlab-4.13.0-py3-none-any.whl", hash = "sha256:8299a054fb571da16e1a8c1868fff01f34ac41ea1410c713a4647b3bbb2aa279"},
-    {file = "python_gitlab-4.13.0.tar.gz", hash = "sha256:576bfb0901faca0c6b2d1ff2592e02944a6ec3e086c3129fb43c2a0df56a1c67"},
+    {file = "python-gitlab-3.15.0.tar.gz", hash = "sha256:c9e65eb7612a9fbb8abf0339972eca7fd7a73d4da66c9b446ffe528930aff534"},
+    {file = "python_gitlab-3.15.0-py3-none-any.whl", hash = "sha256:8f8d1c0d387f642eb1ac7bf5e8e0cd8b3dd49c6f34170cee3c7deb7d384611f3"},
 ]
 
 [package.dependencies]
-requests = ">=2.32.0"
-requests-toolbelt = ">=1.0.0"
+requests = ">=2.25.0"
+requests-toolbelt = ">=0.10.1"
 
 [package.extras]
 autocompletion = ["argcomplete (>=1.10.0,<3)"]
-graphql = ["gql[httpx] (>=3.5.0,<4)"]
-yaml = ["PyYaml (>=6.0.1)"]
+yaml = ["PyYaml (>=5.2)"]
 
 [[package]]
 name = "python-json-logger"
@@ -3377,14 +3376,14 @@ dev = ["backports.zoneinfo ; python_version < \"3.9\"", "black", "build", "freez
 
 [[package]]
 name = "python-semantic-release"
-version = "8.7.0"
+version = "8.3.0"
 description = "Automatic Semantic Versioning for Python projects"
 optional = false
 python-versions = ">=3.7"
 groups = ["packaging"]
 files = [
-    {file = "python-semantic-release-8.7.0.tar.gz", hash = "sha256:6bbd11b1e8ac70e0946ed6d257094c851b2507edfbc393eef6093d0ed1dbe0b4"},
-    {file = "python_semantic_release-8.7.0-py3-none-any.whl", hash = "sha256:a016b1cf43a5f3667ce2cfddd8e30b6210a2d52b0e2f6b487aae1164f2540eaa"},
+    {file = "python-semantic-release-8.3.0.tar.gz", hash = "sha256:62325bf32738ea1223ad4efaba0809bac4355ea2d4ad214f676232613a6625f4"},
+    {file = "python_semantic_release-8.3.0-py3-none-any.whl", hash = "sha256:7a26551af9f56485571b7e7831c342a327b16931560d58bc5de99b1cf1dc7ef5"},
 ]
 
 [package.dependencies]
@@ -3394,14 +3393,14 @@ gitpython = ">=3.0.8,<4"
 importlib-resources = ">=5.7,<7"
 jinja2 = ">=3.1.2,<4"
 pydantic = ">=2,<3"
-python-gitlab = ">=2,<5"
+python-gitlab = ">=2,<4"
 requests = ">=2.25,<3"
 rich = ">=12.5.1"
 shellingham = ">=1.5.0.post1"
 tomlkit = ">=0.10,<1.0"
 
 [package.extras]
-dev = ["pre-commit", "ruff (==0.1.8)", "tox"]
+dev = ["black", "pre-commit", "ruff (==0.0.292)", "tox"]
 docs = ["Sphinx (<=6.0.0)", "furo (>=2023.3.27)", "sphinx-autobuild (==2021.03.14)", "sphinxcontrib-apidoc (==0.3.0)"]
 mypy = ["mypy", "types-requests"]
 test = ["coverage[toml] (>=6,<8)", "pytest (>=7,<8)", "pytest-clarity (>=1.0.1)", "pytest-cov (>=4,<5)", "pytest-lazy-fixture (>=0.6.3,<0.7.0)", "pytest-mock (>=3,<4)", "pytest-pretty (>=1.2.0,<2)", "pytest-xdist (>=2,<4)", "requests-mock (>=1.10.0,<2)", "responses (==0.23.3)", "types-pytest-lazy-fixture (>=0.6.3.3)"]
@@ -4975,4 +4974,4 @@ pyspark = ["pyspark"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "2a289fcf0081289c34847206bac7c83880ac95cfe4919100b6a7e032ac56dc0b"
+content-hash = "e44b40b913fa751663184e2cb1f93b977cb828468f701ffa7b5f721b539f0c3f"
