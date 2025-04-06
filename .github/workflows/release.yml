@@ -119,6 +119,9 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: 🛠️ build distributions with Poetry
+      run: poetry build
+
     - name: 🚀 publish to GitHub releases
       uses: python-semantic-release/upload-to-gh-release@main
       if: steps.release.outputs.released == 'true'
