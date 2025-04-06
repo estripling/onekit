@@ -11,9 +11,13 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d.axes3d import Axes3D
+from scipy import (
+    stats,
+)
 
 from onekit import numpykit as npk
 from onekit import pythonkit as pk
+from onekit.scipykit import BetaParams
 
 ArrayLike = npt.ArrayLike
 
@@ -23,6 +27,7 @@ __all__ = (
     "create_xy_points",
     "create_xyz_points",
     "discrete_cmap",
+    "plot_beta_distribution",
     "plot_contour",
     "plot_digitscale",
     "plot_line",
@@ -430,6 +435,128 @@ def discrete_cmap(
     """
     cmap = plt.get_cmap(name)
     return [cmap(i) for i in np.linspace(lower_bound, upper_bound, num=n)]
+
+
+def plot_beta_distribution(
+    alpha: int | float,
+    beta: int | float,
+    hdi_prob: float = 0.95,
+    n_xvalues: int = 1001,
+    ax=None,
+) -> Axes:
+    """Plot Beta distribution with HDI.
+
+    See Also
+    --------
+    onekit.scipykit.BetaParams : Beta parameters
+
+    Examples
+    --------
+    >>> from onekit import vizkit as vk
+    >>> vk.plot_beta_distribution(alpha=2, beta=2)  # doctest: +SKIP
+    """
+    ax = ax or plt.gca()
+    beta_params = BetaParams(alpha, beta)
+
+    def beta_density(x: float) -> float:
+        return stats.beta.pdf(x, beta_params.alpha, beta_params.beta)
+
+    plotter = FunctionPlotter(
+        beta_density,
+        [(0, 1)],
+        n_xvalues=n_xvalues,
+        kws_plot=dict(zorder=1, alpha=0.7),
+    )
+
+    _, ax, _ = plotter.plot(ax=ax)
+    xy_points = getattr(plotter, "_xyz_pts")
+    x = xy_points.x
+    y = xy_points.y.ravel()
+
+    hdi_endpoints = beta_params.hdi(hdi_prob)
+    if hdi_endpoints is not None:
+        hdi_lower_endpoint, hdi_upper_endpoint = hdi_endpoints
+        ax.fill_between(
+            x,
+            y,
+            where=np.logical_and(x >= hdi_lower_endpoint, x <= hdi_upper_endpoint),
+            color="skyblue",
+            alpha=0.5,
+            zorder=0,
+        )
+
+        # add HDI endpoint labels
+        pad = 1.2
+        for endpoint in [hdi_lower_endpoint, hdi_upper_endpoint]:
+            density_of_endpoint = beta_density(endpoint)
+            ax.text(endpoint, pad * density_of_endpoint, f"{endpoint:.3f}", ha="center")
+            ax.plot(
+                [endpoint, endpoint],
+                [0, density_of_endpoint],
+                color="black",
+                linestyle="--",
+            )
+
+        # draw line segments
+        ax.plot(
+            [hdi_lower_endpoint, hdi_upper_endpoint],
+            [beta_density(hdi_lower_endpoint), beta_density(hdi_upper_endpoint)],
+            color="black",
+            linewidth=2,
+        )
+
+        # add HDI info
+        hdi_info = f"{pk.num_to_str(100 * hdi_prob)}% HDI"
+        hdi_mid_point = float(np.mean([hdi_lower_endpoint, hdi_upper_endpoint]))
+        ax.text(
+            hdi_mid_point,
+            1.25 * pad * beta_density(hdi_lower_endpoint),
+            hdi_info,
+            ha="center",
+            fontsize=12,
+        )
+
+        # Add mode to the legend
+        ax.scatter(
+            beta_params.mode,
+            0,
+            marker="v",
+            color="darkorange",
+            label=f"mode={pk.num_to_str(beta_params.mode)}",
+            alpha=0.6,
+        )
+    else:
+        ax.fill_between(
+            x,
+            y,
+            color="skyblue",
+            alpha=0.5,
+            zorder=0,
+        )
+
+    # Add mean to the legend
+    ax.scatter(
+        beta_params.mean,
+        0,
+        marker="v",
+        color="black",
+        label=f"mean={pk.num_to_str(beta_params.mean)}",
+        alpha=0.6,
+    )
+
+    ax.legend(
+        loc="best",
+        title=f"Beta(alpha={beta_params.alpha}, beta={beta_params.beta})",
+    )
+
+    ax.set_xlabel(r"$\theta$")
+    ax.set_ylabel(
+        r"$p(\theta \mid {}, {})$".format(beta_params.alpha, beta_params.beta)
+    )
+
+    ax.set_xticks(np.arange(0, 1.1, 0.1))
+
+    return ax
 
 
 def plot_contour(
