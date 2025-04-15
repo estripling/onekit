@@ -56,7 +56,7 @@ source .venv/onekit_on_linux/bin/activate  # Linux
 ```
 
 ```shell
-poetry install --no-interaction --all-extras; \
+poetry install --no-interaction --all-extras && \
 pre-commit install
 ```
 
