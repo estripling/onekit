@@ -7,6 +7,7 @@ from argparse import (
     ArgumentParser,
     Namespace,
 )
+from enum import Enum
 from pathlib import Path
 from subprocess import (
     CalledProcessError,
@@ -16,11 +17,17 @@ from subprocess import (
 Response = CompletedProcess | CalledProcessError
 
 
+class Config(Enum):
+    MAX_LENGTH__COMMIT_HASH: int | None = 7
+    POETRY_VERSION: str = "2.1.1"
+    PROJECT: str = "onekit"
+
+
 def main() -> None:
     args = get_arguments()
 
     print(f" branch - {get_current_branch()}")
-    print(f" commit - {get_last_commit(7)}")
+    print(f" commit - {get_last_commit()}")
     print(f"rootdir - {get_root().as_posix()}")
     print(f"    cwd - {Path.cwd().as_posix()}")
 
@@ -31,7 +38,7 @@ def main() -> None:
 
     elif args.create_venv:
         print(" create - venv")
-        run_create_venv(poetry_version="2.1.1")
+        run_create_venv()
 
     else:
         functions = [
@@ -140,11 +147,11 @@ def run_create_docs() -> None:
     os.chdir(cwd)
 
 
-def run_create_venv(poetry_version: str) -> None:
+def run_create_venv() -> None:
     run_multiple_shell_commands(
         f"{get_local_python()} -m venv {get_venv_path()} --clear",
         f"{get_python_exe()} -m pip install --upgrade pip",
-        f"{get_python_exe()} -m pip install poetry=={poetry_version}",
+        f"{get_python_exe()} -m pip install poetry=={Config.POETRY_VERSION.value}",
     )
 
 
@@ -156,7 +163,8 @@ def run_pytest() -> None:
     run_shell_command(
         [
             f"{get_python_exe()} -m pytest",
-            "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
+            "--doctest-modules",
+            f"--ignore-glob=src/{Config.PROJECT.value}/sparkkit.py src/",
             "--cov-report term-missing --cov=src/",
             "tests/",
         ],
@@ -169,7 +177,8 @@ def run_pytest__slow() -> None:
         [
             f"{get_python_exe()} -m pytest",
             "--slow",
-            "--doctest-modules --ignore-glob=src/onekit/sparkkit.py src/",
+            "--doctest-modules",
+            f"--ignore-glob=src/{Config.PROJECT.value}/sparkkit.py src/",
             "--cov-report term-missing --cov=src/",
             "tests/",
         ],
@@ -216,10 +225,11 @@ def get_current_branch() -> str | None:
     return process(response)
 
 
-def get_last_commit(n: int | None = None) -> str | None:
+def get_last_commit() -> str | None:
     """Returns hash of the most recent commit of current branch."""
+    max_length = Config.MAX_LENGTH__COMMIT_HASH.value
     response = run_shell_command("git rev-parse HEAD", capture_output=True)
-    return process(response)[:n]
+    return process(response)[:max_length]
 
 
 def decode(response: CompletedProcess) -> str:
@@ -228,6 +238,10 @@ def decode(response: CompletedProcess) -> str:
 
 def get_local_python() -> str:
     return "python.exe" if is_windows() else "python3"
+
+
+def get_platform_name() -> str:
+    return platform.system().lower()
 
 
 def get_python_exe() -> str:
@@ -250,7 +264,7 @@ def get_root() -> Path:
 
 
 def get_venv_path() -> str:
-    name = f"onekit_on_{platform.system().lower()}"
+    name = f"{Config.PROJECT.value}_on_{get_platform_name()}"
     return get_root().joinpath(".venv").joinpath(name).resolve().as_posix()
 
 
@@ -259,15 +273,15 @@ def has_command_run_successfully(response: CompletedProcess) -> bool:
 
 
 def is_docker_container() -> bool:
-    return str(get_root().resolve()).startswith("/workspaces/onekit")
+    return str(get_root().resolve()).startswith(f"/workspaces/{Config.PROJECT.value}")
 
 
 def is_linux() -> bool:
-    return platform.system() == "Linux"
+    return get_platform_name() == "linux"
 
 
 def is_windows() -> bool:
-    return platform.system() == "Windows"
+    return get_platform_name() == "windows"
 
 
 def process(response: Response) -> str | None:
