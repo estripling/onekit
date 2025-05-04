@@ -9,7 +9,10 @@ from typing import (
 import toolz
 from pyspark.sql import Column as SparkCol
 from pyspark.sql import DataFrame as SparkDF
-from pyspark.sql import Window
+from pyspark.sql import (
+    SparkSession,
+    Window,
+)
 from pyspark.sql import functions as F
 from pyspark.sql import types as SparkColType
 from pyspark.sql import types as T
@@ -30,6 +33,8 @@ __all__ = (
     "bool_to_int",
     "bool_to_str",
     "check_column_present",
+    "collect_partitions",
+    "count_partitions",
     "count_nulls",
     "cvf",
     "date_range",
@@ -41,6 +46,7 @@ __all__ = (
     "is_schema_equal",
     "join",
     "peek",
+    "salty_repartition",
     "select_col_types",
     "str_to_col",
     "union",
@@ -508,6 +514,21 @@ def check_column_present(df: SparkDF, *cols: str | Iterable[str]) -> SparkDF:
     return df
 
 
+def collect_partitions(df: SparkDF) -> SparkDF:
+    id_col = "partition_id"
+    return (
+        df.withColumn(id_col, F.spark_partition_id())
+        .groupBy(id_col)
+        .agg(F.collect_list(F.struct(df.columns)).alias("rows"))
+        .withColumn("count", F.size("rows"))
+        .orderBy("count")
+    )
+
+
+def count_partitions(df: SparkDF) -> int:
+    return int(df.rdd.getNumPartitions())
+
+
 def count_nulls(df: SparkDF, subset: list[str] | None = None) -> SparkDF:
     """Count NULL values in Spark dataframe.
 
@@ -965,6 +986,57 @@ def peek(
         )
 
     return df
+
+
+# noinspection PyUnresolvedReferences
+def salty_repartition(
+    df: SparkDF,
+    num_partitions: int | None = None,
+    cols: list[str] | None = None,
+    seed: int | None = None,
+) -> SparkDF:
+    """Apply a simple salting technique to repartition dataframe.
+
+    Examples
+    --------
+    >>> from pyspark.sql import Row, SparkSession
+    >>> from onekit import sparkkit as sk
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = spark.createDataFrame([Row(x="a"), Row(x="b"), Row(x="c"), Row(x="d")])
+    >>> sk.count_partitions(df)
+    8
+    >>> sk.collect_partitions(df).show()  # empty partitions are not shown
+    +------------+-----+-----+
+    |partition_id| rows|count|
+    +------------+-----+-----+
+    |           1|[{a}]|    1|
+    |           3|[{b}]|    1|
+    |           5|[{c}]|    1|
+    |           7|[{d}]|    1|
+    +------------+-----+-----+
+    <BLANKLINE>
+    >>> salted_df = sk.salty_repartition(df, 2, seed=101)
+    >>> sk.count_partitions(salted_df)
+    2
+    >>> sk.collect_partitions(salted_df).show()  # empty partitions are not shown
+    +------------+----------+-----+
+    |partition_id|      rows|count|
+    +------------+----------+-----+
+    |           0|[{a}, {b}]|    2|
+    |           1|[{c}, {d}]|    2|
+    +------------+----------+-----+
+    <BLANKLINE>
+    """
+    spark = SparkSession.builder.getOrCreate()
+    num_parts = num_partitions or int(spark.conf.get("spark.sql.shuffle.partitions"))
+    cols = cols or []
+
+    salt = "_salt_"
+    return (
+        df.withColumn(salt, (F.rand(seed) * num_parts).cast(T.LongType()))
+        .repartitionByRange(num_parts, *cols, salt)
+        .drop(salt)
+    )  # TODO write test for id column
 
 
 def select_col_types(
