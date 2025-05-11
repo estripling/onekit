@@ -55,6 +55,11 @@ source .venv/onekit_on_windows/Scripts/activate  # Windows - Git Bash
 source .venv/onekit_on_linux/bin/activate  # Linux
 ```
 
+
+```shell
+source .venv/onekit_on_darwin/bin/activate  # macOS
+```
+
 ```shell
 poetry install --no-interaction --all-extras && \
 pre-commit install
