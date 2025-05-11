@@ -7,7 +7,6 @@ ENV PYTHONUNBUFFERED=on \
     PYTHONDONTWRITEBYTECODE=on \
     # pip:
     PIP_NO_CACHE_DIR=on \
-    PIP_BREAK_SYSTEM_PACKAGES=on \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=120 \
     # poetry:
@@ -21,7 +20,8 @@ ENV PYTHONUNBUFFERED=on \
 # install additional system packages
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    build-essential \
+    gcc \
+    make \
     pandoc \
     ## cleanup
     && apt-get clean -y \
