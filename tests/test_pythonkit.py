@@ -1230,7 +1230,7 @@ class TestTimestamp:
             # LD_PRELOAD is only available on Unix platforms
             traveller = time_machine.travel(dt.datetime(2024, 1, 1, 0, 0, 0))
             traveller.start()
-            actual = pk.timestamp()
+            actual = pk.timestamp("UCT")
             expected = "2024-01-01 00:00:00"
             assert actual == expected
             traveller.stop()
