@@ -10,7 +10,7 @@
             "configureZshAsDefaultShell": true,
             "installOhMyZsh": true,
             "upgradePackages": true,
-            "username": "coder"
+            "username": "developer"
         },
         "ghcr.io/devcontainers-contrib/features/spark-sdkman:2": {
             "version": "3.5.3",
@@ -45,5 +45,5 @@
         4040
     ],
     "postCreateCommand": "bash .devcontainer/postcreate.sh",
-    "remoteUser": "coder"
+    "remoteUser": "developer"
 }
