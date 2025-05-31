@@ -54,7 +54,7 @@ def main() -> None:
             (run_pre_commit, args.pre_commit),
             (partial(run_pytest, cfg.project), args.pytest),
             (run_clear_cache, args.clear_cache),
-            (run_remove_branches, args.remove_branches),
+            (run_remove, args.remove),
         ]
 
         for func, value in functions:
@@ -97,12 +97,10 @@ def get_arguments() -> Namespace:
         help="clear cache files and directories",
     )
     parser.add_argument(
-        "--remove-branches",
-        action="store_true",
-        help=(
-            "remove both local and remote-tracking git branches "
-            "except main and current"
-        ),
+        "--remove",
+        default=None,
+        choices=["branches", "docs"],
+        help="remove local git branches or local documentation files",
     )
     return parser.parse_args()
 
@@ -179,6 +177,19 @@ def run_pytest(project: str, option: str | None = None) -> None:
         execute_subprocess(command, print_command=True)
 
 
+# noinspection PyUnreachableCode
+def run_remove(option: str) -> None:
+    match option:
+        case "branches":
+            run_remove_branches()
+
+        case "docs":
+            run_remove_docs()
+
+        case _:
+            raise ValueError(f"{option=} unknown")
+
+
 def run_remove_branches() -> None:
     """Remove both local and remote-tracking git branches except main and current."""
     pipelines = {
@@ -209,6 +220,13 @@ def run_remove_branches() -> None:
             print(None)
         if i < len(pipeline):
             print()
+
+
+def run_remove_docs() -> None:
+    path = get_root().joinpath("docs").joinpath("_build").resolve()
+    if path.exists():
+        shutil.rmtree(path, ignore_errors=False)
+        print(f"deleted - {path}")
 
 
 def get_current_branch() -> str:
