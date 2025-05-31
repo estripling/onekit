@@ -92,15 +92,15 @@ def get_arguments() -> Namespace:
         help="create virtual Python environment for project",
     )
     parser.add_argument(
-        "--clear-cache",
-        action="store_true",
-        help="clear cache files and directories",
-    )
-    parser.add_argument(
         "--remove",
         default=None,
         choices=["branches", "docs"],
         help="remove local git branches or local documentation files",
+    )
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="clear cache directories and files",
     )
     return parser.parse_args()
 
