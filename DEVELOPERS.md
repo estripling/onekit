@@ -18,35 +18,6 @@ python playbook.py --create venv
 python playbook.py --pre-commit --pytest
 ```
 
-## Development Environment: Dev Container
-
-This project comes with a [development container (or dev container)](https://containers.dev) setup, which allows for a
-reproducible development environment.
-To get started with the development, make sure you have the following software installed on your machine:
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [VS Code editor](https://code.visualstudio.com)
-- [VS Code extension: Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- [VS Code extension: Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-
-Next,
-
-1. Start Docker Desktop
-2. Clone repository
-3. Open repository with VS Code using the `Open Folder` option
-4. Click `Reopen in Container` when VS Code prompts you
-
-Once the dev container is created, you are all set and ready to code!
-
-### Things To Try
-
-The `playbook.py` file in the root directory provides a set of predefined commands.
-In the dev container, open a new terminal and run the following command to see what is available:
-
-```shell
-python playbook.py --help
-```
-
 ## Useful Poetry commands
 
 ```shell
