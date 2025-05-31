@@ -106,34 +106,33 @@ def get_arguments() -> Namespace:
     return parser.parse_args()
 
 
-def run_clear_cache() -> None:
-    print("   clear - cache")
-    root = get_root()
-    directories = [
-        "__pycache__",
-        ".pytest_cache",
-        ".ipynb_checkpoints",
-        "spark-warehouse",
-    ]
-    file_extensions = [
-        "*.py[co]",
-        ".coverage",
-        ".coverage.*",
-    ]
+def run_pre_commit(option: str | None = None) -> None:
+    command = "pre-commit run"
+    if option == "all":
+        command += " --all-files"
+    execute_subprocess(command, print_command=True)
 
-    for directory in directories:
-        for path in root.rglob(directory):
-            if "venv" in str(path):
-                continue
-            shutil.rmtree(path.absolute(), ignore_errors=False)
-            print(f" deleted - {path}")
 
-    for file_extension in file_extensions:
-        for path in root.rglob(file_extension):
-            if "venv" in str(path):
-                continue
-            path.unlink()
-            print(f" deleted - {path}")
+def run_pytest(project: str, option: str | None = None) -> None:
+    sparkkit_module = f"src/{project}/sparkkit.py"
+    base_command = (
+        f"{get_local_python()} -m pytest "
+        f"--doctest-modules --ignore-glob={sparkkit_module} src/ "
+        "--cov-report term-missing --cov=src/ "
+        "tests/"
+    )
+
+    commands = (
+        [
+            f"{get_local_python()} -m pytest --doctest-modules {sparkkit_module}",
+            f"{base_command} --slow",
+        ]
+        if option == "slow"
+        else [base_command]
+    )
+
+    for command in commands:
+        execute_subprocess(command, print_command=True)
 
 
 # noinspection PyUnreachableCode
@@ -166,35 +165,6 @@ def run_create_venv(poetry_version: str) -> None:
         f"{get_local_python()} -m poetry install --no-interaction --all-extras",
         f"{get_local_precommit()} install",
     ]
-
-    for command in commands:
-        execute_subprocess(command, print_command=True)
-
-
-def run_pre_commit(option: str | None = None) -> None:
-    command = "pre-commit run"
-    if option == "all":
-        command += " --all-files"
-    execute_subprocess(command, print_command=True)
-
-
-def run_pytest(project: str, option: str | None = None) -> None:
-    sparkkit_module = f"src/{project}/sparkkit.py"
-    base_command = (
-        f"{get_local_python()} -m pytest "
-        f"--doctest-modules --ignore-glob={sparkkit_module} src/ "
-        "--cov-report term-missing --cov=src/ "
-        "tests/"
-    )
-
-    commands = (
-        [
-            f"{get_local_python()} -m pytest --doctest-modules {sparkkit_module}",
-            f"{base_command} --slow",
-        ]
-        if option == "slow"
-        else [base_command]
-    )
 
     for command in commands:
         execute_subprocess(command, print_command=True)
@@ -250,6 +220,36 @@ def run_remove_docs() -> None:
     if path.exists():
         shutil.rmtree(path, ignore_errors=False)
         print(f"deleted - {path}")
+
+
+def run_clear_cache() -> None:
+    print("   clear - cache")
+    root = get_root()
+    directories = [
+        "__pycache__",
+        ".pytest_cache",
+        ".ipynb_checkpoints",
+        "spark-warehouse",
+    ]
+    file_extensions = [
+        "*.py[co]",
+        ".coverage",
+        ".coverage.*",
+    ]
+
+    for directory in directories:
+        for path in root.rglob(directory):
+            if "venv" in str(path):
+                continue
+            shutil.rmtree(path.absolute(), ignore_errors=False)
+            print(f" deleted - {path}")
+
+    for file_extension in file_extensions:
+        for path in root.rglob(file_extension):
+            if "venv" in str(path):
+                continue
+            path.unlink()
+            print(f" deleted - {path}")
 
 
 def get_current_branch() -> str:
