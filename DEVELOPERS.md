@@ -1,5 +1,23 @@
 # Developer Guide
 
+## Local Development Environment Setup
+
+```shell
+python playbook.py
+```
+
+```shell
+python playbook.py --help
+```
+
+```shell
+python playbook.py --create venv
+```
+
+```shell
+python playbook.py --pre-commit --pytest
+```
+
 ## Development Environment: Dev Container
 
 This project comes with a [development container (or dev container)](https://containers.dev) setup, which allows for a
@@ -27,41 +45,6 @@ In the dev container, open a new terminal and run the following command to see w
 
 ```shell
 python playbook.py --help
-```
-
-Use the following command to run `pre-commit` and `pytest` with one command to make sure everything works as intended:
-
-```shell
-python playbook.py --check
-```
-
-## Development Environment: Local Python Venv
-
-To install a virtual Python environment locally, run the following commands from the root directory:
-
-```shell
-which python  # Bash-like shell
-```
-
-```shell
-python playbook.py --create-venv
-```
-
-```shell
-source .venv/onekit_on_windows/Scripts/activate  # Windows - Git Bash
-```
-
-```shell
-source .venv/onekit_on_linux/bin/activate  # Linux
-```
-
-```shell
-poetry install --no-interaction --all-extras && \
-pre-commit install
-```
-
-```shell
-python playbook.py --check
 ```
 
 ## Useful Poetry commands
@@ -148,4 +131,5 @@ poetry publish
 ## Git Commit Guidelines
 
 This project applies semantic versioning
-with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/) using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+with [Python Semantic Release](https://python-semantic-release.readthedocs.io/en/stable/)
+using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).

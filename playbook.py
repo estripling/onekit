@@ -1,3 +1,4 @@
+import importlib
 import os
 import platform
 import shlex
@@ -7,190 +8,211 @@ from argparse import (
     ArgumentParser,
     Namespace,
 )
-from enum import Enum
+from functools import partial
+from importlib import metadata
 from pathlib import Path
 from subprocess import (
     CalledProcessError,
     CompletedProcess,
 )
+from typing import (
+    Iterable,
+    NamedTuple,
+)
 
-Response = CompletedProcess | CalledProcessError
+Response = CompletedProcess | str
 
 
-class Config(Enum):
-    MAX_LENGTH__COMMIT_HASH: int | None = 7
-    POETRY_VERSION: str = "2.1.1"
-    PROJECT: str = "onekit"
+class Config(NamedTuple):
+    commit_hash_length: int | None = 7
+    poetry_version: str = "2.1.1"
+    project: str = "onekit"
 
 
 def main() -> None:
     args = get_arguments()
+    cfg = Config()
 
-    print(f" branch - {get_current_branch()}")
-    print(f" commit - {get_last_commit()}")
-    print(f"rootdir - {get_root().as_posix()}")
-    print(f"    cwd - {Path.cwd().as_posix()}")
+    print(f" project - {cfg.project}")
+    print(f" version - {get_project_version(cfg.project)}")
+    print(f"    root - {get_root()}")
+    print(f"  python - {which_python()}")
+    print(f"packages - {get_num_packages_in_venv()}")
+    print(f"  branch - {get_current_branch()}")
+    print(f"  commit - {get_last_commit(max_length=cfg.commit_hash_length)}")
+    print()
 
-    if all(v is False for v in args.__dict__.values()):
-        print()
+    if all(is_inactive(value) for value in args.__dict__.values()):
         print("see help:")
-        print(f"python {Path(__file__).name} -h")
+        print(f"python {get_current_filename()} -h")
 
-    elif args.create_venv:
-        print(" create - venv")
-        run_create_venv()
+    elif not is_inactive(args.create):
+        run_create(args.create, poetry_version=cfg.poetry_version)
 
     else:
         functions = [
-            (run_check, args.check),
+            (run_pre_commit, args.pre_commit),
+            (partial(run_pytest, cfg.project), args.pytest),
+            (run_remove, args.remove),
             (run_clear_cache, args.clear_cache),
-            (run_pre_commit, args.run_pre_commit),
-            (run_pytest, args.run_pytest),
-            (run_pytest__slow, args.run_pytest_slow),
-            (run_pytest__slow_doctests, args.run_pytest_slow_doctests),
-            (run_create_docs, args.create_docs),
-            (run_remove_docs, args.remove_docs),
-            (run_remove_branches, args.remove_branches),
         ]
-        for func, condition in functions:
-            if condition:
+
+        for func, value in functions:
+            if is_inactive(value):
+                continue
+
+            elif value is True:
                 func()
+
+            else:
+                func(value)
 
 
 def get_arguments() -> Namespace:
     parser = ArgumentParser(description="set of predefined commands")
     parser.add_argument(
-        "-c",
-        "--check",
-        action="store_true",
-        help="run sequence of commands to check code quality",
+        "--pre-commit",
+        nargs="?",
+        const=True,
+        default=None,
+        choices=["all"],
+        help="run pre-commit",
     )
     parser.add_argument(
-        "--create-venv",
-        action="store_true",
-        help="create virtual Python environment",
+        "--pytest",
+        nargs="?",
+        const=True,
+        default=None,
+        choices=["slow"],
+        help="run pytest",
+    )
+    parser.add_argument(
+        "--create",
+        default=None,
+        choices=["docs", "venv"],
+        help="create local documentation files or project venv",
+    )
+    parser.add_argument(
+        "--remove",
+        default=None,
+        choices=["branches", "docs"],
+        help="remove local git branches or local documentation files",
     )
     parser.add_argument(
         "--clear-cache",
         action="store_true",
-        help="clear cache files and directories",
-    )
-    parser.add_argument(
-        "--run-pre-commit",
-        action="store_true",
-        help="run pre-commit",
-    )
-    parser.add_argument(
-        "--run-pytest",
-        action="store_true",
-        help="run pytest with coverage report",
-    )
-    parser.add_argument(
-        "--run-pytest-slow",
-        action="store_true",
-        help="run slow tests with coverage report",
-    )
-    parser.add_argument(
-        "--run-pytest-slow-doctests",
-        action="store_true",
-        help="run slow doctests",
-    )
-    parser.add_argument(
-        "--create-docs",
-        action="store_true",
-        help="create local documentation files",
-    )
-    parser.add_argument(
-        "--remove-docs",
-        action="store_true",
-        help="remove local documentation files",
-    )
-    parser.add_argument(
-        "--remove-branches",
-        action="store_true",
-        help="remove local git branches, except main and current",
+        help="clear cache directories and files",
     )
     return parser.parse_args()
 
 
-def run_check() -> None:
-    run_pre_commit()
-    run_pytest()
+def run_pre_commit(option: str | None = None) -> None:
+    command = "pre-commit run"
+    if option == "all":
+        command += " --all-files"
+    execute_subprocess(command, print_command=True)
 
 
-def run_clear_cache() -> None:
-    print("  clear - cache")
-    cwd = Path().cwd()
-    directories = ["__pycache__", ".pytest_cache", ".ipynb_checkpoints"]
-    file_extensions = ["*.py[co]", ".coverage", ".coverage.*"]
+def run_pytest(project: str, option: str | None = None) -> None:
+    sparkkit_module = f"src/{project}/sparkkit.py"
+    base_command = (
+        f"{get_local_python()} -m pytest "
+        f"--doctest-modules --ignore-glob={sparkkit_module} src/ "
+        "--cov-report term-missing --cov=src/ "
+        "tests/"
+    )
 
-    for directory in directories:
-        for path in cwd.rglob(directory):
-            if "venv" in str(path):
-                continue
-            shutil.rmtree(path.absolute(), ignore_errors=False)
-            print(f"deleted - {path}")
+    commands = (
+        [
+            f"{get_local_python()} -m pytest --doctest-modules {sparkkit_module}",
+            f"{base_command} --slow",
+        ]
+        if option == "slow"
+        else [base_command]
+    )
 
-    for file_extension in file_extensions:
-        for path in cwd.rglob(file_extension):
-            if "venv" in str(path):
-                continue
-            path.unlink()
-            print(f"deleted - {path}")
+    for command in commands:
+        execute_subprocess(command, print_command=True)
+
+
+# noinspection PyUnreachableCode
+def run_create(option: str, *args, **kwargs) -> None:
+    match option:
+        case "docs":
+            print("  create - local documentation files")
+            run_create_docs()
+
+        case "venv":
+            print(f"  create - venv on {get_platform_name()}")
+            run_create_venv(*args, **kwargs)
+
+        case _:
+            raise ValueError(f"{option=} unknown")
 
 
 def run_create_docs() -> None:
-    print(" create - local documentation files")
     cwd = Path().cwd()
     os.chdir(get_root().joinpath("docs"))
-    run_shell_command("make html")
+    execute_subprocess("make html")
     os.chdir(cwd)
 
 
-def run_create_venv() -> None:
-    run_multiple_shell_commands(
-        f"{get_local_python()} -m venv {get_venv_path()} --clear",
-        f"{get_python_exe()} -m pip install --upgrade pip",
-        f"{get_python_exe()} -m pip install poetry=={Config.POETRY_VERSION.value}",
-    )
+def run_create_venv(poetry_version: str) -> None:
+    commands = [
+        f"{get_global_python()} -m venv {get_venv_path()} --clear",
+        f"{get_local_python()} -m pip install --upgrade pip",
+        f"{get_local_python()} -m pip install poetry=={poetry_version}",
+        f"{get_local_python()} -m poetry install --no-interaction --all-extras",
+        f"{get_local_precommit()} install",
+    ]
+
+    for command in commands:
+        execute_subprocess(command, print_command=True)
 
 
-def run_pre_commit() -> None:
-    run_shell_command("pre-commit run --all-files", print_cmd=True)
+# noinspection PyUnreachableCode
+def run_remove(option: str) -> None:
+    match option:
+        case "branches":
+            run_remove_branches()
+
+        case "docs":
+            run_remove_docs()
+
+        case _:
+            raise ValueError(f"{option=} unknown")
 
 
-def run_pytest() -> None:
-    run_shell_command(
-        [
-            f"{get_python_exe()} -m pytest",
-            "--doctest-modules",
-            f"--ignore-glob=src/{Config.PROJECT.value}/sparkkit.py src/",
-            "--cov-report term-missing --cov=src/",
-            "tests/",
-        ],
-        print_cmd=True,
-    )
+def run_remove_branches() -> None:
+    """Remove both local and remote-tracking git branches except main and current."""
+    pipelines = {
+        "delete local branches": {
+            "title": "removing local git branches except main and current",
+            "commands": (
+                "git -P branch",
+                f"grep --invert-match --word-regexp -E 'main|{get_current_branch()}'",
+                "xargs git branch -D",
+            ),
+        },
+        "delete remote branches": {
+            "title": "removing remote-tracking git branches except main and current",
+            "commands": (
+                "git -P branch --all",
+                f"grep --invert-match --word-regexp -E 'main|{get_current_branch()}'",
+                r"sed 's/remotes\///g'",
+                "xargs git branch -r -d",
+            ),
+        },
+    }
 
-
-def run_pytest__slow() -> None:
-    run_shell_command(
-        [
-            f"{get_python_exe()} -m pytest",
-            "--slow",
-            "--doctest-modules",
-            f"--ignore-glob=src/{Config.PROJECT.value}/sparkkit.py src/",
-            "--cov-report term-missing --cov=src/",
-            "tests/",
-        ],
-        print_cmd=True,
-    )
-
-
-def run_pytest__slow_doctests() -> None:
-    run_shell_command(
-        f"{get_python_exe()} -m pytest --doctest-modules src/",
-        print_cmd=True,
-    )
+    for i, pipeline in enumerate(pipelines.values(), start=1):
+        print(pipeline["title"])
+        try:
+            print(execute_chained_subprocesses(*pipeline["commands"]))
+        except CalledProcessError:
+            print(None)
+        if i < len(pipeline):
+            print()
 
 
 def run_remove_docs() -> None:
@@ -200,62 +222,117 @@ def run_remove_docs() -> None:
         print(f"deleted - {path}")
 
 
-def run_remove_branches() -> None:
-    """Remove local git branches, except main and current."""
-    response__delete_local_branches = run_pipe_command(
-        "git -P branch",
-        "grep -v 'main'",
-        f"grep -v '{get_current_branch()}'",
-        "xargs git branch -D",
+def run_clear_cache() -> None:
+    print("   clear - cache")
+    root = get_root()
+    directories = [
+        "__pycache__",
+        ".pytest_cache",
+        ".ipynb_checkpoints",
+        "spark-warehouse",
+    ]
+    file_extensions = [
+        "*.py[co]",
+        ".coverage",
+        ".coverage.*",
+    ]
+
+    for directory in directories:
+        for path in root.rglob(directory):
+            if "venv" in str(path):
+                continue
+            shutil.rmtree(path.absolute(), ignore_errors=False)
+            print(f" deleted - {path}")
+
+    for file_extension in file_extensions:
+        for path in root.rglob(file_extension):
+            if "venv" in str(path):
+                continue
+            path.unlink()
+            print(f" deleted - {path}")
+
+
+def get_current_branch() -> str:
+    return execute_subprocess(
+        "git rev-parse --abbrev-ref HEAD",
+        capture_output=True,
+        return_string=True,
     )
-    print(process(response__delete_local_branches))
-
-    response__delete_remote_branch_reference = run_pipe_command(
-        "git -P branch --all",
-        "grep -v 'main'",
-        f"grep -v '{get_current_branch()}'",
-        r"sed 's/remotes\///g'",
-        "xargs git branch -r -d",
-    )
-    print(process(response__delete_remote_branch_reference))
 
 
-def get_current_branch() -> str | None:
-    response = run_shell_command("git rev-parse --abbrev-ref HEAD", capture_output=True)
-    return process(response)
+def get_current_filename() -> str:
+    return Path(__file__).name
 
 
-def get_last_commit() -> str | None:
-    """Returns hash of the most recent commit of current branch."""
-    max_length = Config.MAX_LENGTH__COMMIT_HASH.value
-    response = run_shell_command("git rev-parse HEAD", capture_output=True)
-    return process(response)[:max_length]
+def get_global_python() -> str:
+    return "python3"
 
 
-def decode(response: CompletedProcess) -> str:
-    return response.stdout.decode("utf-8").rstrip()
+def get_local(program: str, /) -> str:
+    return str(Path().joinpath(get_venv_path()).joinpath("bin").joinpath(program))
+
+
+def get_local_precommit() -> str:
+    return get_local("pre-commit")
 
 
 def get_local_python() -> str:
-    return "python.exe" if is_windows() else "python3"
+    return get_local("python")
+
+
+def get_last_commit(max_length: int | None = None) -> str:
+    """Returns hash of the most recent commit of current branch."""
+    response = execute_subprocess(
+        "git rev-parse HEAD",
+        capture_output=True,
+        return_string=True,
+    )
+    return response[:max_length]
+
+
+def get_num_packages_in_venv() -> int:
+    num_pkg = sum(1 for _ in metadata.distributions())  # count includes current project
+    if num_pkg < 10:
+        num_pkg = execute_chained_subprocesses(
+            "pip list --format=freeze",
+            "wc -l",
+            print_command=False,
+            return_string=True,
+        )
+    return int(num_pkg)
 
 
 def get_platform_name() -> str:
     return platform.system().lower()
 
 
-def get_python_exe() -> str:
-    return "python3" if is_docker_container() else get_python_venv_exe()
+def get_project_version(project_name: str) -> str:
+    try:
+        project_pkg = importlib.import_module(project_name)
+
+        pip_version = project_pkg.__version__
+        toml_version = get_project_version_from_toml()
+        is_stale = (
+            f'(stale: version in pyproject.toml is "{toml_version}")'
+            if pip_version != toml_version
+            else ""
+        )
+        return f"{pip_version} {is_stale}".strip()
+
+    except ImportError:
+        return "project not installed"
 
 
-def get_python_venv_exe() -> str:
-    return str(
-        Path()
-        .joinpath(get_venv_path())
-        .joinpath("Scripts" if is_windows() else "bin")
-        .joinpath(get_local_python())
-        .as_posix()
-    )
+def get_project_version_from_toml() -> str:
+    path = get_root().joinpath("pyproject.toml").resolve()
+
+    with open(file=str(path), mode="r") as lines:
+        for line in lines:
+            if line.startswith("version"):
+                version = line.split("=")[1].strip().strip('"')
+                break
+
+    return version
 
 
 def get_root() -> Path:
@@ -264,70 +341,60 @@ def get_root() -> Path:
 
 
 def get_venv_path() -> str:
-    name = f"{Config.PROJECT.value}_on_{get_platform_name()}"
-    return get_root().joinpath(".venv").joinpath(name).resolve().as_posix()
+    return str(get_root().joinpath(".venv").resolve())
 
 
-def has_command_run_successfully(response: CompletedProcess) -> bool:
-    return response.returncode == 0
+def is_inactive(value) -> bool:
+    """Check if value signals an inactive flag."""
+    return value in [None, False]
 
 
-def is_docker_container() -> bool:
-    return str(get_root().resolve()).startswith(f"/workspaces/{Config.PROJECT.value}")
+def which_python() -> str:
+    return execute_subprocess("which python", capture_output=True, return_string=True)
 
 
-def is_linux() -> bool:
-    return get_platform_name() == "linux"
-
-
-def is_windows() -> bool:
-    return get_platform_name() == "windows"
-
-
-def process(response: Response) -> str | None:
-    if has_command_run_successfully(response):
-        return decode(response)
-
-
-def run_multiple_shell_commands(*commands: str, print_cmd: bool = True) -> None:
-    """Execute a series of shell commands with Python."""
-    for command in commands:
-        run_shell_command(cmd=command, capture_output=False, print_cmd=print_cmd)
-
-
-def run_pipe_command(*commands: str, print_cmd: bool = True) -> Response:
-    """Execute a chain of shell commands with Python."""
-    if print_cmd:
-        print(" | ".join(commands))
-    cmd, *cmds = commands
-    response = run_shell_command(cmd, capture_output=True)
-    for cmd_i in cmds:
-        response = run_shell_command(cmd_i, other=response, capture_output=True)
-    return response
-
-
-def run_shell_command(
-    cmd: str | list[str],
-    capture_output: bool = False,
-    print_cmd: bool = False,
-    other: Response | None = None,
+def execute_chained_subprocesses(
+    *commands: str | Iterable[str],
+    print_command: bool = True,
+    return_string: bool = True,
 ) -> Response:
-    """Execute a shell command with Python."""
-    try:
-        is_cmd_str = isinstance(cmd, str)
-        cmd_to_run = shlex.split(cmd) if is_cmd_str else shlex.split(" ".join(cmd))
-        if print_cmd:
-            print(cmd if is_cmd_str else " ".join(cmd_to_run))
-        stdout = other.stdout if hasattr(other, "stdout") else None
-        return subprocess.run(
-            cmd_to_run,
-            input=stdout,
-            capture_output=capture_output,
-            timeout=None,
-            check=True,
-        )
-    except CalledProcessError as error:
-        return error
+    if print_command:
+        print(" | ".join(commands))
+
+    response = None
+    for command in commands:
+        response = execute_subprocess(command, capture_output=True, other=response)
+
+    return cast_to_str(response) if return_string else response
+
+
+def execute_subprocess(
+    command: str,
+    /,
+    *,
+    print_command: bool = False,
+    capture_output: bool = False,
+    return_string: bool = False,
+    other: CompletedProcess | None = None,
+) -> Response:
+    cmd = shlex.split(command)
+
+    if print_command:
+        print(" ".join(cmd))
+
+    response = subprocess.run(
+        cmd,
+        input=other.stdout if hasattr(other, "stdout") else None,
+        capture_output=capture_output,
+        timeout=None,
+        check=True,
+    )
+
+    return cast_to_str(response) if return_string else response
+
+
+def cast_to_str(response: CompletedProcess) -> str:
+    return response.stdout.decode("utf-8").rstrip()
 
 
 if __name__ == "__main__":
