@@ -1,4 +1,5 @@
 import importlib
+import os
 import platform
 import shlex
 import shutil
@@ -45,16 +46,15 @@ def main() -> None:
         print("see help:")
         print(f"python {get_current_filename()} -h")
 
-    elif args.create_venv:
-        print(f"  create - venv on {get_platform_name()}")
-        run_create_venv(cfg.poetry_version)
+    elif not is_inactive(args.create):
+        run_create(args.create, poetry_version=cfg.poetry_version)
 
     else:
         functions = [
             (run_pre_commit, args.pre_commit),
             (partial(run_pytest, cfg.project), args.pytest),
-            (run_clear_cache, args.clear_cache),
             (run_remove, args.remove),
+            (run_clear_cache, args.clear_cache),
         ]
 
         for func, value in functions:
@@ -87,9 +87,10 @@ def get_arguments() -> Namespace:
         help="run pytest",
     )
     parser.add_argument(
-        "--create-venv",
-        action="store_true",
-        help="create virtual Python environment for project",
+        "--create",
+        default=None,
+        choices=["docs", "venv"],
+        help="create local documentation files or project venv",
     )
     parser.add_argument(
         "--remove",
@@ -133,6 +134,28 @@ def run_clear_cache() -> None:
                 continue
             path.unlink()
             print(f" deleted - {path}")
+
+
+# noinspection PyUnreachableCode
+def run_create(option: str, *args, **kwargs) -> None:
+    match option:
+        case "docs":
+            print("  create - local documentation files")
+            run_create_docs()
+
+        case "venv":
+            print(f"  create - venv on {get_platform_name()}")
+            run_create_venv(*args, **kwargs)
+
+        case _:
+            raise ValueError(f"{option=} unknown")
+
+
+def run_create_docs() -> None:
+    cwd = Path().cwd()
+    os.chdir(get_root().joinpath("docs"))
+    execute_subprocess("make html")
+    os.chdir(cwd)
 
 
 def run_create_venv(poetry_version: str) -> None:
