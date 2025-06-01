@@ -17,7 +17,7 @@ All-in-One Python Kit:
 
 - [Examples](https://onekit.readthedocs.io/en/stable/examples.html)
 - [Documentation](https://onekit.readthedocs.io/en/stable/index.html)
-- [Developer Guide](https://onekit.readthedocs.io/en/stable/developers.html)
+- [Dev Guide](https://onekit.readthedocs.io/en/stable/devguide.html)
 - [API Reference](https://onekit.readthedocs.io/en/stable/autoapi/index.html)
 
 ## Installation
