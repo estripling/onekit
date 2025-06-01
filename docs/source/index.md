@@ -19,7 +19,7 @@ mathkit.ipynb
 optfunckit.ipynb
 vizkit.ipynb
 changelog.md
-developers.md
+devguide.md
 conduct.md
 autoapi/index
 ```
