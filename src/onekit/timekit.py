@@ -111,7 +111,7 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
     return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
-def date_diff(from_date: dt.date, to_date: dt.date, /) -> int:
+def date_diff(min_date: dt.date, max_date: dt.date, /) -> int:
     """Compute difference between dates.
 
     Examples
@@ -130,7 +130,7 @@ def date_diff(from_date: dt.date, to_date: dt.date, /) -> int:
     >>> tk.date_diff(d2, d1)
     -6
     """
-    return (to_date - from_date).days
+    return (max_date - min_date).days
 
 
 # noinspection PyTypeChecker
