@@ -117,14 +117,18 @@ def run_pytest(project: str, option: str | None = None) -> None:
     sparkkit_module = f"src/{project}/sparkkit.py"
     base_command = (
         f"{get_local_python()} -m pytest "
-        f"--doctest-modules --ignore-glob={sparkkit_module} src/ "
+        f"--doctest-modules -W ignore::UserWarning --ignore-glob={sparkkit_module} "
+        "src/ "
         "--cov-report term-missing --cov=src/ "
         "tests/"
     )
 
     commands = (
         [
-            f"{get_local_python()} -m pytest --doctest-modules {sparkkit_module}",
+            (
+                f"{get_local_python()} -m pytest "
+                f"--doctest-modules -W ignore::UserWarning {sparkkit_module}"
+            ),
             f"{base_command} --slow",
         ]
         if option == "slow"
