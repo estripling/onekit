@@ -35,6 +35,7 @@ class TestDateRange:
         assert actual.difference_in_days == (num_days - 1)
         assert actual.number_of_days == num_days
 
+    @pytest.mark.filterwarnings("ignore:dates provided in reverse order - swapping")
     @pytest.mark.parametrize(
         "min_date, max_date",
         [
