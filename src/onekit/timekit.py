@@ -35,7 +35,10 @@ __all__ = (
     "weekday",
 )
 
-from onekit.exception import InvalidDateRangeWarning
+from onekit.exception import (
+    InvalidChoiceError,
+    InvalidDateRangeWarning,
+)
 
 
 class DateRange(NamedTuple):
@@ -277,7 +280,8 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
     return toolz.iterate(lambda d: successor(d, dt.timedelta(1)), ref_date)
 
 
-def date_diff(min_date: dt.date, max_date: dt.date, /) -> int:
+# noinspection PyUnreachableCode
+def date_diff(min_date: dt.date, max_date: dt.date, /, *, unit: str = "days") -> int:
     """Compute difference between dates.
 
     Examples
@@ -295,8 +299,19 @@ def date_diff(min_date: dt.date, max_date: dt.date, /) -> int:
 
     >>> tk.date_diff(d2, d1)
     -6
+
+    >>> tk.date_diff(d1, d2, unit="years")
+    0
     """
-    return (max_date - min_date).days
+    match unit:
+        case "days":
+            return (max_date - min_date).days
+
+        case "years":
+            return relativedelta(max_date, min_date).years
+
+        case _:
+            raise InvalidChoiceError(value=unit, choices=["days", "years"])
 
 
 # noinspection PyTypeChecker

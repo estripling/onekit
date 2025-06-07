@@ -11,6 +11,7 @@ from toolz import curried
 
 from onekit import pythonkit as pk
 from onekit import timekit as tk
+from onekit.exception import InvalidChoiceError
 from onekit.timekit import DateRange
 
 
@@ -192,21 +193,36 @@ def test_date_count_forward():
     assert actual == expected
 
 
-def test_date_diff():
-    d1 = dt.date(2024, 7, 1)
-    d2 = dt.date(2024, 7, 7)
+class TestDateDiff:
+    @pytest.mark.parametrize(
+        "min_date, max_date, unit, expected",
+        [
+            (dt.date(2024, 7, 1), dt.date(2024, 7, 1), "days", 0),
+            (dt.date(2024, 7, 1), dt.date(2024, 7, 7), "days", 6),
+            (dt.date(2024, 7, 7), dt.date(2024, 7, 1), "days", -6),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 1), "years", 0),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 7), "years", 0),
+            (dt.date(2024, 12, 31), dt.date(2025, 1, 1), "years", 0),
+            (dt.date(2024, 1, 1), dt.date(2024, 12, 31), "years", 0),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 1), "years", 1),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 2), "years", 1),
+            (dt.date(2024, 1, 1), dt.date(2026, 1, 1), "years", 2),
+            (dt.date(2000, 1, 1), dt.date(2025, 1, 1), "years", 25),
+        ],
+    )
+    def test_date_diff__valid_input(
+        self,
+        min_date: dt.date,
+        max_date: dt.date,
+        unit: str,
+        expected: int,
+    ):
+        actual = tk.date_diff(min_date, max_date, unit=unit)
+        assert actual == expected
 
-    actual = tk.date_diff(d1, d1)
-    expected = 0
-    assert actual == expected
-
-    actual = tk.date_diff(d1, d2)
-    expected = 6
-    assert actual == expected
-
-    actual = tk.date_diff(d2, d1)
-    expected = -6
-    assert actual == expected
+    def test_date_diff__invalid_input(self):
+        with pytest.raises(InvalidChoiceError):
+            tk.date_diff(dt.date(2000, 1, 1), dt.date(2025, 1, 1), unit="eons")
 
 
 @pytest.mark.parametrize(
