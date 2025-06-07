@@ -75,6 +75,32 @@ class TestDateRange:
         actual = tk.create_date_range(min_date, max_date)
         assert actual.difference_in_years == expected
 
+    @pytest.mark.parametrize(
+        "min_date, max_date, expected",
+        [
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 1), "0y 0m 0w 0d"),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 7), "0y 0m 0w 6d"),
+            (dt.date(2024, 12, 31), dt.date(2025, 1, 1), "0y 0m 0w 1d"),
+            (dt.date(2024, 1, 1), dt.date(2024, 12, 31), "0y 11m 4w 2d"),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 1), "1y 0m 0w 0d"),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 2), "1y 0m 0w 1d"),
+            (dt.date(2024, 1, 1), dt.date(2026, 1, 1), "2y 0m 0w 0d"),
+            (dt.date(2000, 1, 1), dt.date(2025, 1, 1), "25y 0m 0w 0d"),
+            (dt.date(2000, 1, 1), dt.date(2025, 2, 1), "25y 1m 0w 0d"),
+            (dt.date(2000, 1, 1), dt.date(2025, 2, 3), "25y 1m 0w 2d"),
+            (dt.date(2000, 1, 1), dt.date(2025, 2, 15), "25y 1m 2w 0d"),
+            (dt.date(2000, 1, 1), dt.date(2025, 2, 20), "25y 1m 2w 5d"),
+        ],
+    )
+    def test_duration(
+        self,
+        min_date: dt.date,
+        max_date: dt.date,
+        expected: int,
+    ):
+        actual = tk.create_date_range(min_date, max_date)
+        assert actual.duration == expected
+
 
 @pytest.mark.parametrize(
     "n, ref_date, expected",

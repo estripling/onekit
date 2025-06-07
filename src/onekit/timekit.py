@@ -14,6 +14,8 @@ import pytz
 import toolz
 from dateutil.relativedelta import relativedelta
 
+from onekit import pythonkit as pk
+
 __all__ = (
     "DateRange",
     "create_date_range",
@@ -62,6 +64,9 @@ class DateRange(NamedTuple):
     >>> dr.difference_in_days
     2
 
+    >>> dr.duration
+    '0y 0m 0w 2d'
+
     >>> dr.number_of_days
     3
 
@@ -86,6 +91,20 @@ class DateRange(NamedTuple):
     def difference_in_years(self) -> int:
         """Compute the difference in years between the min and max date."""
         return self.delta.years
+
+    @property
+    def duration(self) -> str:
+        """Compute duration between the min and max date."""
+        delta = self.delta
+        weeks = delta.days // 7
+        remaining_days = delta.days % 7
+        return pk.concat_strings(
+            " ",
+            f"{delta.years}y",
+            f"{delta.months}m",
+            f"{weeks}w",
+            f"{remaining_days}d",
+        )
 
     @property
     def number_of_days(self) -> int:
