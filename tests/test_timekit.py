@@ -18,6 +18,7 @@ class TestDateRange:
     @pytest.mark.parametrize(
         "min_date, max_date",
         [
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 1)),
             (dt.date(2025, 6, 1), dt.date(2025, 6, 7)),
         ],
     )
