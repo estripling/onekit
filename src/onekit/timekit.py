@@ -3,15 +3,19 @@ import datetime as dt
 import itertools
 import math
 import operator
+import warnings
 from contextlib import ContextDecorator
 from typing import (
     Generator,
+    NamedTuple,
 )
 
 import pytz
 import toolz
 
 __all__ = (
+    "DateRange",
+    "create_date_range",
     "date_ago",
     "date_ahead",
     "date_count_backward",
@@ -27,6 +31,89 @@ __all__ = (
     "timestamp",
     "weekday",
 )
+
+from onekit.exception import InvalidDateRangeWarning
+
+
+class DateRange(NamedTuple):
+    """Represents an immutable range of dates, defined by its minimum and maximum date.
+
+    Notes
+    -----
+    Validation and ordering (e.g., ensuring `min_date <= max_date`)
+    are NOT performed automatically by the `NamedTuple`'s constructor.
+    It is highly recommended to use the factory function (e.g., `create_date_range`)
+    to instantiate `DateRange` objects robustly, ensuring proper order
+    and any other custom initialization logic.
+
+    See Also
+    --------
+    create_date_range : Factory function for robust instantiation.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from onekit.timekit import DateRange
+    >>> DateRange(dt.date(2025, 6, 1), dt.date(2025, 6, 7))
+    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
+    """
+
+    min_date: dt.date
+    max_date: dt.date
+
+
+def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:
+    """Creates a DateRange NamedTuple.
+
+    This is a factory function for creating `DateRange` instances with automatic date
+    ordering, i.e., it ensures `min_date` is always less than or equal to `max_date`.
+    If `min_date` > `max_date`, they are swapped.
+
+    Parameters
+    ----------
+    min_date : datetime.date
+        The chronological earliest date in the range.
+    max_date : datetime.date
+        The chronological latest date in the range.
+
+    Returns
+    -------
+    DateRange
+        An immutable date range object with `min_date <= max_date`.
+
+    Warns
+    -----
+    InvalidDateRangeWarning
+        If the input dates are in reverse order (`min_date > max_date`) and are swapped.
+
+    See Also
+    --------
+    DateRange : The immutable date range object returned by this factory.
+
+    Examples
+    --------
+    >>> import datetime as dt
+    >>> from onekit import timekit as tk
+    >>> # standard usage
+    >>> tk.create_date_range(dt.date(2025, 6, 1), dt.date(2025, 6, 7))
+    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
+
+    >>> # single day range
+    >>> tk.create_date_range(dt.date(2025, 6, 1), dt.date(2025, 6, 1))
+    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 1))
+
+    >>> # dates provided in reverse order
+    >>> dr = tk.create_date_range(dt.date(2025, 6, 7), dt.date(2025, 6, 1))
+    >>> # a warning "dates provided in reverse order - swapping" is printed to stderr
+    >>> dr
+    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
+    """
+    if min_date > max_date:
+        min_date, max_date = max_date, min_date
+        message = "dates provided in reverse order - swapping"
+        warnings.warn(message, InvalidDateRangeWarning)
+
+    return DateRange(min_date, max_date)
 
 
 def date_ago(ref_date: dt.date, /, n: int) -> dt.date:

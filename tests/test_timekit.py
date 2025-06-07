@@ -10,6 +10,34 @@ import toolz
 from toolz import curried
 
 from onekit import timekit as tk
+from onekit.timekit import DateRange
+
+
+class TestDateRange:
+
+    @pytest.mark.parametrize(
+        "min_date, max_date",
+        [
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 7)),
+        ],
+    )
+    def test_create_date_range__valid_call(self, min_date: dt.date, max_date: dt.date):
+        actual = tk.create_date_range(min_date, max_date)
+        assert isinstance(actual, DateRange)
+        assert actual.min_date == min_date
+        assert actual.max_date == max_date
+
+    @pytest.mark.parametrize(
+        "min_date, max_date",
+        [
+            (dt.date(2025, 6, 7), dt.date(2025, 6, 1)),
+        ],
+    )
+    def test_create_date_range__reversed(self, min_date: dt.date, max_date: dt.date):
+        actual = tk.create_date_range(min_date, max_date)
+        assert isinstance(actual, DateRange)
+        assert actual.min_date == max_date
+        assert actual.max_date == min_date
 
 
 @pytest.mark.parametrize(

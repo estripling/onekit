@@ -11,7 +11,9 @@ from onekit import pythonkit as pk
 __all__ = (
     "ColumnNotFoundError",
     "InvalidChoiceError",
+    "InvalidDateRangeWarning",
     "OnekitError",
+    "OnekitWarning",
     "RowCountMismatchError",
     "RowValueMismatchError",
     "SchemaMismatchError",
@@ -140,3 +142,11 @@ class SchemaMismatchError(OnekitError):
         num_diff = sum(c == "|" for c in msg.splitlines()[1])
         self.message = pk.concat_strings(os.linesep, f"{num_diff=}", msg)
         super().__init__(self.message)
+
+
+class OnekitWarning(UserWarning):
+    """A base class for onekit warnings."""
+
+
+class InvalidDateRangeWarning(OnekitWarning):
+    """Warning for when a date range is provided in reverse order but is corrected."""
