@@ -54,15 +54,18 @@ class DateRange(NamedTuple):
     --------
     >>> import datetime as dt
     >>> from onekit.timekit import DateRange
-    >>> dr = DateRange(dt.date(2025, 6, 1), dt.date(2025, 6, 7))
+    >>> dr = DateRange(dt.date(2025, 6, 1), dt.date(2025, 6, 3))
     >>> dr
-    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
+    DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 3))
 
     >>> dr.difference_in_days
-    6
+    2
 
     >>> dr.number_of_days
-    7
+    3
+
+    >>> list(dr.make_date_range())
+    [datetime.date(2025, 6, 1), datetime.date(2025, 6, 2), datetime.date(2025, 6, 3)]
     """
 
     min_date: dt.date
@@ -77,6 +80,20 @@ class DateRange(NamedTuple):
     def number_of_days(self) -> int:
         """Compute the number of days between the min and max date (both inclusive)."""
         return num_days(self.min_date, self.max_date)
+
+    def make_date_range(
+        self,
+        *,
+        incl_min: bool = True,
+        incl_max: bool = True,
+    ) -> Generator:
+        """Generate sequence of consecutive dates between the min and max date."""
+        return date_range(
+            self.min_date,
+            self.max_date,
+            incl_min=incl_min,
+            incl_max=incl_max,
+        )
 
 
 def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:

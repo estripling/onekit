@@ -47,6 +47,12 @@ class TestDateRange:
         assert actual.min_date == max_date
         assert actual.max_date == min_date
 
+    def test_make_date_range(self):
+        dr = DateRange(dt.date(2025, 6, 1), dt.date(2025, 6, 3))
+        actual = curried.pipe(dr.make_date_range(), curried.map(tk.date_to_str), list)
+        expected = ["2025-06-01", "2025-06-02", "2025-06-03"]
+        assert actual == expected
+
 
 @pytest.mark.parametrize(
     "n, ref_date, expected",
