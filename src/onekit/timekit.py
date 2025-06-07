@@ -12,6 +12,7 @@ from typing import (
 
 import pytz
 import toolz
+from dateutil.relativedelta import relativedelta
 
 __all__ = (
     "DateRange",
@@ -72,9 +73,19 @@ class DateRange(NamedTuple):
     max_date: dt.date
 
     @property
+    def delta(self) -> relativedelta:
+        """Returns the `relativedelta` object."""
+        return relativedelta(self.max_date, self.min_date)
+
+    @property
     def difference_in_days(self) -> int:
         """Compute the difference in days between the min and max date."""
         return date_diff(self.min_date, self.max_date)
+
+    @property
+    def difference_in_years(self) -> int:
+        """Compute the difference in years between the min and max date."""
+        return self.delta.years
 
     @property
     def number_of_days(self) -> int:

@@ -32,8 +32,8 @@ class TestDateRange:
         assert isinstance(actual, DateRange)
         assert actual.min_date == min_date
         assert actual.max_date == max_date
-        assert actual.number_of_days == num_days
         assert actual.difference_in_days == (num_days - 1)
+        assert actual.number_of_days == num_days
 
     @pytest.mark.parametrize(
         "min_date, max_date",
@@ -52,6 +52,28 @@ class TestDateRange:
         actual = curried.pipe(dr.make_date_range(), curried.map(tk.date_to_str), list)
         expected = ["2025-06-01", "2025-06-02", "2025-06-03"]
         assert actual == expected
+
+    @pytest.mark.parametrize(
+        "min_date, max_date, expected",
+        [
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 1), 0),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 7), 0),
+            (dt.date(2024, 12, 31), dt.date(2025, 1, 1), 0),
+            (dt.date(2024, 1, 1), dt.date(2024, 12, 31), 0),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 1), 1),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 2), 1),
+            (dt.date(2024, 1, 1), dt.date(2026, 1, 1), 2),
+            (dt.date(2000, 1, 1), dt.date(2025, 1, 1), 25),
+        ],
+    )
+    def test_difference_in_years(
+        self,
+        min_date: dt.date,
+        max_date: dt.date,
+        expected: int,
+    ):
+        actual = tk.create_date_range(min_date, max_date)
+        assert actual.difference_in_years == expected
 
 
 @pytest.mark.parametrize(
