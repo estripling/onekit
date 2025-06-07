@@ -4,8 +4,6 @@ from typing import (
     Iterable,
 )
 
-from pyspark.sql import DataFrame as SparkDF
-
 from onekit import pythonkit as pk
 
 __all__ = (
@@ -98,6 +96,7 @@ class RowCountMismatchError(OnekitError):
         super().__init__(self.message)
 
 
+# noinspection PyUnresolvedReferences
 class RowValueMismatchError(OnekitError):
     """Exception for mismatch of row values.
 
@@ -109,8 +108,8 @@ class RowValueMismatchError(OnekitError):
 
     def __init__(
         self,
-        lft_rows: SparkDF,
-        rgt_rows: SparkDF,
+        lft_rows: "SparkDF",
+        rgt_rows: "SparkDF",
         num_lft: int,
         num_rgt: int,
     ):
