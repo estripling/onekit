@@ -64,6 +64,7 @@ def skip_util_classes(app, what, name, obj, skip, options):
         "scipykit",
         "sklearnkit",
         "sparkkit",
+        "timekit",
         "vizkit",
     ]
     if what == "module" and any(n in name for n in modules_to_show):
