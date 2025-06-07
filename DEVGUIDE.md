@@ -30,8 +30,9 @@ poetry lock
 
 ```shell
 poetry add --optional base \
-toolz \
-pytz
+python-dateutil \
+pytz \
+toolz
 ```
 
 ```shell
