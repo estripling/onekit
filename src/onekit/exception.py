@@ -108,8 +108,8 @@ class RowValueMismatchError(OnekitError):
 
     def __init__(
         self,
-        lft_rows: "SparkDF",
-        rgt_rows: "SparkDF",
+        lft_rows: "SparkDF",  # noqa: F821
+        rgt_rows: "SparkDF",  # noqa: F821
         num_lft: int,
         num_rgt: int,
     ):
