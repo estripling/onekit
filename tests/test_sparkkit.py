@@ -13,8 +13,8 @@ from pyspark.sql import (
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
-from onekit import pythonkit as pk
 from onekit import sparkkit as sk
+from onekit import timekit as tk
 from onekit.exception import (
     ColumnNotFoundError,
     RowCountMismatchError,
@@ -305,7 +305,7 @@ class TestSparkKit:
         actual = sk.date_range(df, dt.date(2023, 5, 1), dt.date(2023, 5, 7), "id", "d")
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("func", [toolz.identity, tk.str_to_date])
     def test_filter_date(self, spark: SparkSession, func: Callable):
         ref_date = func("2024-01-01")
         df = spark.createDataFrame(
@@ -500,7 +500,7 @@ class TestSparkKit:
         expected = df1.unionByName(df2).unionByName(df3)
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("func", [toolz.identity, tk.str_to_date])
     def test_with_date_diff_ago(self, spark: SparkSession, func: Callable):
         ref_date = func("2024-01-01")
         df = spark.createDataFrame(
@@ -522,7 +522,7 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect").cast(T.IntegerType()).alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("func", [toolz.identity, tk.str_to_date])
     def test_with_date_diff_ahead(self, spark: SparkSession, func: Callable):
         ref_date = func("2024-01-01")
         df = spark.createDataFrame(
@@ -632,7 +632,7 @@ class TestSparkKit:
         with pytest.raises(ValueError):
             sk.with_digitscale(df, "x", "fx", kind=kind)
 
-    @pytest.mark.parametrize("f", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("f", [toolz.identity, tk.str_to_date])
     def test_with_endofweek_date(self, spark: SparkSession, f: Callable):
         field_type = T.StringType() if f == toolz.identity else T.DateType()
         df = spark.createDataFrame(
@@ -717,10 +717,10 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("f", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("f", [toolz.identity, tk.str_to_date])
     def test_with_startofweek_date(self, spark: SparkSession, f: Callable):
         field_type = T.StringType() if f == toolz.identity else T.DateType()
-        s2d = pk.str_to_date
+        s2d = tk.str_to_date
         df = spark.createDataFrame(
             [
                 Row(i=1, d=f("2023-04-30"), e1=s2d("2023-04-24"), e2=s2d("2023-04-30")),
@@ -752,7 +752,7 @@ class TestSparkKit:
         expected = df.select("i", F.col("expect_sat").alias("fx"))
         self.assert_dataframe_equal(actual, expected)
 
-    @pytest.mark.parametrize("func", [toolz.identity, pk.str_to_date])
+    @pytest.mark.parametrize("func", [toolz.identity, tk.str_to_date])
     def test_with_weekday(self, spark: SparkSession, func: Callable):
         df = spark.createDataFrame(
             [
