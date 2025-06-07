@@ -474,7 +474,7 @@ def num_days(min_date: dt.date, max_date: dt.date, /) -> int:
     >>> tk.num_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
     7
     """
-    return abs(date_diff(min_date, max_date)) + 1
+    return abs(date_diff(min_date, max_date, unit="days")) + 1
 
 
 class stopwatch(ContextDecorator):
