@@ -577,7 +577,7 @@ class stopwatch(ContextDecorator):
         return total
 
 
-def str_to_date(string: str, /) -> dt.date:
+def str_to_date(s: str, /) -> dt.date:
     """Cast ISO date string to date.
 
     Examples
@@ -586,7 +586,7 @@ def str_to_date(string: str, /) -> dt.date:
     >>> tk.str_to_date("2022-01-01")
     datetime.date(2022, 1, 1)
     """
-    return dt.datetime.strptime(string, "%Y-%m-%d").date()
+    return dt.datetime.strptime(s, "%Y-%m-%d").date()
 
 
 def timestamp(zone: str | None = None, fmt: str | None = None) -> str:
