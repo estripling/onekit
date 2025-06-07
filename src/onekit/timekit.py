@@ -67,11 +67,14 @@ class DateRange(NamedTuple):
     >>> print(dr)
     date range from 2025-06-01 to 2025-06-03 - 3 days in total - difference 0y 0m 0w 2d
 
+    >>> dr.difference
+    '0y 0m 0w 2d'
+
     >>> dr.difference_in_days
     2
 
-    >>> dr.duration
-    '0y 0m 0w 2d'
+    >>> dr.difference_in_years
+    0
 
     >>> dr.number_of_days
     3
@@ -92,28 +95,13 @@ class DateRange(NamedTuple):
             f"from {date_to_str(self.min_date)}",
             f"to {date_to_str(self.max_date)}",
             f"- {number_of_days} in total",
-            f"- difference {self.duration}",
+            f"- difference {self.difference}",
         )
 
     @property
-    def delta(self) -> relativedelta:
-        """Returns the `relativedelta` object."""
-        return relativedelta(self.max_date, self.min_date)
-
-    @property
-    def difference_in_days(self) -> int:
-        """Compute the difference in days between the min and max date."""
-        return date_diff(self.min_date, self.max_date)
-
-    @property
-    def difference_in_years(self) -> int:
-        """Compute the difference in years between the min and max date."""
-        return self.delta.years
-
-    @property
-    def duration(self) -> str:
+    def difference(self) -> str:
         """Compute duration between the min and max date."""
-        delta = self.delta
+        delta = relativedelta(self.max_date, self.min_date)
         weeks = delta.days // 7
         remaining_days = delta.days % 7
         return pk.concat_strings(
@@ -123,6 +111,16 @@ class DateRange(NamedTuple):
             f"{weeks}w",
             f"{remaining_days}d",
         )
+
+    @property
+    def difference_in_days(self) -> int:
+        """Compute the difference in days between the min and max date."""
+        return date_diff(self.min_date, self.max_date, unit="days")
+
+    @property
+    def difference_in_years(self) -> int:
+        """Compute the difference in years between the min and max date."""
+        return date_diff(self.min_date, self.max_date, unit="years")
 
     @property
     def number_of_days(self) -> int:
