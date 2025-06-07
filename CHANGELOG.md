@@ -1,6 +1,97 @@
 # CHANGELOG
 
 
+## v4.0.0 (2025-06-07)
+
+_This release is published under the BSD 3-Clause License._
+
+### Build System
+
+- Remove docker ([#118](https://github.com/estripling/onekit/pull/118), [`cb43454`](https://github.com/estripling/onekit/commit/cb43454d7782f235fdedfc51855e531444aec9d4))
+
+### Chores
+
+- Add python-dateutil to base dependencies ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+### Code Style
+
+- **date_diff**: Fix typo ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+### Documentation
+
+- Add timekit ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- Fix dev guide references ([#120](https://github.com/estripling/onekit/pull/120), [`a0076ed`](https://github.com/estripling/onekit/commit/a0076ed554962c06d8f41724cd29bdcb8c419cbf))
+
+- Fix timekit references ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- Rename DEVELOPERS.md -> DEVGUIDE.md ([#119](https://github.com/estripling/onekit/pull/119), [`862d77b`](https://github.com/estripling/onekit/commit/862d77b0f327acc21a5126b09e919ce6f578db58))
+
+- Update dev guide ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- Update logo ([`20dad49`](https://github.com/estripling/onekit/commit/20dad498a8459f5123613dd7b46e519f5fc6a11b))
+
+- **DEVELOPERS.md**: Remove docker ([#118](https://github.com/estripling/onekit/pull/118), [`cb43454`](https://github.com/estripling/onekit/commit/cb43454d7782f235fdedfc51855e531444aec9d4))
+
+- **DEVELOPERS.md**: Update poetry install command ([#115](https://github.com/estripling/onekit/pull/115), [`4275132`](https://github.com/estripling/onekit/commit/4275132f0f28d4ab8507586a4c7b4b3c0eefd31c))
+
+### Features
+
+- Add timekit ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **date_diff**: Add unit argument ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Add day properties ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Add difference_in_years ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Add duration ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Add make_date_range ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Overwrite __str__ ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **timekit**: Add create_date_range ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+### Refactoring
+
+- Playbook ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- Test_onekit.py -> test_project.py ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- **date_diff**: Use min_date and max_date ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **DateRange**: Rename duration -> difference ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **exception.py**: Make flake8 exception ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **exception.py**: Remove pyspark dependency ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **num_days**: Add unit ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **num_days**: Use min_date and max_date ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **playbook.py**: Move clear cache to bottom ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- **playbook.py**: Single create flag ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- **playbook.py**: Single remove flag ([#117](https://github.com/estripling/onekit/pull/117), [`e83acd0`](https://github.com/estripling/onekit/commit/e83acd0f7cf4183d2b9c0fcfe197dbb93637a87c))
+
+- **str_to_date**: Rename string -> s ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+### Testing
+
+- Fix timestamp default call ([#116](https://github.com/estripling/onekit/pull/116), [`385685e`](https://github.com/estripling/onekit/commit/385685e2d07f13f24465d1583c5ed55d53fc3a07))
+
+- Ignore InvalidDateRangeWarning ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+- **timekit**: Add single day range case ([#121](https://github.com/estripling/onekit/pull/121), [`8edf9a4`](https://github.com/estripling/onekit/commit/8edf9a4067be50665281b4463da26bd405f33404))
+
+---
+
+**Detailed Changes**: [v3.1.0...v4.0.0](https://github.com/estripling/onekit/compare/v3.1.0...v4.0.0)
+
+
 ## v3.1.0 (2025-04-06)
 
 ### Bug Fixes
