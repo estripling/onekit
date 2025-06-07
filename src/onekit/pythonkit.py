@@ -499,7 +499,7 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
 
 
 def date_diff(from_date: dt.date, to_date: dt.date, /) -> int:
-    """Compute difference betweem dates.
+    """Compute difference between dates.
 
     Examples
     --------
