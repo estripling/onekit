@@ -9,6 +9,7 @@ import time_machine
 import toolz
 from toolz import curried
 
+from onekit import pythonkit as pk
 from onekit import timekit as tk
 from onekit.timekit import DateRange
 
@@ -101,6 +102,16 @@ class TestDateRange:
     ):
         actual = tk.create_date_range(min_date, max_date)
         assert actual.duration == expected
+
+        actual_str = str(actual)
+        expected_str = (
+            f"date range from {min_date} to {max_date} "
+            f"- {pk.num_to_str(actual.number_of_days)} days in total "
+            f"- difference {expected}"
+        )
+        if actual.number_of_days == 1:
+            expected_str = expected_str.replace("days", "day")
+        assert actual_str == expected_str
 
 
 @pytest.mark.parametrize(

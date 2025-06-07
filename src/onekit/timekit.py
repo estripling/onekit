@@ -61,6 +61,9 @@ class DateRange(NamedTuple):
     >>> dr
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 3))
 
+    >>> print(dr)
+    date range from 2025-06-01 to 2025-06-03 - 3 days in total - difference 0y 0m 0w 2d
+
     >>> dr.difference_in_days
     2
 
@@ -76,6 +79,18 @@ class DateRange(NamedTuple):
 
     min_date: dt.date
     max_date: dt.date
+
+    def __str__(self) -> str:
+        n = self.number_of_days
+        number_of_days = "1 day" if n == 1 else f"{pk.num_to_str(n)} days"
+        return pk.concat_strings(
+            " ",
+            "date range",
+            f"from {date_to_str(self.min_date)}",
+            f"to {date_to_str(self.max_date)}",
+            f"- {number_of_days} in total",
+            f"- difference {self.duration}",
+        )
 
     @property
     def delta(self) -> relativedelta:
