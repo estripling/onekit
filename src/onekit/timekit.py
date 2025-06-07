@@ -275,7 +275,7 @@ def last_date_of_month(year: int, month: int, /) -> dt.date:
     return dt.date(year, month, number_of_days_in_month)
 
 
-def num_days(d1: dt.date, d2: dt.date, /) -> int:
+def num_days(min_date: dt.date, max_date: dt.date, /) -> int:
     """Compute the number of days between two dates (both endpoints inclusive).
 
     Examples
@@ -295,7 +295,7 @@ def num_days(d1: dt.date, d2: dt.date, /) -> int:
     >>> tk.num_days(dt.date(2022, 8, 7), dt.date(2022, 8, 1))
     7
     """
-    return abs(date_diff(d1, d2)) + 1
+    return abs(date_diff(min_date, max_date)) + 1
 
 
 class stopwatch(ContextDecorator):
