@@ -16,17 +16,24 @@ from onekit.timekit import DateRange
 class TestDateRange:
 
     @pytest.mark.parametrize(
-        "min_date, max_date",
+        "min_date, max_date, num_days",
         [
-            (dt.date(2025, 6, 1), dt.date(2025, 6, 1)),
-            (dt.date(2025, 6, 1), dt.date(2025, 6, 7)),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 1), 1),
+            (dt.date(2025, 6, 1), dt.date(2025, 6, 7), 7),
         ],
     )
-    def test_create_date_range__valid_call(self, min_date: dt.date, max_date: dt.date):
+    def test_create_date_range__valid_call(
+        self,
+        min_date: dt.date,
+        max_date: dt.date,
+        num_days: int,
+    ):
         actual = tk.create_date_range(min_date, max_date)
         assert isinstance(actual, DateRange)
         assert actual.min_date == min_date
         assert actual.max_date == max_date
+        assert actual.number_of_days == num_days
+        assert actual.difference_in_days == (num_days - 1)
 
     @pytest.mark.parametrize(
         "min_date, max_date",
