@@ -3,7 +3,6 @@ import datetime as dt
 import itertools
 import math
 import operator
-import warnings
 from contextlib import ContextDecorator
 from typing import (
     Generator,
@@ -18,6 +17,7 @@ from onekit import pythonkit as pk
 
 __all__ = (
     "DateRange",
+    "ElapsedTime",
     "create_date_range",
     "date_ago",
     "date_ahead",
@@ -35,10 +35,39 @@ __all__ = (
     "weekday",
 )
 
-from onekit.exception import (
-    InvalidChoiceError,
-    InvalidDateRangeWarning,
-)
+from onekit.exception import InvalidChoiceError
+
+
+class ElapsedTime(NamedTuple):
+    """Represents an immutable, human-readable format for elapsed time.
+
+    See Also
+    --------
+    date_diff : Function to compute the date difference between two dates.
+
+    Examples
+    --------
+    >>> from onekit.timekit import ElapsedTime
+    >>> et = ElapsedTime(years=0, months=0, weeks=0, days=6)
+    >>> et
+    ElapsedTime(years=0, months=0, weeks=0, days=6)
+    >>> str(et)
+    '0y 0m 0w 6d'
+    """
+
+    years: int
+    months: int
+    weeks: int
+    days: int
+
+    def __str__(self) -> str:
+        return pk.concat_strings(
+            " ",
+            f"{self.years}y",
+            f"{self.months}m",
+            f"{self.weeks}w",
+            f"{self.days}d",
+        )
 
 
 class DateRange(NamedTuple):
@@ -64,16 +93,16 @@ class DateRange(NamedTuple):
     >>> dr
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 3))
 
-    >>> print(dr)
-    date range from 2025-06-01 to 2025-06-03 - 3 days in total - difference 0y 0m 0w 2d
+    >>> str(dr)
+    'DateRange(2025-06-01, 2025-06-03) - 3 days in total - elapsed time 0y 0m 0w 2d'
 
-    >>> dr.difference
-    '0y 0m 0w 2d'
+    >>> dr.elapsed_time
+    ElapsedTime(years=0, months=0, weeks=0, days=2)
 
-    >>> dr.difference_in_days
+    >>> dr.elapsed_days
     2
 
-    >>> dr.difference_in_years
+    >>> dr.elapsed_years
     0
 
     >>> dr.number_of_days
@@ -88,38 +117,29 @@ class DateRange(NamedTuple):
 
     def __str__(self) -> str:
         n = self.number_of_days
-        number_of_days = "1 day" if n == 1 else f"{pk.num_to_str(n)} days"
-        return pk.concat_strings(
-            " ",
-            "date range",
-            f"from {date_to_str(self.min_date)}",
-            f"to {date_to_str(self.max_date)}",
-            f"- {number_of_days} in total",
-            f"- difference {self.difference}",
+        return (
+            "{cls_name}({min_date}, {max_date}) - {n} in total - elapsed time {x}"
+        ).format(
+            cls_name=self.__class__.__name__,
+            min_date=date_to_str(self.min_date),
+            max_date=date_to_str(self.max_date),
+            n="1 day" if n == 1 else f"{pk.num_to_str(n)} days",
+            x=str(self.elapsed_time),
         )
 
     @property
-    def difference(self) -> str:
-        """Compute duration between the min and max date."""
-        delta = relativedelta(self.max_date, self.min_date)
-        weeks = delta.days // 7
-        remaining_days = delta.days % 7
-        return pk.concat_strings(
-            " ",
-            f"{delta.years}y",
-            f"{delta.months}m",
-            f"{weeks}w",
-            f"{remaining_days}d",
-        )
+    def elapsed_time(self) -> ElapsedTime:
+        """Compute the elapsed time between the min and max date (max exclusive)."""
+        return date_diff(self.min_date, self.max_date, unit=None)
 
     @property
-    def difference_in_days(self) -> int:
-        """Compute the difference in days between the min and max date."""
+    def elapsed_days(self) -> int:
+        """Compute the elapsed days between the min and max date (max exclusive)."""
         return date_diff(self.min_date, self.max_date, unit="days")
 
     @property
-    def difference_in_years(self) -> int:
-        """Compute the difference in years between the min and max date."""
+    def elapsed_years(self) -> int:
+        """Compute the elapsed years between the min and max date (max exclusive)."""
         return date_diff(self.min_date, self.max_date, unit="years")
 
     @property
@@ -161,11 +181,6 @@ def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:
     DateRange
         An immutable date range object with `min_date <= max_date`.
 
-    Warns
-    -----
-    InvalidDateRangeWarning
-        If the input dates are in reverse order (`min_date > max_date`) and are swapped.
-
     See Also
     --------
     DateRange : The immutable date range object returned by this factory.
@@ -182,17 +197,12 @@ def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:
     >>> tk.create_date_range(dt.date(2025, 6, 1), dt.date(2025, 6, 1))
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 1))
 
-    >>> # dates provided in reverse order
-    >>> dr = tk.create_date_range(dt.date(2025, 6, 7), dt.date(2025, 6, 1))
-    >>> # a warning "dates provided in reverse order - swapping" is printed to stderr
-    >>> dr
+    >>> # dates provided in reverse order are automatically swapped
+    >>> tk.create_date_range(dt.date(2025, 6, 7), dt.date(2025, 6, 1))
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
     """
     if min_date > max_date:
         min_date, max_date = max_date, min_date
-        message = "dates provided in reverse order - swapping"
-        warnings.warn(message, InvalidDateRangeWarning)
-
     return DateRange(min_date, max_date)
 
 
@@ -279,8 +289,18 @@ def date_count_forward(ref_date: dt.date, /) -> Generator:
 
 
 # noinspection PyUnreachableCode
-def date_diff(min_date: dt.date, max_date: dt.date, /, *, unit: str = "days") -> int:
-    """Compute difference between dates.
+def date_diff(
+    min_date: dt.date,
+    max_date: dt.date,
+    /,
+    *,
+    unit: str | None = None,
+) -> ElapsedTime | int:
+    """Compute date difference between the min and max date (max exclusive).
+
+    See Also
+    --------
+    ElapsedTime : The immutable, human-readable object for elapsed time.
 
     Examples
     --------
@@ -289,19 +309,35 @@ def date_diff(min_date: dt.date, max_date: dt.date, /, *, unit: str = "days") ->
     >>> d1 = dt.date(2024, 7, 1)
     >>> d2 = dt.date(2024, 7, 7)
 
-    >>> tk.date_diff(d1, d1)
+    >>> dd = tk.date_diff(d1, d2, unit=None)
+    >>> dd
+    ElapsedTime(years=0, months=0, weeks=0, days=6)
+    >>> str(dd)
+    '0y 0m 0w 6d'
+
+    >>> tk.date_diff(d1, d1, unit="days")
     0
 
-    >>> tk.date_diff(d1, d2)
+    >>> tk.date_diff(d1, d2, unit="days")
     6
 
-    >>> tk.date_diff(d2, d1)
+    >>> tk.date_diff(d2, d1, unit="days")
     -6
 
     >>> tk.date_diff(d1, d2, unit="years")
     0
     """
+    choices = [None, "days", "years"]
     match unit:
+        case None:
+            delta = relativedelta(max_date, min_date)
+            return ElapsedTime(
+                years=delta.years,
+                months=delta.months,
+                weeks=delta.days // 7,
+                days=delta.days % 7,
+            )
+
         case "days":
             return (max_date - min_date).days
 
@@ -309,7 +345,7 @@ def date_diff(min_date: dt.date, max_date: dt.date, /, *, unit: str = "days") ->
             return relativedelta(max_date, min_date).years
 
         case _:
-            raise InvalidChoiceError(value=unit, choices=["days", "years"])
+            raise InvalidChoiceError(unit, choices)
 
 
 # noinspection PyTypeChecker

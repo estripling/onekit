@@ -12,7 +12,10 @@ from toolz import curried
 from onekit import pythonkit as pk
 from onekit import timekit as tk
 from onekit.exception import InvalidChoiceError
-from onekit.timekit import DateRange
+from onekit.timekit import (
+    DateRange,
+    ElapsedTime,
+)
 
 
 class TestDateRange:
@@ -34,17 +37,12 @@ class TestDateRange:
         assert isinstance(actual, DateRange)
         assert actual.min_date == min_date
         assert actual.max_date == max_date
-        assert actual.difference_in_days == (num_days - 1)
+        assert actual.elapsed_days == (num_days - 1)
         assert actual.number_of_days == num_days
 
-    @pytest.mark.filterwarnings("ignore:dates provided in reverse order - swapping")
-    @pytest.mark.parametrize(
-        "min_date, max_date",
-        [
-            (dt.date(2025, 6, 7), dt.date(2025, 6, 1)),
-        ],
-    )
-    def test_create_date_range__reversed(self, min_date: dt.date, max_date: dt.date):
+    def test_create_date_range__reversed(self):
+        min_date = dt.date(2025, 6, 7)
+        max_date = dt.date(2025, 6, 1)
         actual = tk.create_date_range(min_date, max_date)
         assert isinstance(actual, DateRange)
         assert actual.min_date == max_date
@@ -73,23 +71,29 @@ class TestDateRange:
             (dt.date(2000, 1, 1), dt.date(2025, 2, 20), "25y 1m 2w 5d"),
         ],
     )
-    def test_difference(
+    def test_elapsed_time(
         self,
         min_date: dt.date,
         max_date: dt.date,
         expected: int,
     ):
         actual = tk.create_date_range(min_date, max_date)
-        assert actual.difference == expected
+        assert isinstance(actual.elapsed_time, ElapsedTime)
+        assert str(actual.elapsed_time) == expected
 
         actual_str = str(actual)
         expected_str = (
-            f"date range from {min_date} to {max_date} "
-            f"- {pk.num_to_str(actual.number_of_days)} days in total "
-            f"- difference {expected}"
+            "{cls_name}({min_date}, {max_date}) - {n} days in total - elapsed time {x}"
+        ).format(
+            cls_name=DateRange.__name__,
+            min_date=tk.date_to_str(min_date),
+            max_date=tk.date_to_str(max_date),
+            n=pk.num_to_str(actual.number_of_days),
+            x=expected,
         )
         if actual.number_of_days == 1:
             expected_str = expected_str.replace("days", "day")
+
         assert actual_str == expected_str
 
     @pytest.mark.parametrize(
@@ -105,14 +109,14 @@ class TestDateRange:
             (dt.date(2000, 1, 1), dt.date(2025, 1, 1), 25),
         ],
     )
-    def test_difference_in_years(
+    def test_elapsed_years(
         self,
         min_date: dt.date,
         max_date: dt.date,
         expected: int,
     ):
         actual = tk.create_date_range(min_date, max_date)
-        assert actual.difference_in_years == expected
+        assert actual.elapsed_years == expected
 
 
 @pytest.mark.parametrize(
@@ -223,6 +227,38 @@ class TestDateDiff:
     def test_date_diff__invalid_input(self):
         with pytest.raises(InvalidChoiceError):
             tk.date_diff(dt.date(2000, 1, 1), dt.date(2025, 1, 1), unit="eons")
+
+    @pytest.mark.parametrize(
+        "min_date, max_date, years, months, weeks, days",
+        [
+            (dt.date(2024, 7, 1), dt.date(2024, 7, 1), 0, 0, 0, 0),
+            (dt.date(2024, 7, 1), dt.date(2024, 7, 7), 0, 0, 0, 6),
+            (dt.date(2024, 7, 7), dt.date(2024, 7, 1), 0, 0, -1, 1),
+            (dt.date(2024, 12, 31), dt.date(2025, 1, 1), 0, 0, 0, 1),
+            (dt.date(2025, 1, 1), dt.date(2025, 1, 2), 0, 0, 0, 1),
+            (dt.date(2025, 1, 2), dt.date(2025, 1, 1), 0, 0, -1, 6),
+            (dt.date(2025, 1, 1), dt.date(2024, 12, 31), 0, 0, -1, 6),
+            (dt.date(2024, 12, 1), dt.date(2024, 12, 31), 0, 0, 4, 2),
+            (dt.date(2024, 1, 1), dt.date(2024, 12, 31), 0, 11, 4, 2),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 1), 1, 0, 0, 0),
+            (dt.date(2024, 1, 1), dt.date(2025, 1, 2), 1, 0, 0, 1),
+            (dt.date(2024, 1, 1), dt.date(2026, 1, 1), 2, 0, 0, 0),
+            (dt.date(2000, 1, 1), dt.date(2025, 1, 1), 25, 0, 0, 0),
+        ],
+    )
+    def test_date_diff__elapsed_time(
+        self,
+        min_date: dt.date,
+        max_date: dt.date,
+        years: int,
+        months: int,
+        weeks: int,
+        days: int,
+    ):
+        actual = tk.date_diff(min_date, max_date, unit=None)
+        expected = ElapsedTime(years, months, weeks, days)
+        assert actual == expected
+        assert str(actual) == f"{years}y {months}m {weeks}w {days}d"
 
 
 @pytest.mark.parametrize(
