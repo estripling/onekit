@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v4.1.0 (2025-06-08)
+
+_This release is published under the BSD 3-Clause License._
+
+### Bug Fixes
+
+- **create_date_range**: Remove warning ([#122](https://github.com/estripling/onekit/pull/122), [`e5c5898`](https://github.com/estripling/onekit/commit/e5c5898622aeb621bd3a2ca981804cbd37d979e0))
+
+### Documentation
+
+- **CHANGELOG.md**: Update v4.0.0 release ([`5947d79`](https://github.com/estripling/onekit/commit/5947d7956ca293ac290099710ea8d38e9f506d6f))
+
+### Features
+
+- **timekit**: Add ElapsedTime ([#122](https://github.com/estripling/onekit/pull/122), [`e5c5898`](https://github.com/estripling/onekit/commit/e5c5898622aeb621bd3a2ca981804cbd37d979e0))
+
+### Refactoring
+
+- **DateRange**: String representation ([#122](https://github.com/estripling/onekit/pull/122), [`e5c5898`](https://github.com/estripling/onekit/commit/e5c5898622aeb621bd3a2ca981804cbd37d979e0))
+
+---
+
+**Detailed Changes**: [v4.0.0...v4.1.0](https://github.com/estripling/onekit/compare/v4.0.0...v4.1.0)
+
+
 ## v4.0.0 (2025-06-07)
 
 _This release is published under the BSD 3-Clause License._
