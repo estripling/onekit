@@ -79,9 +79,13 @@ class TestDateRange:
 
         actual_str = str(actual)
         expected_str = (
-            f"date range from {min_date} to {max_date} "
-            f"- {pk.num_to_str(actual.number_of_days)} days in total "
-            f"- difference {expected}"
+            "{cls_name}({min_date}, {max_date}) - {n} days in total - elapsed time {x}"
+        ).format(
+            cls_name=DateRange.__name__,
+            min_date=tk.date_to_str(min_date),
+            max_date=tk.date_to_str(max_date),
+            n=pk.num_to_str(actual.number_of_days),
+            x=expected,
         )
         if actual.number_of_days == 1:
             expected_str = expected_str.replace("days", "day")

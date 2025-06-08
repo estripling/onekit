@@ -61,7 +61,7 @@ class DateRange(NamedTuple):
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 3))
 
     >>> print(dr)
-    date range from 2025-06-01 to 2025-06-03 - 3 days in total - difference 0y 0m 0w 2d
+    DateRange(2025-06-01, 2025-06-03) - 3 days in total - elapsed time 0y 0m 0w 2d
 
     >>> dr.difference
     '0y 0m 0w 2d'
@@ -84,14 +84,14 @@ class DateRange(NamedTuple):
 
     def __str__(self) -> str:
         n = self.number_of_days
-        number_of_days = "1 day" if n == 1 else f"{pk.num_to_str(n)} days"
-        return pk.concat_strings(
-            " ",
-            "date range",
-            f"from {date_to_str(self.min_date)}",
-            f"to {date_to_str(self.max_date)}",
-            f"- {number_of_days} in total",
-            f"- difference {self.difference}",
+        return (
+            "{cls_name}({min_date}, {max_date}) - {n} in total - elapsed time {x}"
+        ).format(
+            cls_name=self.__class__.__name__,
+            min_date=date_to_str(self.min_date),
+            max_date=date_to_str(self.max_date),
+            n="1 day" if n == 1 else f"{pk.num_to_str(n)} days",
+            x=self.difference,
         )
 
     @property
