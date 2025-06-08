@@ -3,7 +3,6 @@ import datetime as dt
 import itertools
 import math
 import operator
-import warnings
 from contextlib import ContextDecorator
 from typing import (
     Generator,
@@ -35,10 +34,7 @@ __all__ = (
     "weekday",
 )
 
-from onekit.exception import (
-    InvalidChoiceError,
-    InvalidDateRangeWarning,
-)
+from onekit.exception import InvalidChoiceError
 
 
 class DateRange(NamedTuple):
@@ -161,11 +157,6 @@ def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:
     DateRange
         An immutable date range object with `min_date <= max_date`.
 
-    Warns
-    -----
-    InvalidDateRangeWarning
-        If the input dates are in reverse order (`min_date > max_date`) and are swapped.
-
     See Also
     --------
     DateRange : The immutable date range object returned by this factory.
@@ -182,17 +173,12 @@ def create_date_range(min_date: dt.date, max_date: dt.date, /) -> DateRange:
     >>> tk.create_date_range(dt.date(2025, 6, 1), dt.date(2025, 6, 1))
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 1))
 
-    >>> # dates provided in reverse order
-    >>> dr = tk.create_date_range(dt.date(2025, 6, 7), dt.date(2025, 6, 1))
-    >>> # a warning "dates provided in reverse order - swapping" is printed to stderr
-    >>> dr
+    >>> # dates provided in reverse order are automatically swapped
+    >>> tk.create_date_range(dt.date(2025, 6, 7), dt.date(2025, 6, 1))
     DateRange(min_date=datetime.date(2025, 6, 1), max_date=datetime.date(2025, 6, 7))
     """
     if min_date > max_date:
         min_date, max_date = max_date, min_date
-        message = "dates provided in reverse order - swapping"
-        warnings.warn(message, InvalidDateRangeWarning)
-
     return DateRange(min_date, max_date)
 
 

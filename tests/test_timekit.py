@@ -37,14 +37,9 @@ class TestDateRange:
         assert actual.difference_in_days == (num_days - 1)
         assert actual.number_of_days == num_days
 
-    @pytest.mark.filterwarnings("ignore:dates provided in reverse order - swapping")
-    @pytest.mark.parametrize(
-        "min_date, max_date",
-        [
-            (dt.date(2025, 6, 7), dt.date(2025, 6, 1)),
-        ],
-    )
-    def test_create_date_range__reversed(self, min_date: dt.date, max_date: dt.date):
+    def test_create_date_range__reversed(self):
+        min_date = dt.date(2025, 6, 7)
+        max_date = dt.date(2025, 6, 1)
         actual = tk.create_date_range(min_date, max_date)
         assert isinstance(actual, DateRange)
         assert actual.min_date == max_date
