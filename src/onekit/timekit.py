@@ -12,6 +12,7 @@ from typing import (
 import duckdb
 import pytz
 import toolz
+from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
 from onekit import pythonkit as pk
@@ -34,12 +35,14 @@ __all__ = (
     "stopwatch",
     "str_to_date",
     "timestamp",
+    "to_datetime",
     "weekday",
 )
 
 from onekit.exception import InvalidChoiceError
 
-DateTimeLike = dt.date | dt.datetime | dt.time | str
+DateLike = dt.datetime | dt.date | str
+DateTimeLike = dt.datetime | dt.date | dt.time | str
 
 
 class ElapsedTime(NamedTuple):
@@ -889,6 +892,132 @@ def timestamp(zone: str | None = None, fmt: str | None = None) -> str:
     zone = None if zone is None else pytz.timezone(zone)
     fmt = fmt or "%Y-%m-%d %H:%M:%S"
     return dt.datetime.now(tz=zone).strftime(fmt)
+
+
+def to_datetime(
+    value: DateTimeLike,
+    /,
+    *,
+    date_for_time: DateLike | None = None,
+    fmt: str | None = None,
+) -> dt.datetime:
+    """Convert a date, time, or string value to a datetime.datetime object.
+
+    Parameters
+    ----------
+    value : datetime, date, time, str
+        - For datetime: returns input value
+        - For date: sets time to 00:00:00
+        - For time: uses ``date_for_time`` or today's date
+        - For string: tries a series of different conversion strategies
+
+    date_for_time : datetime, date, str, optional
+        Specify the date to fill if ``value`` is a time.
+        If None, the date of today is used.
+
+    fmt : str, optional
+        Provide datetime format to parse from string.
+        If None, a series of different formats are tried.
+
+    Raises
+    ------
+    TypeError
+        If ``value`` is not a datetime, date, time, or string.
+    ValueError
+        If ``value`` is a string but cannot be converted.
+
+    Examples
+    --------
+    >>> from onekit import timekit as tk
+    >>> tk.to_datetime("2000-01-02T03:04:05.123456")
+    datetime.datetime(2000, 1, 2, 3, 4, 5, 123456)
+
+    >>> tk.to_datetime("2000-01-02")
+    datetime.datetime(2000, 1, 2, 0, 0)
+
+    >>> tk.to_datetime("T03:04:05.123456", date_for_time="2000-01-02")
+    datetime.datetime(2000, 1, 2, 3, 4, 5, 123456)
+
+    >>> tk.to_datetime("11:22:33", date_for_time="2020-10-20")
+    datetime.datetime(2020, 10, 20, 11, 22, 33)
+    """
+    if isinstance(value, dt.datetime):
+        return value
+
+    def get_fill_dt(x: DateLike | None, /) -> dt.datetime:
+        x = to_datetime(x) if isinstance(x, str) else x
+        return dt.datetime.combine(x or dt.datetime.now(), dt.time.min)
+
+    match value:
+        case str():
+            v = value.strip()
+
+            if fmt is not None:
+                return dt.datetime.strptime(v, fmt)
+
+            try:
+                return dt.datetime.fromisoformat(v)
+            except ValueError:
+                pass
+
+            fmts = [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d_%H:%M:%S",
+                "%Y-%m-%d-%H:%M:%S",
+                "%Y-%m-%d %H:%M",
+                "%Y-%m-%d_%H:%M",
+                "%Y-%m-%d-%H:%M",
+                "%Y%m%d %H%M%S",
+                "%Y%m%d_%H%M%S",
+                "%Y%m%d-%H%M%S",
+                "%Y%m%d %H%M",
+                "%Y%m%d_%H%M",
+                "%Y%m%d-%H%M",
+                "%d-%m-%Y %H:%M:%S",
+                "%d-%m-%Y %H:%M",
+                "%Y%m%d",
+                "%Y.%m.%d",
+                "%Y-%m-%d",
+                "%Y/%m/%d",
+                "%d.%m.%Y",
+                "%d-%m-%Y",
+                "%d/%m/%Y",
+                "%m/%d/%Y",
+                "%H:%M:%S",
+                "%H:%M",
+                "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%dT%H:%M:%S%z",
+            ]
+            fill_dt = get_fill_dt(date_for_time)
+            for fmt in fmts:
+                try:
+                    result = dt.datetime.strptime(v, fmt)
+                    if "%Y" not in fmt:
+                        result = result.replace(year=fill_dt.year)
+                    if "%m" not in fmt:
+                        result = result.replace(month=fill_dt.month)
+                    if "%d" not in fmt:
+                        result = result.replace(day=fill_dt.day)
+                    return result
+
+                except ValueError:
+                    continue
+
+            try:
+                return parser.parse(v, default=fill_dt)
+            except (ValueError, OverflowError):
+                pass
+
+            raise ValueError(f"{value=!r} - unrecognized datetime format")
+
+        case dt.date():
+            return dt.datetime.combine(value, dt.time.min)
+
+        case dt.time():
+            return dt.datetime.combine(get_fill_dt(date_for_time), value)
+
+        case _:
+            raise TypeError(f"{type(value)} is unsupported")
 
 
 def weekday(d: dt.date, /) -> str:
