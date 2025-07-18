@@ -15,6 +15,7 @@ from onekit import timekit as tk
 from onekit.exception import InvalidChoiceError
 from onekit.timekit import (
     DateRange,
+    DateTimeLike,
     ElapsedTime,
 )
 
@@ -1153,3 +1154,99 @@ class TestDateSub:
     @pytest.fixture(scope="class")
     def ref_date(self) -> str:
         return "2024-07-01"
+
+
+class TestDatetimeConversion:
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            # datetime
+            (dt.datetime(2024, 7, 1), dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 00:00", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 00:00:00", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 12:00:00", dt.datetime(2024, 7, 1, 12, 0, 0)),
+            ("20240701_120114", dt.datetime(2024, 7, 1, 12, 1, 14)),
+            # date
+            (dt.date(2024, 7, 1), dt.datetime(2024, 7, 1)),
+            ("2024-07-01", dt.datetime(2024, 7, 1)),
+            ("2024-07-01", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("20240701", dt.datetime(2024, 7, 1)),
+            # time
+            (dt.time(12, 30), dt.datetime.combine(dt.date.today(), dt.time(12, 30))),
+            ("12:30", dt.datetime.combine(dt.date.today(), dt.time(12, 30))),
+            ("12:30:00", dt.datetime.combine(dt.date.today(), dt.time(12, 30))),
+            ("00:00", dt.datetime.combine(dt.date.today(), dt.time(0, 0))),
+            # ISO 8601
+            ("2024-07-01T12:00:00", dt.datetime(2024, 7, 1, 12, 0, 0)),
+            ("2024-07-01T23:59:59", dt.datetime(2024, 7, 1, 23, 59, 59)),
+            (
+                "2024-07-01T23:59:59Z",
+                dt.datetime(2024, 7, 1, 23, 59, 59, tzinfo=dt.timezone.utc),
+            ),
+        ],
+    )
+    def test_to_datetime(self, value: DateTimeLike, expected: str):
+        actual = tk.to_datetime(value)
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            # datetime
+            (dt.datetime(2024, 7, 1), dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 00:00", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 00:00:00", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("2024-07-01 12:00:00", dt.datetime(2024, 7, 1, 12, 0, 0)),
+            ("20240701_120114", dt.datetime(2024, 7, 1, 12, 1, 14)),
+            # date
+            (dt.date(2024, 7, 1), dt.datetime(2024, 7, 1)),
+            ("2024-07-01", dt.datetime(2024, 7, 1)),
+            ("2024-07-01", dt.datetime(2024, 7, 1, 0, 0, 0)),
+            ("20240701", dt.datetime(2024, 7, 1)),
+            # time
+            (dt.time(12, 30, 45), dt.datetime(2000, 1, 1, 12, 30, 45)),
+            ("12:30", dt.datetime(2000, 1, 1, 12, 30)),
+            ("12:30:00", dt.datetime(2000, 1, 1, 12, 30)),
+            ("00:00", dt.datetime(2000, 1, 1, 0, 0)),
+            # ISO 8601
+            ("2024-07-01T12:00:00", dt.datetime(2024, 7, 1, 12, 0, 0)),
+            ("2024-07-01T23:59:59", dt.datetime(2024, 7, 1, 23, 59, 59)),
+            (
+                "2024-07-01T23:59:59Z",
+                dt.datetime(2024, 7, 1, 23, 59, 59, tzinfo=dt.timezone.utc),
+            ),
+        ],
+    )
+    def test_to_datetime__date_for_time(self, value: DateTimeLike, expected: str):
+        actual = tk.to_datetime(value, date_for_time="2000-01-01")
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        "value, fmt, expected",
+        [
+            (
+                "2024/07/01  12.01.14",
+                "%Y/%m/%d %H.%M.%S",
+                dt.datetime(2024, 7, 1, 12, 1, 14),
+            ),
+            (
+                "20240701_120114",
+                "%Y%m%d_%H%M%S",
+                dt.datetime(2024, 7, 1, 12, 1, 14),
+            ),
+        ],
+    )
+    def test_to_datetime__fmt(self, value: str, fmt: str, expected: str):
+        actual = tk.to_datetime(value, fmt=fmt)
+        assert actual == expected
+
+    @pytest.mark.parametrize("value", ["foo", "-"])
+    def test_invalid_input_value__value_error(self, value: str):
+        with pytest.raises(ValueError):
+            tk.to_datetime(value)
+
+    @pytest.mark.parametrize("value", [None, 0, 1.0])
+    def test_invalid_input_value__type_error(self, value: str):
+        with pytest.raises(TypeError):
+            tk.to_datetime(value)
