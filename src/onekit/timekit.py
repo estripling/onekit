@@ -30,6 +30,7 @@ __all__ = (
     "date_to_str",
     "datesub",
     "humantime",
+    "isoduration",
     "last_date_of_month",
     "num_days",
     "stopwatch",
@@ -536,6 +537,56 @@ def humantime(seconds: int | float, /) -> str:
         output.append(f"{seconds}s")
 
     return " ".join(output)
+
+
+def isoduration(start: DateTimeLike, end: DateTimeLike, /) -> str:
+    """Compute ISO 8601 duration between two timestamps.
+
+    ISO 8601 Duration Format: P[n]Y[n]M[n]DT[n]H[n]M[n]S
+
+    Examples
+    --------
+    >>> from onekit import timekit as tk
+    >>> # duration = 1 day, 2 hours, 15 minutes
+    >>> tk.isoduration("2024-07-01T13:00:00Z", "2024-07-02T15:15:00Z")
+    'P1DT2H15M'
+    """
+    dt_start = to_datetime(start)
+    dt_end = to_datetime(end)
+
+    if dt_end < dt_start:
+        dt_start, dt_end = dt_end, dt_start
+
+    delta = relativedelta(dt_end, dt_start)
+
+    date_parts = []
+    if delta.years:
+        date_parts.append(f"{delta.years}Y")
+    if delta.months:
+        date_parts.append(f"{delta.months}M")
+    if delta.days:
+        date_parts.append(f"{delta.days}D")
+
+    time_parts = []
+    if delta.hours:
+        time_parts.append(f"{delta.hours}H")
+    if delta.minutes:
+        time_parts.append(f"{delta.minutes}M")
+    if delta.seconds:
+        time_parts.append(f"{delta.seconds}S")
+
+    if len(date_parts) == 0 and len(time_parts) == 0:
+        # zero duration
+        return "PT0S"
+
+    parts = ["P"]
+    if date_parts:
+        parts.extend(date_parts)
+    if time_parts:
+        parts.append("T")
+        parts.extend(time_parts)
+
+    return "".join(parts)
 
 
 def last_date_of_month(year: int, month: int, /) -> dt.date:
