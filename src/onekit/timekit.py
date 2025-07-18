@@ -9,6 +9,7 @@ from typing import (
     NamedTuple,
 )
 
+import duckdb
 import pytz
 import toolz
 from dateutil.relativedelta import relativedelta
@@ -26,6 +27,7 @@ __all__ = (
     "date_diff",
     "date_range",
     "date_to_str",
+    "datesub",
     "humantime",
     "last_date_of_month",
     "num_days",
@@ -36,6 +38,8 @@ __all__ = (
 )
 
 from onekit.exception import InvalidChoiceError
+
+DateTimeLike = dt.date | dt.datetime | dt.time | str
 
 
 class ElapsedTime(NamedTuple):
@@ -418,6 +422,60 @@ def date_to_str(d: dt.date, /) -> str:
     '2022-01-01'
     """
     return d.isoformat()
+
+
+def datesub(part: str, start: DateTimeLike, end: DateTimeLike, /) -> int:
+    """Returns the number of complete partitions between times.
+
+    Function computes the difference of fully elapsed time units between the start and
+    end date/time values using DuckDB's datesub time function for date subtraction.
+    [1]_ [2]_
+
+    References
+    ----------
+    .. [1] "Time Functions: datesub", DuckDB Documentation,
+           `<https://duckdb.org/docs/stable/sql/functions/time>`_
+    .. [2] "Date Part Functions", DuckDB Documentation,
+            `<https://duckdb.org/docs/stable/sql/functions/datepart.html>`_
+
+    Examples
+    --------
+    >>> from onekit import timekit as tk
+    >>> start_time = "2000-01-01 00:00:00.012345"
+    >>> end_time = "2025-01-01 23:59:59.123456"
+    >>> tk.datesub("decades", start_time, end_time)
+    2
+    >>> tk.datesub("years", start_time, end_time)
+    25
+    >>> tk.datesub("quarter", start_time, end_time)
+    100
+    >>> tk.datesub("months", start_time, end_time)
+    300
+    >>> tk.datesub("days", start_time, end_time)
+    9132
+    >>> tk.datesub("hours", start_time, end_time)
+    219191
+    >>> tk.datesub("minutes", start_time, end_time)
+    13151519
+    >>> tk.datesub("seconds", start_time, end_time)
+    789091199
+
+    >>> tk.datesub("days", "2024-07-01", "2024-07-07")
+    6
+    """
+
+    def get_query(type_name: str) -> str:
+        return f"""
+        SELECT datesub('{part}', CAST(? AS {type_name}), CAST(? AS {type_name}))
+        """
+
+    def get_value(query: str) -> int:
+        return duckdb.execute(query, parameters=(start, end)).fetchone()[0]
+
+    try:
+        return get_value(query=get_query("TIMESTAMP"))
+    except duckdb.ConversionException:
+        return get_value(query=get_query("TIME"))
 
 
 def humantime(seconds: int | float, /) -> str:
