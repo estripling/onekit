@@ -3,7 +3,6 @@ import platform
 import re
 import time
 from typing import Callable
-from zoneinfo import ZoneInfo
 
 import pytest
 import time_machine
@@ -1079,17 +1078,16 @@ class TestToDatetimeConversion:
         ],
     )
     def test_to_datetime__cet_timestamps(self, value_cet: str, value_dt: dt.datetime):
-        tz = ZoneInfo("CET")
         try:
             actual = tk.to_datetime(value_cet)
-            expected = value_dt.astimezone(tz)
+            expected = value_dt.replace(tzinfo=dt.timezone(dt.timedelta(seconds=3600)))
             assert actual.tzinfo is not None
             assert actual.tzname() == "UTC+01:00"
             assert actual == expected
         except AssertionError:
             value_cest = value_cet.replace("+01:00", "+02:00")
             actual = tk.to_datetime(value_cest)
-            expected = value_dt.astimezone(tz)
+            expected = value_dt.replace(tzinfo=dt.timezone(dt.timedelta(seconds=7200)))
             assert actual.tzinfo is not None
             assert actual.tzname() == "UTC+02:00"
             assert actual == expected
