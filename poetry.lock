@@ -3459,7 +3459,7 @@ description = "World timezone definitions, modern and historical"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"base\" or extra == \"analytics\""
+markers = "extra == \"analytics\""
 files = [
     {file = "pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00"},
     {file = "pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"},
@@ -5020,10 +5020,10 @@ cffi = ["cffi (>=1.11)"]
 
 [extras]
 analytics = ["pandas", "scikit-learn", "tqdm"]
-base = ["duckdb", "python-dateutil", "pytz", "toolz"]
+base = ["duckdb", "python-dateutil", "toolz"]
 pyspark = ["pyspark"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "8e61a22ae6bfa72615d2b171c5c0933bd3c41c20a5f3e0fa3b881be158c3aecd"
+content-hash = "ec509d569a6fe47413654971d8bef8897ff3697f316805b939e3d276995eceb4"

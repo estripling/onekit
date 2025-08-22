@@ -32,7 +32,6 @@ poetry lock
 poetry add --optional base \
 duckdb \
 python-dateutil \
-pytz \
 toolz
 ```
 
