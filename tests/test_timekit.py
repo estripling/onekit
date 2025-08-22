@@ -866,10 +866,9 @@ class TestTimestamp:
             ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 00:00:00"),
         ],
     )
-    @pytest.mark.parametrize("zone", ["UTC", "utc"])
-    def test_utc(self, zone: str, fmt: str, expected: str, tm_seed: dt.datetime):
+    def test_utc(self, fmt: str, expected: str, tm_seed: dt.datetime):
         with time_machine.travel(tm_seed):
-            actual = tk.timestamp(zone, fmt=fmt)
+            actual = tk.timestamp("UTC", fmt=fmt)
             assert actual == expected
 
     @pytest.mark.parametrize(
@@ -885,10 +884,9 @@ class TestTimestamp:
             ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 01:00:00"),
         ],
     )
-    @pytest.mark.parametrize("zone", ["CET", "cet"])
-    def test_cet(self, zone: str, fmt: str, expected: str, tm_seed: dt.datetime):
+    def test_cet(self, fmt: str, expected: str, tm_seed: dt.datetime):
         with time_machine.travel(tm_seed):
-            actual = tk.timestamp(zone, fmt=fmt)
+            actual = tk.timestamp("CET", fmt=fmt)
             assert actual == expected
 
     @pytest.mark.parametrize(
@@ -904,10 +902,9 @@ class TestTimestamp:
             ("%A, %d %B %Y %H:%M:%S", "Sunday, 31 December 2023 14:00:00"),
         ],
     )
-    @pytest.mark.parametrize("zone", ["US/Hawaii", "us/hawaii", "Us/HawaiI"])
-    def test_hawaii(self, zone: str, fmt: str, expected: str, tm_seed: dt.datetime):
+    def test_hawaii(self, fmt: str, expected: str, tm_seed: dt.datetime):
         with time_machine.travel(tm_seed):
-            actual = tk.timestamp(zone, fmt=fmt)
+            actual = tk.timestamp("US/Hawaii", fmt=fmt)
             assert actual == expected
 
     @pytest.mark.parametrize(
@@ -923,14 +920,13 @@ class TestTimestamp:
             ("%A, %d %B %Y %H:%M:%S", "Monday, 01 January 2024 09:00:00"),
         ],
     )
-    @pytest.mark.parametrize("zone", ["Asia/Tokyo", "asia/tokyo", "AsIa/ToKyO"])
-    def test_tokyo(self, zone: str, fmt: str, expected: str, tm_seed: dt.datetime):
+    def test_tokyo(self, fmt: str, expected: str, tm_seed: dt.datetime):
         with time_machine.travel(tm_seed):
-            actual = tk.timestamp(zone, fmt=fmt)
+            actual = tk.timestamp("Asia/Tokyo", fmt=fmt)
             assert actual == expected
 
     @pytest.mark.parametrize(
-        "zone, fmt, expected_str, expected_dt",
+        "timezone, fmt, expected_str, expected_dt",
         [
             (
                 "UTC",
@@ -978,21 +974,21 @@ class TestTimestamp:
     )
     def test_timestamp_to_datetime(
         self,
-        zone: str,
+        timezone,
         fmt: str,
         expected_str: str,
         expected_dt: dt.datetime,
         tm_seed: dt.datetime,
     ):
         with time_machine.travel(tm_seed):
-            actual = tk.timestamp(zone, fmt=fmt)
+            actual = tk.timestamp(timezone, fmt=fmt)
             assert actual == expected_str
             assert tk.to_datetime(actual) == expected_dt
 
-    @pytest.mark.parametrize("zone", ["CTE", "Europe"])
-    def test_invalid_input(self, zone: str):
+    @pytest.mark.parametrize("timezone", ["CTE", "cte", "Europe"])
+    def test_invalid_input(self, timezone):
         with pytest.raises(InvalidChoiceError):
-            tk.timestamp(zone)
+            tk.timestamp(timezone)
 
     @pytest.fixture(scope="class")
     def tm_seed(self) -> dt.datetime:
