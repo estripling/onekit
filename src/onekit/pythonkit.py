@@ -118,7 +118,7 @@ def archive_files(
     """
     target = Path(target).resolve()
     wildcards = wildcards or ["**/*"]
-    name = name or f"{tk.timestamp(zone=timezone, fmt='%Y%m%d%H%M%S')}_{target.stem}"
+    name = name or f"{tk.timestamp(timezone, fmt='%Y%m%d%H%M%S')}_{target.stem}"
     makedir = functools.partial(os.makedirs, exist_ok=True)
 
     with TemporaryDirectory() as tmpdir:
